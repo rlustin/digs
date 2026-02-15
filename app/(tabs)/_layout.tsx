@@ -1,8 +1,6 @@
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import { Tabs } from "expo-router";
-import { View } from "react-native";
 
-import { SyncStatusBar } from "@/components/sync/sync-status-bar";
 import { useInitialSync } from "@/hooks/use-sync";
 
 function TabBarIcon(props: {
@@ -16,8 +14,6 @@ export default function TabLayout() {
   useInitialSync();
 
   return (
-    <View className="flex-1 bg-black">
-      <SyncStatusBar />
       <Tabs
         screenOptions={{
           tabBarActiveTintColor: "#4CAF50",
@@ -71,6 +67,5 @@ export default function TabLayout() {
           }}
         />
       </Tabs>
-    </View>
   );
 }

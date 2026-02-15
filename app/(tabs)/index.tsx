@@ -6,6 +6,7 @@ import FontAwesome from "@expo/vector-icons/FontAwesome";
 import { getAllFolders } from "@/db/queries/folders";
 import { EmptyState } from "@/components/ui/empty-state";
 import { ListSkeleton } from "@/components/ui/skeleton";
+import { SyncStatusCard } from "@/components/sync/sync-status-bar";
 import { useAuthStore } from "@/stores/auth-store";
 import { runFullSync } from "@/lib/sync/engine";
 import { useSyncStore } from "@/stores/sync-store";
@@ -56,6 +57,7 @@ export default function CollectionScreen() {
       <FlatList
         data={folders}
         keyExtractor={(item) => String(item.id)}
+        ListHeaderComponent={<SyncStatusCard />}
         refreshControl={
           <RefreshControl
             refreshing={isSyncing}
