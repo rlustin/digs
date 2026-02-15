@@ -1,6 +1,7 @@
 import { eq } from "drizzle-orm";
 import { db, expo } from "@/db/client";
 import { releases } from "@/db/schema";
+import { getAllFolders } from "@/db/queries/folders";
 import {
   fetchReleasesInFolder,
   fetchReleaseDetail,
@@ -12,12 +13,12 @@ import type { CollectionRelease } from "@/lib/discogs/types";
 /**
  * Map a Discogs collection release to a DB row for basic sync.
  */
-function mapBasicRelease(r: CollectionRelease) {
+function mapBasicRelease(r: CollectionRelease, folderId: number) {
   const info = r.basic_information;
   return {
     instanceId: r.instance_id,
     releaseId: info.id,
-    folderId: r.folder_id,
+    folderId,
     title: info.title,
     year: info.year,
     artists: info.artists.map((a) => ({ name: a.name, id: a.id })),
@@ -36,42 +37,61 @@ function mapBasicRelease(r: CollectionRelease) {
   };
 }
 
+function upsertReleasePage(
+  releasePage: CollectionRelease[],
+  folderId: number
+) {
+  expo.withTransactionSync(() => {
+    for (const r of releasePage) {
+      const row = mapBasicRelease(r, folderId);
+      const existing = db
+        .select()
+        .from(releases)
+        .where(eq(releases.instanceId, r.instance_id))
+        .get();
+
+      if (existing) {
+        db.update(releases)
+          .set(row)
+          .where(eq(releases.instanceId, r.instance_id))
+          .run();
+      } else {
+        db.insert(releases).values(row).run();
+      }
+    }
+  });
+}
+
 /**
- * Paginate through folder 0 (All) and upsert all basic release info.
+ * Sync releases from each real folder (skipping folder 0 which is virtual).
+ * This ensures each release gets its correct folder_id.
  */
 export async function syncBasicReleases(username: string) {
   const store = useSyncStore.getState();
   store.setPhase("basic-releases");
 
-  let page = 1;
-  let totalPages = 1;
+  const folders = getAllFolders().filter((f) => f.id !== 0);
 
-  while (page <= totalPages) {
-    const response = await fetchReleasesInFolder(username, 0, page);
-    totalPages = response.pagination.pages;
-    store.setProgress(page, totalPages);
+  // If user has no custom folders, fall back to folder 1 (Uncategorized)
+  const foldersToSync = folders.length > 0 ? folders : [{ id: 1, name: "Uncategorized", count: 0 }];
 
-    expo.withTransactionSync(() => {
-      for (const r of response.releases) {
-        const row = mapBasicRelease(r);
-        const existing = db
-          .select()
-          .from(releases)
-          .where(eq(releases.instanceId, r.instance_id))
-          .get();
+  let totalProcessed = 0;
+  const totalItems = foldersToSync.reduce((sum, f) => sum + f.count, 0);
 
-        if (existing) {
-          db.update(releases)
-            .set(row)
-            .where(eq(releases.instanceId, r.instance_id))
-            .run();
-        } else {
-          db.insert(releases).values(row).run();
-        }
-      }
-    });
+  for (const folder of foldersToSync) {
+    let page = 1;
+    let totalPages = 1;
 
-    page++;
+    while (page <= totalPages) {
+      const response = await fetchReleasesInFolder(username, folder.id, page);
+      totalPages = response.pagination.pages;
+
+      totalProcessed += response.releases.length;
+      store.setProgress(totalProcessed, totalItems);
+
+      upsertReleasePage(response.releases, folder.id);
+      page++;
+    }
   }
 }
 

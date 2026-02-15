@@ -14,7 +14,7 @@ export function getReleaseByReleaseId(releaseId: number) {
     .select()
     .from(releases)
     .where(eq(releases.releaseId, releaseId))
-    .get();
+    .get() ?? null;
 }
 
 export function getReleasesNeedingDetailSync(limit: number = 10) {
@@ -76,7 +76,7 @@ export function getRandomRelease(folderId?: number) {
       .where(eq(releases.folderId, folderId))
       .orderBy(sql`RANDOM()`)
       .limit(1)
-      .get();
+      .get() ?? null;
   }
-  return db.select().from(releases).orderBy(sql`RANDOM()`).limit(1).get();
+  return db.select().from(releases).orderBy(sql`RANDOM()`).limit(1).get() ?? null;
 }
