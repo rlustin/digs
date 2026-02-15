@@ -1,4 +1,4 @@
-import { View, FlatList } from "react-native";
+import { View, FlatList, RefreshControl } from "react-native";
 import { useLocalSearchParams } from "expo-router";
 import { useQuery } from "@tanstack/react-query";
 import { Stack } from "expo-router";
@@ -7,6 +7,9 @@ import { getReleasesByFolder } from "@/db/queries/releases";
 import { getAllFolders } from "@/db/queries/folders";
 import { ReleaseCard } from "@/components/release/release-card";
 import { EmptyState } from "@/components/ui/empty-state";
+import { ListSkeleton } from "@/components/ui/skeleton";
+
+const ITEM_HEIGHT = 68;
 
 export default function FolderReleasesScreen() {
   const { folderId } = useLocalSearchParams<{ folderId: string }>();
@@ -19,7 +22,11 @@ export default function FolderReleasesScreen() {
 
   const folderName = folders.find((f) => f.id === id)?.name ?? "Releases";
 
-  const { data: releases = [] } = useQuery({
+  const {
+    data: releases = [],
+    isLoading,
+    refetch,
+  } = useQuery({
     queryKey: ["releases", "folder", id],
     queryFn: () => getReleasesByFolder(id),
   });
@@ -27,7 +34,9 @@ export default function FolderReleasesScreen() {
   return (
     <View className="flex-1 bg-black">
       <Stack.Screen options={{ headerShown: true, title: folderName }} />
-      {releases.length === 0 ? (
+      {isLoading ? (
+        <ListSkeleton type="release" />
+      ) : releases.length === 0 ? (
         <EmptyState
           icon="music"
           title="No releases"
@@ -37,6 +46,18 @@ export default function FolderReleasesScreen() {
         <FlatList
           data={releases}
           keyExtractor={(item) => String(item.instanceId)}
+          getItemLayout={(_, index) => ({
+            length: ITEM_HEIGHT,
+            offset: ITEM_HEIGHT * index,
+            index,
+          })}
+          refreshControl={
+            <RefreshControl
+              refreshing={false}
+              onRefresh={() => refetch()}
+              tintColor="#4CAF50"
+            />
+          }
           renderItem={({ item }) => (
             <ReleaseCard
               releaseId={item.releaseId}

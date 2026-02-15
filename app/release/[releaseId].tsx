@@ -8,6 +8,7 @@ import { fetchReleaseDetail } from "@/lib/discogs/endpoints";
 import { TrackList } from "@/components/release/track-list";
 import { CommunityRating } from "@/components/release/community-rating";
 import { ImageGallery } from "@/components/release/image-gallery";
+import { DetailSkeleton } from "@/components/ui/detail-skeleton";
 import { db } from "@/db/client";
 import { releases } from "@/db/schema";
 import { eq } from "drizzle-orm";
@@ -58,11 +59,7 @@ export default function ReleaseDetailScreen() {
   });
 
   if (!release) {
-    return (
-      <View className="flex-1 bg-black items-center justify-center">
-        <ActivityIndicator color="#4CAF50" size="large" />
-      </View>
-    );
+    return <DetailSkeleton />;
   }
 
   const artistNames =

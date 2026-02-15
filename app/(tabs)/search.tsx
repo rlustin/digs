@@ -1,17 +1,32 @@
 import { View, TextInput, FlatList } from "react-native";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useCallback } from "react";
 
 import { searchReleases } from "@/db/queries/releases";
 import { ReleaseCard } from "@/components/release/release-card";
 import { EmptyState } from "@/components/ui/empty-state";
+
+const ITEM_HEIGHT = 68;
 
 export default function SearchScreen() {
   const [query, setQuery] = useState("");
 
   const results = useMemo(() => {
     if (query.trim().length < 2) return [];
-    return searchReleases(query);
+    try {
+      return searchReleases(query);
+    } catch {
+      return [];
+    }
   }, [query]);
+
+  const getItemLayout = useCallback(
+    (_: unknown, index: number) => ({
+      length: ITEM_HEIGHT,
+      offset: ITEM_HEIGHT * index,
+      index,
+    }),
+    []
+  );
 
   return (
     <View className="flex-1 bg-black">
@@ -23,6 +38,8 @@ export default function SearchScreen() {
           placeholderTextColor="#666"
           autoCorrect={false}
           autoCapitalize="none"
+          returnKeyType="search"
+          clearButtonMode="while-editing"
           className="bg-white/10 text-white rounded-xl px-4 py-3 text-base"
         />
       </View>
@@ -37,6 +54,9 @@ export default function SearchScreen() {
         <FlatList
           data={results}
           keyExtractor={(item) => String(item.instance_id)}
+          getItemLayout={getItemLayout}
+          keyboardShouldPersistTaps="handled"
+          keyboardDismissMode="on-drag"
           renderItem={({ item }) => (
             <ReleaseCard
               releaseId={item.release_id}

@@ -1,17 +1,43 @@
-import { View, Text, FlatList, Pressable } from "react-native";
+import { View, Text, FlatList, Pressable, RefreshControl } from "react-native";
 import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "expo-router";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 
 import { getAllFolders } from "@/db/queries/folders";
 import { EmptyState } from "@/components/ui/empty-state";
+import { ListSkeleton } from "@/components/ui/skeleton";
+import { useAuthStore } from "@/stores/auth-store";
+import { runFullSync } from "@/lib/sync/engine";
+import { useSyncStore } from "@/stores/sync-store";
 
 export default function CollectionScreen() {
   const router = useRouter();
-  const { data: folders = [] } = useQuery({
+  const username = useAuthStore((s) => s.username);
+  const isSyncing = useSyncStore((s) => s.isSyncing);
+
+  const {
+    data: folders = [],
+    isLoading,
+    refetch,
+  } = useQuery({
     queryKey: ["folders"],
     queryFn: getAllFolders,
   });
+
+  const onRefresh = () => {
+    if (username && !isSyncing) {
+      runFullSync(username);
+    }
+    refetch();
+  };
+
+  if (isLoading) {
+    return (
+      <View className="flex-1 bg-black">
+        <ListSkeleton type="folder" />
+      </View>
+    );
+  }
 
   if (folders.length === 0) {
     return (
@@ -30,6 +56,13 @@ export default function CollectionScreen() {
       <FlatList
         data={folders}
         keyExtractor={(item) => String(item.id)}
+        refreshControl={
+          <RefreshControl
+            refreshing={isSyncing}
+            onRefresh={onRefresh}
+            tintColor="#4CAF50"
+          />
+        }
         renderItem={({ item }) => (
           <Pressable
             onPress={() => router.push(`/(tabs)/folder/${item.id}`)}
