@@ -22,15 +22,15 @@ export async function runFullSync(username: string) {
     await syncBasicReleases(username);
     queryClient.invalidateQueries({ queryKey: ["releases"] });
 
-    // Start detail sync in batches
-    await runDetailSyncLoop();
-
     store.setLastFullSyncAt(new Date().toISOString());
-  } catch (err) {
-    store.setError(err instanceof Error ? err.message : "Sync failed");
-  } finally {
     store.setSyncing(false);
     store.setPhase("idle");
+
+    // Detail sync continues silently in the background
+    await runDetailSyncLoop();
+  } catch (err) {
+    store.setError(err instanceof Error ? err.message : "Sync failed");
+    store.setSyncing(false);
   }
 }
 
@@ -39,19 +39,19 @@ export async function runFullSync(username: string) {
  * to stay within rate limits.
  */
 export async function runDetailSyncLoop() {
-  const store = useSyncStore.getState();
-
   while (true) {
-    const processed = await syncReleaseDetails(10);
-    queryClient.invalidateQueries({ queryKey: ["releases"] });
+    try {
+      const processed = await syncReleaseDetails(10);
+      queryClient.invalidateQueries({ queryKey: ["releases"] });
 
-    if (processed === 0) break;
+      if (processed === 0) break;
 
-    // Pause between batches to respect rate limits
-    await new Promise((r) => setTimeout(r, 12000));
-
-    // Stop if sync was cancelled
-    if (!useSyncStore.getState().isSyncing) break;
+      // Pause between batches to respect rate limits
+      await new Promise((r) => setTimeout(r, 12000));
+    } catch {
+      // Silently stop on error during background detail sync
+      break;
+    }
   }
 }
 

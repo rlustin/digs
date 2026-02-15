@@ -102,15 +102,11 @@ export async function syncBasicReleases(username: string) {
 export async function syncReleaseDetails(
   batchSize: number = 10
 ): Promise<number> {
-  const store = useSyncStore.getState();
-  store.setPhase("details");
-
   const pending = getReleasesNeedingDetailSync(batchSize);
   if (pending.length === 0) return 0;
 
   for (let i = 0; i < pending.length; i++) {
     const release = pending[i];
-    store.setProgress(i + 1, pending.length);
 
     const detail = await fetchReleaseDetail(release.releaseId);
 
