@@ -1,21 +1,10 @@
 import { signRequest } from "../oauth-signer";
 
-// Mock crypto-js to produce deterministic output for testing
-jest.mock("crypto-js", () => {
-  const actual = jest.requireActual("crypto-js");
-  let callCount = 0;
-  return {
-    ...actual,
-    lib: {
-      WordArray: {
-        random: () => ({
-          // Deterministic nonce for reproducible tests
-          toString: () => "testnonce" + String(++callCount).padStart(8, "0"),
-        }),
-      },
-    },
-  };
-});
+// Mock expo-crypto for deterministic nonces in tests
+let callCount = 0;
+jest.mock("expo-crypto", () => ({
+  randomUUID: () => `00000000-0000-0000-0000-${String(++callCount).padStart(12, "0")}`,
+}));
 
 describe("signRequest", () => {
   beforeEach(() => {

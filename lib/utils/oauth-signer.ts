@@ -1,4 +1,5 @@
 import CryptoJS from "crypto-js";
+import * as Crypto from "expo-crypto";
 
 /** RFC 3986 percent-encode */
 function percentEncode(str: string): string {
@@ -8,9 +9,9 @@ function percentEncode(str: string): string {
   );
 }
 
-/** Generate a random nonce */
+/** Generate a random nonce using native crypto */
 function nonce(): string {
-  return CryptoJS.lib.WordArray.random(16).toString();
+  return Crypto.randomUUID().replace(/-/g, "");
 }
 
 /** Current Unix timestamp as string */

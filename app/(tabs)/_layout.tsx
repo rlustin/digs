@@ -1,59 +1,76 @@
-import React from 'react';
-import FontAwesome from '@expo/vector-icons/FontAwesome';
-import { Link, Tabs } from 'expo-router';
-import { Pressable } from 'react-native';
+import FontAwesome from "@expo/vector-icons/FontAwesome";
+import { Tabs } from "expo-router";
+import { View } from "react-native";
 
-import Colors from '@/constants/Colors';
-import { useColorScheme } from '@/components/useColorScheme';
-import { useClientOnlyValue } from '@/components/useClientOnlyValue';
+import { SyncStatusBar } from "@/components/sync/sync-status-bar";
+import { useInitialSync } from "@/hooks/use-sync";
 
-// You can explore the built-in icon families and icons on the web at https://icons.expo.fyi/
 function TabBarIcon(props: {
-  name: React.ComponentProps<typeof FontAwesome>['name'];
+  name: React.ComponentProps<typeof FontAwesome>["name"];
   color: string;
 }) {
-  return <FontAwesome size={28} style={{ marginBottom: -3 }} {...props} />;
+  return <FontAwesome size={24} style={{ marginBottom: -3 }} {...props} />;
 }
 
 export default function TabLayout() {
-  const colorScheme = useColorScheme();
+  useInitialSync();
 
   return (
-    <Tabs
-      screenOptions={{
-        tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
-        // Disable the static render of the header on web
-        // to prevent a hydration error in React Navigation v6.
-        headerShown: useClientOnlyValue(false, true),
-      }}>
-      <Tabs.Screen
-        name="index"
-        options={{
-          title: 'Tab One',
-          tabBarIcon: ({ color }) => <TabBarIcon name="code" color={color} />,
-          headerRight: () => (
-            <Link href="/modal" asChild>
-              <Pressable>
-                {({ pressed }) => (
-                  <FontAwesome
-                    name="info-circle"
-                    size={25}
-                    color={Colors[colorScheme ?? 'light'].text}
-                    style={{ marginRight: 15, opacity: pressed ? 0.5 : 1 }}
-                  />
-                )}
-              </Pressable>
-            </Link>
-          ),
+    <View className="flex-1 bg-black">
+      <SyncStatusBar />
+      <Tabs
+        screenOptions={{
+          tabBarActiveTintColor: "#4CAF50",
+          tabBarInactiveTintColor: "#888",
+          tabBarStyle: {
+            backgroundColor: "#111111",
+            borderTopColor: "#222",
+          },
+          headerStyle: { backgroundColor: "#111111" },
+          headerTintColor: "#fff",
         }}
-      />
-      <Tabs.Screen
-        name="two"
-        options={{
-          title: 'Tab Two',
-          tabBarIcon: ({ color }) => <TabBarIcon name="code" color={color} />,
-        }}
-      />
-    </Tabs>
+      >
+        <Tabs.Screen
+          name="index"
+          options={{
+            title: "Collection",
+            tabBarIcon: ({ color }) => (
+              <TabBarIcon name="th-list" color={color} />
+            ),
+          }}
+        />
+        <Tabs.Screen
+          name="folder/[folderId]"
+          options={{
+            href: null, // Hidden from tab bar, navigated to from Collection
+          }}
+        />
+        <Tabs.Screen
+          name="search"
+          options={{
+            title: "Search",
+            tabBarIcon: ({ color }) => (
+              <TabBarIcon name="search" color={color} />
+            ),
+          }}
+        />
+        <Tabs.Screen
+          name="random"
+          options={{
+            title: "Random",
+            tabBarIcon: ({ color }) => (
+              <TabBarIcon name="random" color={color} />
+            ),
+          }}
+        />
+        <Tabs.Screen
+          name="settings"
+          options={{
+            title: "Settings",
+            tabBarIcon: ({ color }) => <TabBarIcon name="cog" color={color} />,
+          }}
+        />
+      </Tabs>
+    </View>
   );
 }

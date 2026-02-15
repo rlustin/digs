@@ -16,8 +16,12 @@
     "ios": {
       "supportsTablet": true,
       "infoPlist": {
-        "UIBackgroundModes": ["processing"]
-      }
+        "UIBackgroundModes": [
+          "processing",
+          "processing"
+        ]
+      },
+      "bundleIdentifier": "com.anonymous.discogs-app"
     },
     "android": {
       "adaptiveIcon": {
