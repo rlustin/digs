@@ -29,18 +29,18 @@ export default function SearchScreen() {
   );
 
   return (
-    <View className="flex-1 bg-black">
+    <View className="flex-1 bg-white">
       <View className="px-4 pt-2 pb-3">
         <TextInput
           value={query}
           onChangeText={setQuery}
           placeholder="Search artists, albums, labels..."
-          placeholderTextColor="#666"
+          placeholderTextColor="#9CA3AF"
           autoCorrect={false}
           autoCapitalize="none"
           returnKeyType="search"
           clearButtonMode="while-editing"
-          className="bg-white/10 text-white rounded-xl px-4 py-3 text-base"
+          className="bg-gray-100 text-gray-900 rounded-xl px-4 py-3 text-base"
         />
       </View>
 

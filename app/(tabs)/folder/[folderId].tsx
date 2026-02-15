@@ -32,7 +32,7 @@ export default function FolderReleasesScreen() {
   });
 
   return (
-    <View className="flex-1 bg-black">
+    <View className="flex-1 bg-white">
       <Stack.Screen options={{ headerShown: true, title: folderName }} />
       {isLoading ? (
         <ListSkeleton type="release" />
@@ -55,7 +55,7 @@ export default function FolderReleasesScreen() {
             <RefreshControl
               refreshing={false}
               onRefresh={() => refetch()}
-              tintColor="#4CAF50"
+              tintColor="#F97316"
             />
           }
           renderItem={({ item }) => (

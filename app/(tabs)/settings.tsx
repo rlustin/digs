@@ -40,47 +40,47 @@ export default function SettingsScreen() {
   };
 
   return (
-    <View className="flex-1 bg-black">
+    <View className="flex-1 bg-white">
       {/* User info */}
-      <View className="flex-row items-center px-4 py-5 border-b border-white/5">
-        <FontAwesome name="user-circle" size={40} color="#4CAF50" />
+      <View className="flex-row items-center px-4 py-5 border-b border-gray-100">
+        <FontAwesome name="user-circle" size={40} color="#F97316" />
         <View className="ml-3">
-          <Text className="text-white text-lg font-semibold">{username}</Text>
+          <Text className="text-gray-900 text-lg font-semibold">{username}</Text>
           <Text className="text-gray-500 text-sm">Discogs account</Text>
         </View>
       </View>
 
       {/* Sync info */}
-      <View className="px-4 py-4 border-b border-white/5">
+      <View className="px-4 py-4 border-b border-gray-100">
         <Text className="text-gray-400 text-xs uppercase tracking-wider mb-3">
           Sync
         </Text>
         <View className="flex-row justify-between mb-2">
-          <Text className="text-gray-400 text-sm">Last full sync</Text>
-          <Text className="text-white text-sm">
+          <Text className="text-gray-500 text-sm">Last full sync</Text>
+          <Text className="text-gray-900 text-sm">
             {formatDate(lastFullSyncAt)}
           </Text>
         </View>
         <View className="flex-row justify-between">
-          <Text className="text-gray-400 text-sm">Status</Text>
-          <Text className="text-white text-sm">
+          <Text className="text-gray-500 text-sm">Status</Text>
+          <Text className="text-gray-900 text-sm">
             {isSyncing ? "Syncing..." : "Idle"}
           </Text>
         </View>
       </View>
 
       {/* Sync Now button */}
-      <View className="px-4 py-4 border-b border-white/5">
+      <View className="px-4 py-4 border-b border-gray-100">
         <Pressable
           onPress={handleSyncNow}
           disabled={isSyncing}
           className={`rounded-xl py-3 items-center ${
-            isSyncing ? "bg-white/5" : "bg-accent active:opacity-80"
+            isSyncing ? "bg-gray-100" : "bg-accent active:opacity-80"
           }`}
         >
           <Text
             className={`text-base font-semibold ${
-              isSyncing ? "text-gray-500" : "text-white"
+              isSyncing ? "text-gray-400" : "text-white"
             }`}
           >
             {isSyncing ? "Syncing..." : "Sync Now"}

@@ -27,7 +27,7 @@ export function SyncStatusCard() {
   return (
     <View
       className={`mx-4 mt-3 rounded-xl overflow-hidden ${
-        isError ? "bg-red-950 border border-red-800/40" : "bg-white/5 border border-white/10"
+        isError ? "bg-red-50 border border-red-200" : "bg-gray-50 border border-gray-200"
       }`}
     >
       <View className="px-4 py-3">
@@ -36,11 +36,11 @@ export function SyncStatusCard() {
             {isError ? (
               <FontAwesome name="exclamation-circle" size={14} color="#f87171" />
             ) : (
-              <FontAwesome name="refresh" size={12} color="#4CAF50" />
+              <FontAwesome name="refresh" size={12} color="#F97316" />
             )}
             <Text
               className={`text-sm font-medium ml-2 ${
-                isError ? "text-red-400" : "text-white"
+                isError ? "text-red-600" : "text-gray-900"
               }`}
               numberOfLines={1}
             >
@@ -50,7 +50,7 @@ export function SyncStatusCard() {
 
           {isError ? (
             <Pressable onPress={reset} hitSlop={8}>
-              <FontAwesome name="times" size={14} color="#666" />
+              <FontAwesome name="times" size={14} color="#9CA3AF" />
             </Pressable>
           ) : progress ? (
             <Text className="text-gray-500 text-xs ml-2">{pct}%</Text>
@@ -59,7 +59,7 @@ export function SyncStatusCard() {
 
         {/* Progress bar */}
         {!isError && progress && progress.total > 0 && (
-          <View className="mt-2 h-1 rounded-full bg-white/10 overflow-hidden">
+          <View className="mt-2 h-1 rounded-full bg-gray-200 overflow-hidden">
             <View
               className="h-full rounded-full bg-accent"
               style={{ width: `${pct}%` }}

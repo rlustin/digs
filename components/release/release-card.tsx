@@ -29,7 +29,7 @@ export const ReleaseCard = memo(function ReleaseCard({
   return (
     <Pressable
       onPress={() => router.push(`/release/${releaseId}`)}
-      className="flex-row px-4 py-3 active:bg-white/5"
+      className="flex-row px-4 py-3 active:bg-gray-50"
     >
       <Image
         source={{ uri: thumbUrl || undefined }}
@@ -39,7 +39,7 @@ export const ReleaseCard = memo(function ReleaseCard({
         transition={200}
       />
       <View className="flex-1 ml-3 justify-center">
-        <Text className="text-white text-base font-medium" numberOfLines={1}>
+        <Text className="text-gray-900 text-base font-medium" numberOfLines={1}>
           {title}
         </Text>
         <Text className="text-gray-400 text-sm mt-0.5" numberOfLines={1}>

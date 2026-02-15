@@ -34,7 +34,7 @@ export default function CollectionScreen() {
 
   if (isLoading) {
     return (
-      <View className="flex-1 bg-black">
+      <View className="flex-1 bg-white">
         <ListSkeleton type="folder" />
       </View>
     );
@@ -42,7 +42,7 @@ export default function CollectionScreen() {
 
   if (folders.length === 0) {
     return (
-      <View className="flex-1 bg-black">
+      <View className="flex-1 bg-white">
         <EmptyState
           icon="folder-open-o"
           title="No folders yet"
@@ -53,7 +53,7 @@ export default function CollectionScreen() {
   }
 
   return (
-    <View className="flex-1 bg-black">
+    <View className="flex-1 bg-white">
       <FlatList
         data={folders}
         keyExtractor={(item) => String(item.id)}
@@ -62,25 +62,25 @@ export default function CollectionScreen() {
           <RefreshControl
             refreshing={isSyncing}
             onRefresh={onRefresh}
-            tintColor="#4CAF50"
+            tintColor="#F97316"
           />
         }
         renderItem={({ item }) => (
           <Pressable
             onPress={() => router.push(`/(tabs)/folder/${item.id}`)}
-            className="flex-row items-center px-4 py-4 border-b border-white/5 active:bg-white/5"
+            className="flex-row items-center px-4 py-4 border-b border-gray-100 active:bg-gray-50"
           >
-            <FontAwesome name="folder" size={20} color="#4CAF50" />
-            <Text className="text-white text-base flex-1 ml-3">
+            <FontAwesome name="folder" size={20} color="#F97316" />
+            <Text className="text-gray-900 text-base flex-1 ml-3">
               {item.name}
             </Text>
-            <View className="bg-white/10 rounded-full px-2.5 py-0.5">
-              <Text className="text-gray-400 text-sm">{item.count}</Text>
+            <View className="bg-gray-100 rounded-full px-2.5 py-0.5">
+              <Text className="text-gray-500 text-sm">{item.count}</Text>
             </View>
             <FontAwesome
               name="chevron-right"
               size={12}
-              color="#555"
+              color="#D1D5DB"
               style={{ marginLeft: 12 }}
             />
           </Pressable>

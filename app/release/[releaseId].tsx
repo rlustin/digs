@@ -82,7 +82,7 @@ export default function ReleaseDetailScreen() {
   const images = (release.images as { type: string; uri: string; width: number; height: number }[]) ?? [];
 
   return (
-    <ScrollView className="flex-1 bg-black" contentContainerClassName="pb-10">
+    <ScrollView className="flex-1 bg-white" contentContainerClassName="pb-10">
       {/* Hero image */}
       <Image
         source={{ uri: release.coverUrl || release.thumbUrl || undefined }}
@@ -93,7 +93,7 @@ export default function ReleaseDetailScreen() {
 
       {/* Title block */}
       <View className="px-4 mt-4">
-        <Text className="text-white text-2xl font-bold">{release.title}</Text>
+        <Text className="text-gray-900 text-2xl font-bold">{release.title}</Text>
         <Text className="text-gray-400 text-base mt-1">{artistNames}</Text>
         <View className="flex-row items-center mt-2">
           {release.year ? (
@@ -131,7 +131,7 @@ export default function ReleaseDetailScreen() {
       {/* Loading indicator for on-demand detail fetch */}
       {fetchingDetail && (
         <View className="flex-row items-center justify-center mt-4">
-          <ActivityIndicator color="#4CAF50" size="small" />
+          <ActivityIndicator color="#F97316" size="small" />
           <Text className="text-gray-400 text-sm ml-2">
             Loading details...
           </Text>

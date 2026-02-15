@@ -32,7 +32,7 @@ export default function RandomScreen() {
     "Unknown Artist";
 
   return (
-    <ScrollView className="flex-1 bg-black" contentContainerClassName="pb-8">
+    <ScrollView className="flex-1 bg-white" contentContainerClassName="pb-8">
       {/* Folder chips */}
       <ScrollView
         horizontal
@@ -43,12 +43,12 @@ export default function RandomScreen() {
         <Pressable
           onPress={() => setSelectedFolder(undefined)}
           className={`px-3 py-1.5 rounded-full ${
-            selectedFolder === undefined ? "bg-accent" : "bg-white/10"
+            selectedFolder === undefined ? "bg-accent" : "bg-gray-100"
           }`}
         >
           <Text
             className={`text-sm ${
-              selectedFolder === undefined ? "text-white font-semibold" : "text-gray-400"
+              selectedFolder === undefined ? "text-white font-semibold" : "text-gray-500"
             }`}
           >
             All
@@ -61,14 +61,14 @@ export default function RandomScreen() {
               key={folder.id}
               onPress={() => setSelectedFolder(folder.id)}
               className={`px-3 py-1.5 rounded-full ${
-                selectedFolder === folder.id ? "bg-accent" : "bg-white/10"
+                selectedFolder === folder.id ? "bg-accent" : "bg-gray-100"
               }`}
             >
               <Text
                 className={`text-sm ${
                   selectedFolder === folder.id
                     ? "text-white font-semibold"
-                    : "text-gray-400"
+                    : "text-gray-500"
                 }`}
               >
                 {folder.name}
@@ -89,10 +89,10 @@ export default function RandomScreen() {
             contentFit="cover"
             transition={300}
           />
-          <Text className="text-white text-xl font-bold mt-4 text-center">
+          <Text className="text-gray-900 text-xl font-bold mt-4 text-center">
             {release.title}
           </Text>
-          <Text className="text-gray-400 text-base mt-1 text-center">
+          <Text className="text-gray-500 text-base mt-1 text-center">
             {artistNames}
           </Text>
           {release.year ? (
@@ -101,7 +101,7 @@ export default function RandomScreen() {
         </Pressable>
       ) : (
         <View className="items-center justify-center py-20">
-          <FontAwesome name="random" size={48} color="#555" />
+          <FontAwesome name="random" size={48} color="#D1D5DB" />
           <Text className="text-gray-400 text-lg mt-4">
             Tap the button to pick a random release
           </Text>

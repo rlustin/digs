@@ -2,7 +2,7 @@ import "@/global.css";
 import "@/lib/sync/background-task";
 
 import FontAwesome from "@expo/vector-icons/FontAwesome";
-import { DarkTheme, ThemeProvider } from "@react-navigation/native";
+import { DefaultTheme, ThemeProvider } from "@react-navigation/native";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { useFonts } from "expo-font";
 import { Stack, useRouter, useSegments } from "expo-router";
@@ -23,14 +23,15 @@ export const unstable_settings = {
 
 SplashScreen.preventAutoHideAsync();
 
-// Dark theme with green accent
+// Light theme with orange accent
 const appTheme = {
-  ...DarkTheme,
+  ...DefaultTheme,
   colors: {
-    ...DarkTheme.colors,
-    primary: "#4CAF50",
-    background: "#000000",
-    card: "#111111",
+    ...DefaultTheme.colors,
+    primary: "#F97316",
+    background: "#FFFFFF",
+    card: "#FFFFFF",
+    border: "#E5E7EB",
   },
 };
 
@@ -77,7 +78,7 @@ export default function RootLayout() {
   return (
     <QueryClientProvider client={queryClient}>
       <ThemeProvider value={appTheme}>
-        <StatusBar style="light" />
+        <StatusBar style="dark" />
         <AuthGate />
       </ThemeProvider>
     </QueryClientProvider>
@@ -108,8 +109,8 @@ function AuthGate() {
         options={{
           headerShown: true,
           headerTitle: "",
-          headerStyle: { backgroundColor: "#111111" },
-          headerTintColor: "#fff",
+          headerStyle: { backgroundColor: "#FFFFFF" },
+          headerTintColor: "#111",
         }}
       />
     </Stack>

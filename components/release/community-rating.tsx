@@ -21,7 +21,7 @@ export function CommunityRating({ rating, have, want }: CommunityRatingProps) {
               key={n}
               name={n <= stars ? "star" : n - 0.5 <= stars ? "star-half-o" : "star-o"}
               size={14}
-              color="#4CAF50"
+              color="#F97316"
               style={{ marginRight: 2 }}
             />
           ))}
