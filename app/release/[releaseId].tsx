@@ -1,9 +1,10 @@
-import { View, Text, ScrollView, ActivityIndicator } from "react-native";
-import { useLocalSearchParams } from "expo-router";
+import { View, Text, ScrollView, ActivityIndicator, Pressable } from "react-native";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import { useQuery } from "@tanstack/react-query";
 import { Image } from "expo-image";
 
 import { getReleaseByReleaseId } from "@/db/queries/releases";
+import { getFolderById } from "@/db/queries/folders";
 import { fetchReleaseDetail } from "@/lib/discogs/endpoints";
 import { TrackList } from "@/components/release/track-list";
 import { CommunityRating } from "@/components/release/community-rating";
@@ -15,11 +16,18 @@ import { eq } from "drizzle-orm";
 
 export default function ReleaseDetailScreen() {
   const { releaseId } = useLocalSearchParams<{ releaseId: string }>();
+  const router = useRouter();
   const id = Number(releaseId);
 
   const { data: release, refetch } = useQuery({
     queryKey: ["release", id],
     queryFn: () => getReleaseByReleaseId(id),
+  });
+
+  const { data: folder } = useQuery({
+    queryKey: ["folder", release?.folderId],
+    queryFn: () => getFolderById(release!.folderId),
+    enabled: !!release && release.folderId !== 0,
   });
 
   // On-demand detail fetch if not yet synced
@@ -118,6 +126,16 @@ export default function ReleaseDetailScreen() {
         )}
         {genresAndStyles ? (
           <Text className="text-gray-500 text-sm mt-1">{genresAndStyles}</Text>
+        ) : null}
+        {folder ? (
+          <View className="flex-row mt-2">
+            <Pressable
+              onPress={() => router.push(`/folder/${folder.id}`)}
+              className="bg-accent rounded-full px-3 py-1 active:opacity-70"
+            >
+              <Text className="text-white text-sm font-semibold">{folder.name}</Text>
+            </Pressable>
+          </View>
         ) : null}
       </View>
 
