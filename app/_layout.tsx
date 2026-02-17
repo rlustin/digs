@@ -109,6 +109,7 @@ function AuthGate() {
         options={{
           headerShown: true,
           headerTitle: "",
+          headerBackTitle: "Back",
           headerStyle: { backgroundColor: "#FFFFFF" },
           headerTintColor: "#111",
         }}
