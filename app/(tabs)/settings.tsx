@@ -1,3 +1,4 @@
+import { useState, useEffect, useCallback } from "react";
 import { View, Text, Pressable, Alert } from "react-native";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 
@@ -6,12 +7,28 @@ import { useSyncStore } from "@/stores/sync-store";
 import { logout } from "@/lib/discogs/oauth";
 import { clearClientCredentials } from "@/lib/discogs/client";
 import { runFullSync } from "@/lib/sync/engine";
+import { getDetailSyncCounts } from "@/db/queries/releases";
+import { SyncStatusCard } from "@/components/sync/sync-status-bar";
 
 export default function SettingsScreen() {
   const username = useAuthStore((s) => s.username);
   const clearAuth = useAuthStore((s) => s.clearAuth);
   const isSyncing = useSyncStore((s) => s.isSyncing);
   const lastFullSyncAt = useSyncStore((s) => s.lastFullSyncAt);
+
+  const [detailCounts, setDetailCounts] = useState({ synced: 0, total: 0 });
+
+  const refreshCounts = useCallback(() => {
+    setDetailCounts(getDetailSyncCounts());
+  }, []);
+
+  useEffect(() => {
+    refreshCounts();
+    const id = setInterval(refreshCounts, 5000);
+    return () => clearInterval(id);
+  }, [refreshCounts]);
+
+  const detailPending = detailCounts.total > 0 && detailCounts.synced < detailCounts.total;
 
   const handleSyncNow = () => {
     if (username && !isSyncing) {
@@ -61,13 +78,49 @@ export default function SettingsScreen() {
             {formatDate(lastFullSyncAt)}
           </Text>
         </View>
-        <View className="flex-row justify-between">
-          <Text className="text-gray-500 text-sm">Status</Text>
+        <View className="flex-row justify-between mb-2">
+          <Text className="text-gray-500 text-sm">Collection</Text>
           <Text className="text-gray-900 text-sm">
             {isSyncing ? "Syncing..." : "Idle"}
           </Text>
         </View>
+        <View className="flex-row justify-between">
+          <Text className="text-gray-500 text-sm">Release details</Text>
+          <Text className="text-gray-900 text-sm">
+            {detailCounts.total === 0
+              ? "No releases"
+              : detailPending
+                ? `${detailCounts.synced}/${detailCounts.total}`
+                : "All synced"}
+          </Text>
+        </View>
       </View>
+
+      {/* Collection sync (folders + basic releases) */}
+      <SyncStatusCard />
+
+      {/* Detail sync progress bar */}
+      {detailPending && (
+        <View className="px-4 py-4 border-b border-gray-100">
+          <View className="flex-row items-center mb-2">
+            <FontAwesome name="refresh" size={12} color="#F97316" />
+            <Text className="text-gray-900 text-sm font-medium ml-2">
+              Syncing release details
+            </Text>
+            <Text className="text-gray-500 text-xs ml-auto">
+              {Math.round((detailCounts.synced / detailCounts.total) * 100)}%
+            </Text>
+          </View>
+          <View className="h-1 rounded-full bg-gray-200 overflow-hidden">
+            <View
+              className="h-full rounded-full bg-accent"
+              style={{
+                width: `${Math.round((detailCounts.synced / detailCounts.total) * 100)}%`,
+              }}
+            />
+          </View>
+        </View>
+      )}
 
       {/* Sync Now button */}
       <View className="px-4 py-4 border-b border-gray-100">

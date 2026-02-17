@@ -26,6 +26,17 @@ export function getReleasesNeedingDetailSync(limit: number = 10) {
     .all();
 }
 
+export function getDetailSyncCounts() {
+  const row = db
+    .select({
+      total: sql<number>`count(*)`,
+      synced: sql<number>`count(${releases.detailSyncedAt})`,
+    })
+    .from(releases)
+    .get();
+  return { total: row?.total ?? 0, synced: row?.synced ?? 0 };
+}
+
 export function searchReleases(query: string) {
   if (!query.trim()) return [];
 
