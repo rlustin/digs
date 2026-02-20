@@ -23,7 +23,7 @@ export default function LoginScreen() {
 
   return (
     <View className="flex-1 bg-white items-center justify-center px-8">
-      <Text className="text-gray-900 text-3xl font-bold mb-2">Vinyl Browser</Text>
+      <Text className="text-gray-900 text-3xl font-bold mb-2">Digs</Text>
       <Text className="text-gray-500 text-base mb-10 text-center">
         Browse your Discogs collection offline
       </Text>

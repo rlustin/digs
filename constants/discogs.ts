@@ -5,8 +5,8 @@ export const DISCOGS_CONSUMER_SECRET =
   process.env.EXPO_PUBLIC_DISCOGS_SECRET ?? "";
 
 export const DISCOGS_BASE_URL = "https://api.discogs.com";
-export const DISCOGS_USER_AGENT = "DiscogsVinylBrowser/1.0.0";
-export const DISCOGS_CALLBACK_URL = "discogs-app://oauth/callback";
+export const DISCOGS_USER_AGENT = "Digs/1.0.0";
+export const DISCOGS_CALLBACK_URL = "digs://oauth/callback";
 
 export const DISCOGS_REQUEST_TOKEN_URL = `${DISCOGS_BASE_URL}/oauth/request_token`;
 export const DISCOGS_AUTHORIZE_URL = "https://www.discogs.com/oauth/authorize";

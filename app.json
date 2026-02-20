@@ -1,11 +1,11 @@
 {
   "expo": {
-    "name": "discogs-app",
-    "slug": "discogs-app",
+    "name": "Digs",
+    "slug": "digs",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "discogs-app",
+    "scheme": "digs",
     "userInterfaceStyle": "light",
     "newArchEnabled": true,
     "splash": {
@@ -20,7 +20,7 @@
           "processing"
         ]
       },
-      "bundleIdentifier": "com.anonymous.discogs-app"
+      "bundleIdentifier": "fr.lustin.digs"
     },
     "android": {
       "adaptiveIcon": {
