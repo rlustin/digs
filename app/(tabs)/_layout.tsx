@@ -2,6 +2,7 @@ import { Disc3, Dices, Search, Settings, type LucideIcon } from "lucide-react-na
 import { Tabs } from "expo-router";
 
 import { useInitialSync } from "@/hooks/use-sync";
+import { FloatingTabBar } from "@/components/ui/tab-bar";
 
 function TabBarIcon({ Icon, color }: { Icon: LucideIcon; color: string }) {
   return <Icon size={25} color={color} strokeWidth={1.75} />;
@@ -12,13 +13,12 @@ export default function TabLayout() {
 
   return (
       <Tabs
+        tabBar={(props) => <FloatingTabBar {...props} />}
         screenOptions={{
+          tabBarShowLabel: false,
           tabBarActiveTintColor: "#F97316",
-          tabBarInactiveTintColor: "#999",
-          tabBarStyle: {
-            backgroundColor: "#FFFFFF",
-            borderTopColor: "#E5E7EB",
-          },
+          tabBarInactiveTintColor: "#AAAAAA",
+          tabBarStyle: { position: "absolute" },
           headerStyle: { backgroundColor: "#FFFFFF" },
           headerTintColor: "#111",
         }}

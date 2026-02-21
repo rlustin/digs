@@ -47,6 +47,7 @@ export default function FolderReleasesScreen() {
         <FlatList
           data={releases}
           keyExtractor={(item) => String(item.instanceId)}
+          contentContainerStyle={{ paddingBottom: 90 }}
           getItemLayout={(_, index) => ({
             length: ITEM_HEIGHT,
             offset: ITEM_HEIGHT * index,

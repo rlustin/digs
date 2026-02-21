@@ -32,7 +32,7 @@ export default function RandomScreen() {
     "Unknown Artist";
 
   return (
-    <ScrollView className="flex-1 bg-white" contentContainerClassName="pb-8">
+    <ScrollView className="flex-1 bg-white" contentContainerClassName="pb-24">
       {/* Folder chips */}
       <ScrollView
         horizontal

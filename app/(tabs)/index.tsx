@@ -70,7 +70,7 @@ export default function CollectionScreen() {
       <FlatList
         data={folders}
         keyExtractor={(item) => String(item.id)}
-        contentContainerStyle={{ paddingTop: 4, paddingBottom: 16 }}
+        contentContainerStyle={{ paddingTop: 4, paddingBottom: 90 }}
         ListHeaderComponent={
           <>
             <SyncStatusCard />

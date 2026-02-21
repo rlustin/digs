@@ -216,7 +216,7 @@ export default function SettingsScreen() {
       </View>
 
       {/* Bottom padding */}
-      <View className="h-12" />
+      <View className="h-24" />
     </ScrollView>
   );
 }

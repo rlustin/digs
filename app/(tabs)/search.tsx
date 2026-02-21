@@ -58,6 +58,7 @@ export default function SearchScreen() {
           getItemLayout={getItemLayout}
           keyboardShouldPersistTaps="handled"
           keyboardDismissMode="on-drag"
+          contentContainerStyle={{ paddingBottom: 90 }}
           renderItem={({ item }) => (
             <ReleaseCard
               releaseId={item.release_id}
