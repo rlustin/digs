@@ -108,8 +108,10 @@ function AuthGate() {
           headerShown: true,
           headerTitle: "",
           headerBackTitle: "Back",
-          headerStyle: { backgroundColor: "#FFFFFF" },
-          headerTintColor: "#111",
+          headerTransparent: true,
+          headerStyle: { backgroundColor: "transparent" },
+          headerTintColor: "#fff",
+          headerShadowVisible: false,
         }}
       />
     </Stack>

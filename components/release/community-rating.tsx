@@ -13,7 +13,7 @@ export function CommunityRating({ rating, have, want }: CommunityRatingProps) {
   const stars = rating ? Math.round(rating * 2) / 2 : 0;
 
   return (
-    <View className="flex-row items-center px-4 mt-3">
+    <View className="flex-row items-center">
       {rating != null && (
         <View className="flex-row items-center mr-4">
           {[1, 2, 3, 4, 5].map((n) => {

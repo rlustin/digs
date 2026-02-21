@@ -1,7 +1,16 @@
-import { View, Text, ScrollView, ActivityIndicator, Pressable } from "react-native";
+import {
+  View,
+  Text,
+  ScrollView,
+  ActivityIndicator,
+  Pressable,
+  useWindowDimensions,
+} from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useQuery } from "@tanstack/react-query";
 import { Image } from "expo-image";
+import { LinearGradient } from "expo-linear-gradient";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { getReleaseByReleaseId } from "@/db/queries/releases";
 import { getFolderById } from "@/db/queries/folders";
@@ -14,10 +23,19 @@ import { db } from "@/db/client";
 import { releases } from "@/db/schema";
 import { eq } from "drizzle-orm";
 
+const COVER_WIDTH_RATIO = 0.75;
+const COVER_TOP_SPACING = 20;
+const BACKDROP_EXTRA = 20;
+
 export default function ReleaseDetailScreen() {
   const { releaseId } = useLocalSearchParams<{ releaseId: string }>();
   const router = useRouter();
   const id = Number(releaseId);
+  const { width: screenWidth } = useWindowDimensions();
+  const insets = useSafeAreaInsets();
+
+  const coverSize = screenWidth * COVER_WIDTH_RATIO;
+  const backdropHeight = insets.top + 44 + COVER_TOP_SPACING + coverSize + BACKDROP_EXTRA;
 
   const { data: release, refetch } = useQuery({
     queryKey: ["release", id],
@@ -70,6 +88,8 @@ export default function ReleaseDetailScreen() {
     return <DetailSkeleton />;
   }
 
+  const coverUrl = release.coverUrl || release.thumbUrl || undefined;
+
   const artistNames =
     release.artists?.map((a: { name: string }) => a.name).join(", ") ??
     "Unknown Artist";
@@ -86,22 +106,80 @@ export default function ReleaseDetailScreen() {
     ...(release.styles ?? []),
   ].join(", ");
 
-  const tracklist = (release.tracklist as { position: string; title: string; duration: string }[]) ?? [];
-  const images = (release.images as { type: string; uri: string; width: number; height: number }[]) ?? [];
+  const tracklist =
+    (release.tracklist as {
+      position: string;
+      title: string;
+      duration: string;
+    }[]) ?? [];
+  const images =
+    (release.images as {
+      type: string;
+      uri: string;
+      width: number;
+      height: number;
+    }[]) ?? [];
 
   return (
     <ScrollView className="flex-1 bg-white" contentContainerClassName="pb-10">
-      {/* Hero image */}
-      <Image
-        source={{ uri: release.coverUrl || release.thumbUrl || undefined }}
-        style={{ width: "100%", aspectRatio: 1 }}
-        contentFit="cover"
-        transition={300}
-      />
+      {/* Immersive header */}
+      <View style={{ height: backdropHeight }}>
+        {/* Blurred backdrop */}
+        <Image
+          source={{ uri: coverUrl }}
+          style={{ width: screenWidth, height: backdropHeight }}
+          contentFit="cover"
+          blurRadius={25}
+          transition={300}
+        />
+
+        {/* Gradient fade to white */}
+        <LinearGradient
+          colors={["transparent", "rgba(255,255,255,0.6)", "#fff"]}
+          locations={[0.3, 0.7, 1]}
+          style={{
+            position: "absolute",
+            left: 0,
+            right: 0,
+            bottom: 0,
+            height: backdropHeight * 0.5,
+          }}
+        />
+
+        {/* Floating cover art */}
+        <View
+          style={{
+            position: "absolute",
+            top: insets.top + 44 + COVER_TOP_SPACING,
+            left: (screenWidth - coverSize) / 2,
+            width: coverSize,
+            height: coverSize,
+            borderRadius: 12,
+            shadowColor: "#000",
+            shadowOffset: { width: 0, height: 8 },
+            shadowOpacity: 0.3,
+            shadowRadius: 16,
+            elevation: 10,
+          }}
+        >
+          <Image
+            source={{ uri: coverUrl }}
+            style={{
+              width: coverSize,
+              height: coverSize,
+              borderRadius: 12,
+            }}
+            contentFit="cover"
+            transition={300}
+          />
+        </View>
+      </View>
 
       {/* Title block */}
-      <View className="px-4 mt-4">
-        <Text className="text-gray-900 text-2xl font-bold">{release.title}</Text>
+      <View className="px-4 mt-3">
+        <Text className="text-gray-900 text-2xl font-bold">
+          {release.title}
+        </Text>
         <Text className="text-gray-400 text-base mt-1">{artistNames}</Text>
         <View className="flex-row items-center mt-2">
           {release.year ? (
@@ -127,24 +205,26 @@ export default function ReleaseDetailScreen() {
         {genresAndStyles ? (
           <Text className="text-gray-500 text-sm mt-1">{genresAndStyles}</Text>
         ) : null}
-        {folder ? (
-          <View className="flex-row mt-2">
+
+        {/* Folder badge + community rating on same row */}
+        <View className="flex-row items-center mt-2">
+          {folder ? (
             <Pressable
               onPress={() => router.push(`/folder/${folder.id}`)}
-              className="bg-accent rounded-full px-3 py-1 active:opacity-70"
+              className="bg-accent rounded-full px-3 py-1 mr-3 active:opacity-70"
             >
-              <Text className="text-white text-sm font-semibold">{folder.name}</Text>
+              <Text className="text-white text-sm font-semibold">
+                {folder.name}
+              </Text>
             </Pressable>
-          </View>
-        ) : null}
+          ) : null}
+          <CommunityRating
+            rating={release.communityRating}
+            have={release.communityHave}
+            want={release.communityWant}
+          />
+        </View>
       </View>
-
-      {/* Community rating */}
-      <CommunityRating
-        rating={release.communityRating}
-        have={release.communityHave}
-        want={release.communityWant}
-      />
 
       {/* Loading indicator for on-demand detail fetch */}
       {fetchingDetail && (
