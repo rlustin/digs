@@ -31,15 +31,25 @@ export const ReleaseCard = memo(function ReleaseCard({
       onPress={() => router.push(`/release/${releaseId}`)}
       className="flex-row px-4 py-3 active:bg-gray-50"
     >
-      <Image
-        source={{ uri: thumbUrl || undefined }}
-        style={{ width: 56, height: 56, borderRadius: 4 }}
-        contentFit="cover"
-        placeholder={{ blurhash: "L6PZfSi_.AyE_3t7t7R**0o#DgR4" }}
-        transition={200}
-      />
-      <View className="flex-1 ml-3 justify-center">
-        <Text className="text-gray-900 text-base font-medium" numberOfLines={1}>
+      <View
+        style={{
+          shadowColor: "#000",
+          shadowOffset: { width: 0, height: 2 },
+          shadowOpacity: 0.15,
+          shadowRadius: 6,
+          elevation: 4,
+        }}
+      >
+        <Image
+          source={{ uri: thumbUrl || undefined }}
+          style={{ width: 80, height: 80, borderRadius: 8 }}
+          contentFit="cover"
+          placeholder={{ blurhash: "L6PZfSi_.AyE_3t7t7R**0o#DgR4" }}
+          transition={200}
+        />
+      </View>
+      <View className="flex-1 ml-4 justify-center">
+        <Text className="text-gray-900 text-lg font-medium" numberOfLines={1}>
           {title}
         </Text>
         <Text className="text-gray-400 text-sm mt-0.5" numberOfLines={1}>

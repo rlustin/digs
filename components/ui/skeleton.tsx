@@ -3,8 +3,8 @@ import { View } from "react-native";
 export function ReleaseCardSkeleton() {
   return (
     <View className="flex-row px-4 py-3">
-      <View className="w-14 h-14 rounded bg-gray-100" />
-      <View className="flex-1 ml-3 justify-center">
+      <View className="w-20 h-20 rounded-lg bg-gray-100" />
+      <View className="flex-1 ml-4 justify-center">
         <View className="h-4 w-3/4 rounded bg-gray-100 mb-2" />
         <View className="h-3 w-1/2 rounded bg-gray-100 mb-1.5" />
         <View className="h-3 w-1/4 rounded bg-gray-100" />

@@ -6,7 +6,7 @@ import { ReleaseCard } from "@/components/release/release-card";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Search } from "lucide-react-native";
 
-const ITEM_HEIGHT = 68;
+const ITEM_HEIGHT = 104;
 
 export default function SearchScreen() {
   const [query, setQuery] = useState("");

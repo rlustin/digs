@@ -10,7 +10,7 @@ import { EmptyState } from "@/components/ui/empty-state";
 import { Music } from "lucide-react-native";
 import { ListSkeleton } from "@/components/ui/skeleton";
 
-const ITEM_HEIGHT = 68;
+const ITEM_HEIGHT = 104;
 
 export default function FolderReleasesScreen() {
   const { folderId } = useLocalSearchParams<{ folderId: string }>();
