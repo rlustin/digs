@@ -1,5 +1,14 @@
-import { View, Text, Pressable, ActivityIndicator } from "react-native";
-import { useState } from "react";
+import { View, Text, Pressable, ActivityIndicator, StyleSheet } from "react-native";
+import { useState, useEffect } from "react";
+import { LinearGradient } from "expo-linear-gradient";
+import { Disc3 } from "lucide-react-native";
+import Animated, {
+  useSharedValue,
+  useAnimatedStyle,
+  withRepeat,
+  withTiming,
+  Easing,
+} from "react-native-reanimated";
 import { login } from "@/lib/discogs/oauth";
 import { useAuthStore } from "@/stores/auth-store";
 
@@ -7,6 +16,20 @@ export default function LoginScreen() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const setAuthenticated = useAuthStore((s) => s.setAuthenticated);
+
+  const rotation = useSharedValue(0);
+
+  useEffect(() => {
+    rotation.value = withRepeat(
+      withTiming(360, { duration: 8000, easing: Easing.linear }),
+      -1,
+      false,
+    );
+  }, [rotation]);
+
+  const spinStyle = useAnimatedStyle(() => ({
+    transform: [{ rotate: `${rotation.value}deg` }],
+  }));
 
   const handleLogin = async () => {
     setLoading(true);
@@ -22,29 +45,78 @@ export default function LoginScreen() {
   };
 
   return (
-    <View className="flex-1 bg-white items-center justify-center px-8">
-      <Text className="text-gray-900 text-3xl font-bold mb-2">Digs</Text>
-      <Text className="text-gray-500 text-base mb-10 text-center">
-        Browse your Discogs collection offline
-      </Text>
+    <LinearGradient colors={["#FFFFFF", "#F3F4F6"]} style={{ flex: 1 }}>
+      <View style={styles.content}>
+        <Animated.View style={spinStyle}>
+          <Disc3 size={160} color="rgba(249,115,22,0.12)" strokeWidth={1} />
+        </Animated.View>
 
-      <Pressable
-        onPress={handleLogin}
-        disabled={loading}
-        className="bg-accent rounded-xl px-8 py-4 w-full items-center active:opacity-80"
-      >
-        {loading ? (
-          <ActivityIndicator color="#fff" />
-        ) : (
-          <Text className="text-white text-lg font-semibold">
-            Sign in with Discogs
-          </Text>
-        )}
-      </Pressable>
+        <Text style={styles.title}>Digs</Text>
+        <Text style={styles.tagline}>Your records, always with you</Text>
+      </View>
 
-      {error && (
-        <Text className="text-red-400 text-sm mt-4 text-center">{error}</Text>
-      )}
-    </View>
+      <View style={styles.bottom}>
+        <Pressable
+          onPress={handleLogin}
+          disabled={loading}
+          style={styles.button}
+        >
+          {loading ? (
+            <ActivityIndicator color="#fff" />
+          ) : (
+            <Text style={styles.buttonText}>Sign in with Discogs</Text>
+          )}
+        </Pressable>
+
+        {error && <Text style={styles.error}>{error}</Text>}
+      </View>
+    </LinearGradient>
   );
 }
+
+const styles = StyleSheet.create({
+  content: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  title: {
+    fontSize: 52,
+    fontWeight: "800",
+    color: "#111111",
+    marginTop: 28,
+    letterSpacing: -1.5,
+  },
+  tagline: {
+    fontSize: 17,
+    color: "#9CA3AF",
+    marginTop: 8,
+  },
+  bottom: {
+    paddingHorizontal: 32,
+    paddingBottom: 56,
+  },
+  button: {
+    backgroundColor: "#F97316",
+    borderRadius: 16,
+    paddingVertical: 18,
+    alignItems: "center",
+    shadowColor: "#F97316",
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.4,
+    shadowRadius: 16,
+    elevation: 8,
+  },
+  buttonText: {
+    color: "#FFFFFF",
+    fontSize: 17,
+    fontWeight: "600",
+    textAlign: "center",
+  },
+  error: {
+    color: "#f87171",
+    fontSize: 14,
+    textAlign: "center",
+    marginTop: 16,
+  },
+});
