@@ -3,7 +3,7 @@ import { useState, useCallback } from "react";
 import { Image } from "expo-image";
 import { useRouter } from "expo-router";
 import { useQuery } from "@tanstack/react-query";
-import FontAwesome from "@expo/vector-icons/FontAwesome";
+import { Dices } from "lucide-react-native";
 
 import { getRandomRelease } from "@/db/queries/releases";
 import { getAllFolders } from "@/db/queries/folders";
@@ -101,7 +101,7 @@ export default function RandomScreen() {
         </Pressable>
       ) : (
         <View className="items-center justify-center py-20">
-          <FontAwesome name="random" size={48} color="#D1D5DB" />
+          <Dices size={48} color="#D1D5DB" strokeWidth={1.5} />
           <Text className="text-gray-400 text-lg mt-4">
             Tap the button to pick a random release
           </Text>
@@ -115,7 +115,7 @@ export default function RandomScreen() {
           className="bg-accent rounded-xl px-8 py-4 w-full items-center active:opacity-80"
         >
           <Text className="text-white text-lg font-semibold">
-            <FontAwesome name="random" size={18} color="#fff" /> Pick Random
+            <Dices size={18} color="#fff" /> Pick Random
           </Text>
         </Pressable>
       </View>

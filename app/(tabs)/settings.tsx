@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { View, Text, Pressable, Alert } from "react-native";
-import FontAwesome from "@expo/vector-icons/FontAwesome";
+import { CircleUserRound, RefreshCw } from "lucide-react-native";
 
 import { useAuthStore } from "@/stores/auth-store";
 import { useSyncStore } from "@/stores/sync-store";
@@ -60,7 +60,7 @@ export default function SettingsScreen() {
     <View className="flex-1 bg-white">
       {/* User info */}
       <View className="flex-row items-center px-4 py-5 border-b border-gray-100">
-        <FontAwesome name="user-circle" size={40} color="#F97316" />
+        <CircleUserRound size={40} color="#F97316" strokeWidth={1.5} />
         <View className="ml-3">
           <Text className="text-gray-900 text-lg font-semibold">{username}</Text>
           <Text className="text-gray-500 text-sm">Discogs account</Text>
@@ -103,7 +103,7 @@ export default function SettingsScreen() {
       {detailPending && (
         <View className="px-4 py-4 border-b border-gray-100">
           <View className="flex-row items-center mb-2">
-            <FontAwesome name="refresh" size={12} color="#F97316" />
+            <RefreshCw size={12} color="#F97316" />
             <Text className="text-gray-900 text-sm font-medium ml-2">
               Syncing release details
             </Text>

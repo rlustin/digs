@@ -7,6 +7,7 @@ import { getReleasesByFolder } from "@/db/queries/releases";
 import { getAllFolders } from "@/db/queries/folders";
 import { ReleaseCard } from "@/components/release/release-card";
 import { EmptyState } from "@/components/ui/empty-state";
+import { Music } from "lucide-react-native";
 import { ListSkeleton } from "@/components/ui/skeleton";
 
 const ITEM_HEIGHT = 68;
@@ -38,7 +39,7 @@ export default function FolderReleasesScreen() {
         <ListSkeleton type="release" />
       ) : releases.length === 0 ? (
         <EmptyState
-          icon="music"
+          icon={Music}
           title="No releases"
           message="This folder is empty"
         />

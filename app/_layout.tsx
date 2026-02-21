@@ -1,7 +1,6 @@
 import "@/global.css";
 import "@/lib/sync/background-task";
 
-import FontAwesome from "@expo/vector-icons/FontAwesome";
 import { DefaultTheme, ThemeProvider } from "@react-navigation/native";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { useFonts } from "expo-font";
@@ -38,7 +37,6 @@ const appTheme = {
 export default function RootLayout() {
   const [loaded, error] = useFonts({
     SpaceMono: require("../assets/fonts/SpaceMono-Regular.ttf"),
-    ...FontAwesome.font,
   });
   const [dbReady, setDbReady] = useState(false);
   const [authChecked, setAuthChecked] = useState(false);

@@ -1,5 +1,5 @@
 import { View, Text, Pressable } from "react-native";
-import FontAwesome from "@expo/vector-icons/FontAwesome";
+import { CircleAlert, RefreshCw, X } from "lucide-react-native";
 import { useSyncStore } from "@/stores/sync-store";
 
 const phaseLabels: Record<string, string> = {
@@ -34,9 +34,9 @@ export function SyncStatusCard() {
         <View className="flex-row items-center justify-between">
           <View className="flex-row items-center flex-1">
             {isError ? (
-              <FontAwesome name="exclamation-circle" size={14} color="#f87171" />
+              <CircleAlert size={14} color="#f87171" />
             ) : (
-              <FontAwesome name="refresh" size={12} color="#F97316" />
+              <RefreshCw size={12} color="#F97316" />
             )}
             <Text
               className={`text-sm font-medium ml-2 ${
@@ -50,7 +50,7 @@ export function SyncStatusCard() {
 
           {isError ? (
             <Pressable onPress={reset} hitSlop={8}>
-              <FontAwesome name="times" size={14} color="#9CA3AF" />
+              <X size={14} color="#9CA3AF" />
             </Pressable>
           ) : progress ? (
             <Text className="text-gray-500 text-xs ml-2">{pct}%</Text>

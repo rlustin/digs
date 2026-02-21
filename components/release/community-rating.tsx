@@ -1,5 +1,5 @@
 import { View, Text } from "react-native";
-import FontAwesome from "@expo/vector-icons/FontAwesome";
+import { Star, StarHalf } from "lucide-react-native";
 
 interface CommunityRatingProps {
   rating: number | null;
@@ -16,15 +16,17 @@ export function CommunityRating({ rating, have, want }: CommunityRatingProps) {
     <View className="flex-row items-center px-4 mt-3">
       {rating != null && (
         <View className="flex-row items-center mr-4">
-          {[1, 2, 3, 4, 5].map((n) => (
-            <FontAwesome
-              key={n}
-              name={n <= stars ? "star" : n - 0.5 <= stars ? "star-half-o" : "star-o"}
-              size={14}
-              color="#F97316"
-              style={{ marginRight: 2 }}
-            />
-          ))}
+          {[1, 2, 3, 4, 5].map((n) => {
+            const isFull = n <= stars;
+            const isHalf = !isFull && n - 0.5 <= stars;
+            return isFull ? (
+              <Star key={n} size={14} color="#F97316" fill="#F97316" style={{ marginRight: 2 }} />
+            ) : isHalf ? (
+              <StarHalf key={n} size={14} color="#F97316" fill="#F97316" style={{ marginRight: 2 }} />
+            ) : (
+              <Star key={n} size={14} color="#F97316" style={{ marginRight: 2 }} />
+            );
+          })}
           <Text className="text-gray-400 text-xs ml-1">
             {rating.toFixed(1)}
           </Text>

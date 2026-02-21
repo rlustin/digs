@@ -4,6 +4,7 @@ import { useState, useMemo, useCallback } from "react";
 import { searchReleases } from "@/db/queries/releases";
 import { ReleaseCard } from "@/components/release/release-card";
 import { EmptyState } from "@/components/ui/empty-state";
+import { Search } from "lucide-react-native";
 
 const ITEM_HEIGHT = 68;
 
@@ -46,7 +47,7 @@ export default function SearchScreen() {
 
       {query.trim().length >= 2 && results.length === 0 ? (
         <EmptyState
-          icon="search"
+          icon={Search}
           title="No results"
           message={`Nothing found for "${query}"`}
         />

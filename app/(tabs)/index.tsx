@@ -1,7 +1,7 @@
 import { View, Text, FlatList, Pressable, RefreshControl } from "react-native";
 import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "expo-router";
-import FontAwesome from "@expo/vector-icons/FontAwesome";
+import { Folder, ChevronRight, FolderOpen } from "lucide-react-native";
 
 import { getAllFolders } from "@/db/queries/folders";
 import { EmptyState } from "@/components/ui/empty-state";
@@ -44,7 +44,7 @@ export default function CollectionScreen() {
     return (
       <View className="flex-1 bg-white">
         <EmptyState
-          icon="folder-open-o"
+          icon={FolderOpen}
           title="No folders yet"
           message="Your collection will appear here after syncing"
         />
@@ -70,16 +70,15 @@ export default function CollectionScreen() {
             onPress={() => router.push(`/(tabs)/folder/${item.id}`)}
             className="flex-row items-center px-4 py-4 border-b border-gray-100 active:bg-gray-50"
           >
-            <FontAwesome name="folder" size={20} color="#F97316" />
+            <Folder size={20} color="#F97316" />
             <Text className="text-gray-900 text-base flex-1 ml-3">
               {item.name}
             </Text>
             <View className="bg-gray-100 rounded-full px-2.5 py-0.5">
               <Text className="text-gray-500 text-sm">{item.count}</Text>
             </View>
-            <FontAwesome
-              name="chevron-right"
-              size={12}
+            <ChevronRight
+              size={16}
               color="#D1D5DB"
               style={{ marginLeft: 12 }}
             />

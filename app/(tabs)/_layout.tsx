@@ -1,13 +1,10 @@
-import FontAwesome from "@expo/vector-icons/FontAwesome";
+import { Disc3, Dices, Search, Settings, type LucideIcon } from "lucide-react-native";
 import { Tabs } from "expo-router";
 
 import { useInitialSync } from "@/hooks/use-sync";
 
-function TabBarIcon(props: {
-  name: React.ComponentProps<typeof FontAwesome>["name"];
-  color: string;
-}) {
-  return <FontAwesome size={24} style={{ marginBottom: -3 }} {...props} />;
+function TabBarIcon({ Icon, color }: { Icon: LucideIcon; color: string }) {
+  return <Icon size={25} color={color} strokeWidth={1.75} />;
 }
 
 export default function TabLayout() {
@@ -31,7 +28,7 @@ export default function TabLayout() {
           options={{
             title: "Collection",
             tabBarIcon: ({ color }) => (
-              <TabBarIcon name="th-list" color={color} />
+              <TabBarIcon Icon={Disc3} color={color} />
             ),
           }}
         />
@@ -46,7 +43,7 @@ export default function TabLayout() {
           options={{
             title: "Search",
             tabBarIcon: ({ color }) => (
-              <TabBarIcon name="search" color={color} />
+              <TabBarIcon Icon={Search} color={color} />
             ),
           }}
         />
@@ -55,7 +52,7 @@ export default function TabLayout() {
           options={{
             title: "Random",
             tabBarIcon: ({ color }) => (
-              <TabBarIcon name="random" color={color} />
+              <TabBarIcon Icon={Dices} color={color} />
             ),
           }}
         />
@@ -63,7 +60,7 @@ export default function TabLayout() {
           name="settings"
           options={{
             title: "Settings",
-            tabBarIcon: ({ color }) => <TabBarIcon name="cog" color={color} />,
+            tabBarIcon: ({ color }) => <TabBarIcon Icon={Settings} color={color} />,
           }}
         />
       </Tabs>
