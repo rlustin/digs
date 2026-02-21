@@ -1,12 +1,15 @@
 import { View, Text, FlatList, Pressable, RefreshControl } from "react-native";
 import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "expo-router";
-import { Folder, ChevronRight, FolderOpen } from "lucide-react-native";
+import { FolderOpen, ChevronRight } from "lucide-react-native";
 
-import { getAllFolders } from "@/db/queries/folders";
+import { getAllFolders, getFolderThumbnails } from "@/db/queries/folders";
+import { getCollectionStats } from "@/db/queries/releases";
 import { EmptyState } from "@/components/ui/empty-state";
 import { ListSkeleton } from "@/components/ui/skeleton";
 import { SyncStatusCard } from "@/components/sync/sync-status-bar";
+import { CollectionStatsHeader } from "@/components/collection/collection-stats-header";
+import { FolderCoverCollage } from "@/components/collection/folder-cover-collage";
 import { useAuthStore } from "@/stores/auth-store";
 import { runFullSync } from "@/lib/sync/engine";
 import { useSyncStore } from "@/stores/sync-store";
@@ -25,6 +28,16 @@ export default function CollectionScreen() {
     queryFn: getAllFolders,
   });
 
+  const { data: thumbnails = {} } = useQuery({
+    queryKey: ["folder-thumbnails"],
+    queryFn: getFolderThumbnails,
+  });
+
+  const { data: stats } = useQuery({
+    queryKey: ["collection-stats"],
+    queryFn: getCollectionStats,
+  });
+
   const onRefresh = () => {
     if (username && !isSyncing) {
       runFullSync(username);
@@ -35,7 +48,7 @@ export default function CollectionScreen() {
   if (isLoading) {
     return (
       <View className="flex-1 bg-white">
-        <ListSkeleton type="folder" />
+        <ListSkeleton type="folder" count={4} />
       </View>
     );
   }
@@ -57,7 +70,18 @@ export default function CollectionScreen() {
       <FlatList
         data={folders}
         keyExtractor={(item) => String(item.id)}
-        ListHeaderComponent={<SyncStatusCard />}
+        contentContainerStyle={{ paddingTop: 4, paddingBottom: 16 }}
+        ListHeaderComponent={
+          <>
+            <SyncStatusCard />
+            {stats && (
+              <CollectionStatsHeader
+                totalReleases={stats.totalReleases}
+                totalArtists={stats.totalArtists}
+              />
+            )}
+          </>
+        }
         refreshControl={
           <RefreshControl
             refreshing={isSyncing}
@@ -68,20 +92,21 @@ export default function CollectionScreen() {
         renderItem={({ item }) => (
           <Pressable
             onPress={() => router.push(`/(tabs)/folder/${item.id}`)}
-            className="flex-row items-center px-4 py-4 border-b border-gray-100 active:bg-gray-50"
+            className="flex-row items-center px-4 py-3 active:bg-gray-50"
           >
-            <Folder size={20} color="#F97316" />
-            <Text className="text-gray-900 text-base flex-1 ml-3">
-              {item.name}
-            </Text>
-            <View className="bg-gray-100 rounded-full px-2.5 py-0.5">
-              <Text className="text-gray-500 text-sm">{item.count}</Text>
+            <FolderCoverCollage thumbnails={thumbnails[item.id] ?? []} />
+            <View className="flex-1 ml-4 justify-center">
+              <Text
+                className="text-gray-900 text-base font-semibold"
+                numberOfLines={1}
+              >
+                {item.name}
+              </Text>
+              <Text className="text-gray-400 text-sm mt-1">
+                {item.count} {item.count === 1 ? "release" : "releases"}
+              </Text>
             </View>
-            <ChevronRight
-              size={16}
-              color="#D1D5DB"
-              style={{ marginLeft: 12 }}
-            />
+            <ChevronRight size={18} color="#D1D5DB" />
           </Pressable>
         )}
       />

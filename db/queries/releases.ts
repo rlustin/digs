@@ -79,6 +79,23 @@ export function searchReleases(query: string) {
   return results;
 }
 
+export function getCollectionStats() {
+  const row = expo.getFirstSync<{
+    total_releases: number;
+    total_artists: number;
+  }>(
+    `SELECT
+      COUNT(*) as total_releases,
+      COUNT(DISTINCT json_each.value) as total_artists
+    FROM releases, json_each(releases.artists, '$[*].name')
+    WHERE releases.artists IS NOT NULL`
+  );
+  return {
+    totalReleases: row?.total_releases ?? 0,
+    totalArtists: row?.total_artists ?? 0,
+  };
+}
+
 export function getRandomRelease(folderId?: number) {
   if (folderId && folderId !== 0) {
     return db
