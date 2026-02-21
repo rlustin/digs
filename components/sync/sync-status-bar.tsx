@@ -26,8 +26,8 @@ export function SyncStatusCard() {
 
   return (
     <View
-      className={`mx-4 mt-3 rounded-xl overflow-hidden ${
-        isError ? "bg-red-50 border border-red-200" : "bg-gray-50 border border-gray-200"
+      className={`mx-4 mt-3 rounded-2xl overflow-hidden ${
+        isError ? "bg-red-50" : "bg-orange-50"
       }`}
     >
       <View className="px-4 py-3">

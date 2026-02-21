@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
-import { View, Text, Pressable, Alert } from "react-native";
-import { CircleUserRound, RefreshCw } from "lucide-react-native";
+import { View, Text, Pressable, Alert, ScrollView } from "react-native";
+import { CircleAlert, RefreshCw, X } from "lucide-react-native";
 
 import { useAuthStore } from "@/stores/auth-store";
 import { useSyncStore } from "@/stores/sync-store";
@@ -8,13 +8,23 @@ import { logout } from "@/lib/discogs/oauth";
 import { clearClientCredentials } from "@/lib/discogs/client";
 import { runFullSync } from "@/lib/sync/engine";
 import { getDetailSyncCounts } from "@/db/queries/releases";
-import { SyncStatusCard } from "@/components/sync/sync-status-bar";
+
+const phaseLabels: Record<string, string> = {
+  folders: "Syncing folders",
+  "basic-releases": "Syncing collection",
+  details: "Syncing release details",
+  error: "Sync failed",
+};
 
 export default function SettingsScreen() {
   const username = useAuthStore((s) => s.username);
   const clearAuth = useAuthStore((s) => s.clearAuth);
   const isSyncing = useSyncStore((s) => s.isSyncing);
   const lastFullSyncAt = useSyncStore((s) => s.lastFullSyncAt);
+  const phase = useSyncStore((s) => s.phase);
+  const progress = useSyncStore((s) => s.progress);
+  const error = useSyncStore((s) => s.error);
+  const reset = useSyncStore((s) => s.reset);
 
   const [detailCounts, setDetailCounts] = useState({ synced: 0, total: 0 });
 
@@ -56,100 +66,157 @@ export default function SettingsScreen() {
     return new Date(iso).toLocaleString();
   };
 
+  const isError = phase === "error";
+  const syncActive = phase !== "idle";
+  const syncLabel = phaseLabels[phase] ?? "Syncing";
+  const syncPct =
+    progress && progress.total > 0
+      ? Math.round((progress.current / progress.total) * 100)
+      : 0;
+
+  const initial = username ? username.charAt(0).toUpperCase() : "?";
+
   return (
-    <View className="flex-1 bg-white">
-      {/* User info */}
-      <View className="flex-row items-center px-4 py-5 border-b border-gray-100">
-        <CircleUserRound size={40} color="#F97316" strokeWidth={1.5} />
-        <View className="ml-3">
-          <Text className="text-gray-900 text-lg font-semibold">{username}</Text>
-          <Text className="text-gray-500 text-sm">Discogs account</Text>
+    <ScrollView className="flex-1 bg-gray-50">
+      {/* Profile area */}
+      <View className="items-center pt-8 pb-6">
+        <View className="w-16 h-16 rounded-full bg-accent items-center justify-center mb-3">
+          <Text className="text-white text-2xl font-bold">{initial}</Text>
         </View>
+        <Text className="text-gray-900 text-lg font-semibold">{username}</Text>
+        <Text className="text-gray-400 text-sm">Discogs account</Text>
       </View>
 
-      {/* Sync info */}
-      <View className="px-4 py-4 border-b border-gray-100">
-        <Text className="text-gray-400 text-xs uppercase tracking-wider mb-3">
-          Sync
-        </Text>
-        <View className="flex-row justify-between mb-2">
+      {/* SYNC section */}
+      <Text className="text-gray-400 text-xs uppercase tracking-wider mx-4 mb-2 ml-8">
+        Sync
+      </Text>
+      <View className="mx-4 rounded-2xl bg-white overflow-hidden">
+        {/* Last full sync */}
+        <View className="flex-row justify-between px-4 py-3 border-b border-gray-100">
           <Text className="text-gray-500 text-sm">Last full sync</Text>
-          <Text className="text-gray-900 text-sm">
-            {formatDate(lastFullSyncAt)}
-          </Text>
+          <Text className="text-gray-900 text-sm">{formatDate(lastFullSyncAt)}</Text>
         </View>
-        <View className="flex-row justify-between mb-2">
+
+        {/* Collection status */}
+        <View className={`flex-row justify-between px-4 py-3 ${syncActive || detailPending ? "border-b border-gray-100" : ""}`}>
           <Text className="text-gray-500 text-sm">Collection</Text>
           <Text className="text-gray-900 text-sm">
             {isSyncing ? "Syncing..." : "Idle"}
           </Text>
         </View>
-        <View className="flex-row justify-between">
-          <Text className="text-gray-500 text-sm">Release details</Text>
-          <Text className="text-gray-900 text-sm">
-            {detailCounts.total === 0
-              ? "No releases"
-              : detailPending
-                ? `${detailCounts.synced}/${detailCounts.total}`
-                : "All synced"}
-          </Text>
-        </View>
+
+        {/* Release details */}
+        {(detailCounts.total > 0 || !syncActive) && (
+          <View className={`flex-row justify-between px-4 py-3 ${syncActive || detailPending ? "border-b border-gray-100" : ""}`}>
+            <Text className="text-gray-500 text-sm">Release details</Text>
+            <Text className="text-gray-900 text-sm">
+              {detailCounts.total === 0
+                ? "No releases"
+                : detailPending
+                  ? `${detailCounts.synced}/${detailCounts.total}`
+                  : "All synced"}
+            </Text>
+          </View>
+        )}
+
+        {/* Active sync status (inline) */}
+        {syncActive && !isError && (
+          <View className={`px-4 py-3 ${detailPending ? "border-b border-gray-100" : ""}`}>
+            <View className="flex-row items-center justify-between">
+              <View className="flex-row items-center flex-1">
+                <RefreshCw size={12} color="#F97316" />
+                <Text className="text-sm font-medium ml-2 text-gray-900" numberOfLines={1}>
+                  {syncLabel}
+                </Text>
+              </View>
+              {progress ? (
+                <Text className="text-gray-500 text-xs ml-2">{syncPct}%</Text>
+              ) : null}
+            </View>
+            {progress && progress.total > 0 && (
+              <View className="mt-2 h-1 rounded-full bg-gray-200 overflow-hidden">
+                <View
+                  className="h-full rounded-full bg-accent"
+                  style={{ width: `${syncPct}%` }}
+                />
+              </View>
+            )}
+          </View>
+        )}
+
+        {/* Error state (inline) */}
+        {isError && (
+          <View className="px-4 py-3 bg-red-50">
+            <View className="flex-row items-center justify-between">
+              <View className="flex-row items-center flex-1">
+                <CircleAlert size={14} color="#f87171" />
+                <Text className="text-sm font-medium ml-2 text-red-600" numberOfLines={1}>
+                  {error}
+                </Text>
+              </View>
+              <Pressable onPress={reset} hitSlop={8}>
+                <X size={14} color="#9CA3AF" />
+              </Pressable>
+            </View>
+          </View>
+        )}
+
+        {/* Detail sync progress */}
+        {detailPending && (
+          <View className="px-4 py-3">
+            <View className="flex-row items-center justify-between mb-2">
+              <View className="flex-row items-center">
+                <RefreshCw size={12} color="#F97316" />
+                <Text className="text-gray-900 text-sm font-medium ml-2">
+                  Syncing release details
+                </Text>
+              </View>
+              <Text className="text-gray-500 text-xs">
+                {Math.round((detailCounts.synced / detailCounts.total) * 100)}%
+              </Text>
+            </View>
+            <View className="h-1 rounded-full bg-gray-200 overflow-hidden">
+              <View
+                className="h-full rounded-full bg-accent"
+                style={{
+                  width: `${Math.round((detailCounts.synced / detailCounts.total) * 100)}%`,
+                }}
+              />
+            </View>
+          </View>
+        )}
       </View>
 
-      {/* Collection sync (folders + basic releases) */}
-      <SyncStatusCard />
-
-      {/* Detail sync progress bar */}
-      {detailPending && (
-        <View className="px-4 py-4 border-b border-gray-100">
-          <View className="flex-row items-center mb-2">
-            <RefreshCw size={12} color="#F97316" />
-            <Text className="text-gray-900 text-sm font-medium ml-2">
-              Syncing release details
-            </Text>
-            <Text className="text-gray-500 text-xs ml-auto">
-              {Math.round((detailCounts.synced / detailCounts.total) * 100)}%
-            </Text>
-          </View>
-          <View className="h-1 rounded-full bg-gray-200 overflow-hidden">
-            <View
-              className="h-full rounded-full bg-accent"
-              style={{
-                width: `${Math.round((detailCounts.synced / detailCounts.total) * 100)}%`,
-              }}
-            />
-          </View>
-        </View>
-      )}
-
-      {/* Sync Now button */}
-      <View className="px-4 py-4 border-b border-gray-100">
-        <Pressable
-          onPress={handleSyncNow}
-          disabled={isSyncing}
-          className={`rounded-xl py-3 items-center ${
-            isSyncing ? "bg-gray-100" : "bg-accent active:opacity-80"
+      {/* Sync Now */}
+      <Pressable
+        onPress={handleSyncNow}
+        disabled={isSyncing}
+        className="mx-4 mt-3 rounded-2xl bg-white overflow-hidden active:opacity-80"
+      >
+        <Text
+          className={`text-center py-3 text-base font-semibold ${
+            isSyncing ? "text-gray-300" : "text-accent"
           }`}
         >
-          <Text
-            className={`text-base font-semibold ${
-              isSyncing ? "text-gray-400" : "text-white"
-            }`}
-          >
-            {isSyncing ? "Syncing..." : "Sync Now"}
+          {isSyncing ? "Syncing..." : "Sync Now"}
+        </Text>
+      </Pressable>
+
+      {/* ACCOUNT section */}
+      <Text className="text-gray-400 text-xs uppercase tracking-wider mx-4 mt-8 mb-2 ml-8">
+        Account
+      </Text>
+      <View className="mx-4 rounded-2xl bg-white overflow-hidden">
+        <Pressable onPress={handleLogout} className="active:opacity-80">
+          <Text className="text-red-500 text-base font-semibold text-center py-3">
+            Log out
           </Text>
         </Pressable>
       </View>
 
-      {/* Logout */}
-      <View className="px-4 py-4">
-        <Pressable
-          onPress={handleLogout}
-          className="rounded-xl py-3 items-center border border-red-500/30 active:bg-red-500/10"
-        >
-          <Text className="text-red-400 text-base font-semibold">Log out</Text>
-        </Pressable>
-      </View>
-    </View>
+      {/* Bottom padding */}
+      <View className="h-12" />
+    </ScrollView>
   );
 }
