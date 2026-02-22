@@ -1,6 +1,7 @@
 import { syncFolders } from "./folder-sync";
 import { syncBasicReleases, syncReleaseDetails } from "./release-sync";
 import { useSyncStore } from "@/stores/sync-store";
+import { useAuthStore } from "@/stores/auth-store";
 import { queryClient } from "@/lib/query-client";
 
 /**
@@ -35,6 +36,11 @@ export async function runFullSync(username: string) {
     await runDetailSyncLoop(signal);
   } catch (err) {
     if (signal.aborted) return;
+    if (err instanceof Error && err.message === "authentication_expired") {
+      useAuthStore.getState().clearAuth();
+      store.setSyncing(false);
+      return;
+    }
     store.setError(err instanceof Error ? err.message : "Sync failed");
     store.setSyncing(false);
   }

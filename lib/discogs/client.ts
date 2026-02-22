@@ -74,6 +74,11 @@ export async function discogsRequest<T>(
     return discogsRequest<T>(path, method, retries - 1, signal);
   }
 
+  if (response.status === 401) {
+    clearClientCredentials();
+    throw new Error("authentication_expired");
+  }
+
   if (!response.ok) {
     throw new Error(
       `Discogs API error: ${response.status} ${response.statusText}`

@@ -182,6 +182,25 @@ describe("discogsRequest", () => {
     );
   });
 
+  it("clears credentials and throws authentication_expired on 401", async () => {
+    setClientCredentials({
+      consumerKey: "ck",
+      consumerSecret: "cs",
+      token: "t",
+      tokenSecret: "ts",
+    });
+    mockFetch.mockResolvedValue(jsonResponse(null, 401));
+
+    await expect(discogsRequest("/test")).rejects.toThrow(
+      "authentication_expired"
+    );
+
+    // Credentials should be cleared — next call should throw "not authenticated"
+    await expect(discogsRequest("/test")).rejects.toThrow(
+      "Discogs client not authenticated"
+    );
+  });
+
   it("passes signal to fetch", async () => {
     setClientCredentials({
       consumerKey: "ck",
