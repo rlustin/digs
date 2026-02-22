@@ -13,7 +13,7 @@ import type { CollectionRelease } from "@/lib/discogs/types";
 /**
  * Map a Discogs collection release to a DB row for basic sync.
  */
-function mapBasicRelease(r: CollectionRelease, folderId: number) {
+export function mapBasicRelease(r: CollectionRelease, folderId: number) {
   const info = r.basic_information;
   return {
     instanceId: r.instance_id,
