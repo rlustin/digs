@@ -10,6 +10,10 @@ export function getFolderById(folderId: number) {
   return db.select().from(folders).where(eq(folders.id, folderId)).get() ?? null;
 }
 
+export function clearAllFolders() {
+  db.delete(folders).run();
+}
+
 export function getFolderThumbnails(): Record<number, string[]> {
   const rows = expo.getAllSync<{ folder_id: number; thumb_url: string }>(
     `SELECT folder_id, thumb_url FROM (

@@ -8,7 +8,9 @@ import { useSyncStore } from "@/stores/sync-store";
 import { logout } from "@/lib/discogs/oauth";
 import { clearClientCredentials } from "@/lib/discogs/client";
 import { runFullSync } from "@/lib/sync/engine";
-import { getDetailSyncCounts } from "@/db/queries/releases";
+import { clearAllReleases, getDetailSyncCounts } from "@/db/queries/releases";
+import { clearAllFolders } from "@/db/queries/folders";
+import { queryClient } from "@/lib/query-client";
 import { t } from "@/lib/i18n";
 
 const syncPhaseKeys: Record<string, string> = {
@@ -57,6 +59,9 @@ export default function SettingsScreen() {
         style: "destructive",
         onPress: async () => {
           cancelSync();
+          clearAllFolders();
+          clearAllReleases();
+          queryClient.invalidateQueries();
           await logout();
           clearClientCredentials();
           clearAuth();

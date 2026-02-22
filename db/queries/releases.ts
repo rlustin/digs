@@ -120,6 +120,11 @@ export function getCollectionStats() {
   };
 }
 
+export function clearAllReleases() {
+  db.delete(releases).run();
+  expo.execSync("INSERT INTO releases_fts(releases_fts) VALUES('rebuild')");
+}
+
 export function getRandomRelease(folderId?: number) {
   if (folderId && folderId !== 0) {
     return db
