@@ -20,12 +20,7 @@ const KEY_USERNAME = "discogs_username";
 
 /** Parse URL-encoded response body into a record. */
 function parseFormBody(body: string): Record<string, string> {
-  const params: Record<string, string> = {};
-  for (const pair of body.split("&")) {
-    const [k, v] = pair.split("=");
-    params[decodeURIComponent(k)] = decodeURIComponent(v);
-  }
-  return params;
+  return Object.fromEntries(new URLSearchParams(body));
 }
 
 /**
