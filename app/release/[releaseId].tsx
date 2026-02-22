@@ -23,7 +23,7 @@ import { releases } from "@/db/schema";
 import { fetchReleaseDetail } from "@/lib/discogs/endpoints";
 import { eq } from "drizzle-orm";
 
-const COVER_WIDTH_RATIO = 0.75;
+const COVER_WIDTH_RATIO = 0.88;
 const COVER_TOP_SPACING = 20;
 const BACKDROP_EXTRA = 20;
 
