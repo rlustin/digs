@@ -13,6 +13,7 @@ import { queryClient } from "@/lib/query-client";
 import { runMigrations } from "@/db/migrations";
 import { restoreSession } from "@/lib/discogs/oauth";
 import { useAuthStore } from "@/stores/auth-store";
+import { useSyncStore } from "@/stores/sync-store";
 import { Colors } from "@/constants/Colors";
 import { t } from "@/lib/i18n";
 
@@ -60,13 +61,15 @@ export default function RootLayout() {
     }
   }, []);
 
-  // Restore session from SecureStore
+  // Restore session and sync state from SecureStore
   useEffect(() => {
     if (!dbReady) return;
-    restoreSession().then((username) => {
-      if (username) setAuthenticated(username);
-      setAuthChecked(true);
-    });
+    Promise.all([
+      restoreSession().then((username) => {
+        if (username) setAuthenticated(username);
+      }),
+      useSyncStore.getState().restoreLastFullSyncAt(),
+    ]).then(() => setAuthChecked(true));
   }, [dbReady]);
 
   useEffect(() => {

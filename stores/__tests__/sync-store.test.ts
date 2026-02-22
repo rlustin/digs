@@ -1,5 +1,13 @@
 import { useSyncStore } from "../sync-store";
 
+jest.mock("expo-secure-store", () => ({
+  getItemAsync: jest.fn().mockResolvedValue(null),
+  setItemAsync: jest.fn().mockResolvedValue(undefined),
+  deleteItemAsync: jest.fn().mockResolvedValue(undefined),
+}));
+
+const SecureStore = require("expo-secure-store");
+
 describe("useSyncStore", () => {
   beforeEach(() => {
     useSyncStore.setState({
@@ -50,10 +58,30 @@ describe("useSyncStore", () => {
     expect(state.isSyncing).toBe(false);
   });
 
-  it("setLastFullSyncAt stores ISO date", () => {
+  it("setLastFullSyncAt stores ISO date and persists to SecureStore", () => {
     const date = "2025-01-15T10:30:00.000Z";
     useSyncStore.getState().setLastFullSyncAt(date);
     expect(useSyncStore.getState().lastFullSyncAt).toBe(date);
+    expect(SecureStore.setItemAsync).toHaveBeenCalledWith("last_full_sync_at", date);
+  });
+
+  it("restoreLastFullSyncAt reads from SecureStore", async () => {
+    SecureStore.getItemAsync.mockResolvedValue("2025-02-01T12:00:00.000Z");
+    await useSyncStore.getState().restoreLastFullSyncAt();
+    expect(useSyncStore.getState().lastFullSyncAt).toBe("2025-02-01T12:00:00.000Z");
+  });
+
+  it("restoreLastFullSyncAt does nothing when SecureStore is empty", async () => {
+    SecureStore.getItemAsync.mockResolvedValue(null);
+    await useSyncStore.getState().restoreLastFullSyncAt();
+    expect(useSyncStore.getState().lastFullSyncAt).toBeNull();
+  });
+
+  it("clearLastFullSyncAt clears state and SecureStore", () => {
+    useSyncStore.setState({ lastFullSyncAt: "2025-01-15T10:30:00.000Z" });
+    useSyncStore.getState().clearLastFullSyncAt();
+    expect(useSyncStore.getState().lastFullSyncAt).toBeNull();
+    expect(SecureStore.deleteItemAsync).toHaveBeenCalledWith("last_full_sync_at");
   });
 
   it("reset clears syncing/phase/progress/error but preserves lastFullSyncAt", () => {

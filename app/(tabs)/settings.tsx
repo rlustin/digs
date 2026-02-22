@@ -26,6 +26,7 @@ export default function SettingsScreen() {
   const clearAuth = useAuthStore((s) => s.clearAuth);
   const isSyncing = useSyncStore((s) => s.isSyncing);
   const cancelSync = useSyncStore((s) => s.cancelSync);
+  const clearLastFullSyncAt = useSyncStore((s) => s.clearLastFullSyncAt);
   const lastFullSyncAt = useSyncStore((s) => s.lastFullSyncAt);
   const phase = useSyncStore((s) => s.phase);
   const progress = useSyncStore((s) => s.progress);
@@ -60,6 +61,7 @@ export default function SettingsScreen() {
         style: "destructive",
         onPress: async () => {
           cancelSync();
+          clearLastFullSyncAt();
           clearAllFolders();
           clearAllReleases();
           queryClient.invalidateQueries();

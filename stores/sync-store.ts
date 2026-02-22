@@ -1,4 +1,7 @@
 import { create } from "zustand";
+import * as SecureStore from "expo-secure-store";
+
+const KEY_LAST_FULL_SYNC_AT = "last_full_sync_at";
 
 export type SyncPhase = "idle" | "folders" | "basic-releases" | "details" | "error";
 
@@ -14,6 +17,8 @@ interface SyncState {
   setSyncing: (syncing: boolean) => void;
   setError: (error: string | null) => void;
   setLastFullSyncAt: (date: string) => void;
+  restoreLastFullSyncAt: () => Promise<void>;
+  clearLastFullSyncAt: () => void;
   startSync: () => AbortController;
   cancelSync: () => void;
   reset: () => void;
@@ -30,7 +35,18 @@ export const useSyncStore = create<SyncState>((set, get) => ({
   setProgress: (current, total) => set({ progress: { current, total } }),
   setSyncing: (syncing) => set({ isSyncing: syncing }),
   setError: (error) => set({ phase: "error", error, isSyncing: false }),
-  setLastFullSyncAt: (date) => set({ lastFullSyncAt: date }),
+  setLastFullSyncAt: (date) => {
+    set({ lastFullSyncAt: date });
+    SecureStore.setItemAsync(KEY_LAST_FULL_SYNC_AT, date);
+  },
+  restoreLastFullSyncAt: async () => {
+    const date = await SecureStore.getItemAsync(KEY_LAST_FULL_SYNC_AT);
+    if (date) set({ lastFullSyncAt: date });
+  },
+  clearLastFullSyncAt: () => {
+    set({ lastFullSyncAt: null });
+    SecureStore.deleteItemAsync(KEY_LAST_FULL_SYNC_AT);
+  },
   startSync: () => {
     const controller = new AbortController();
     set({ isSyncing: true, abortController: controller });
