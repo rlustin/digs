@@ -56,10 +56,10 @@ export default function ReleaseDetailScreen() {
       const detail = await fetchReleaseDetail(id);
       db.update(releases)
         .set({
-          tracklist: detail.tracklist.map((t) => ({
-            position: t.position,
-            title: t.title,
-            duration: t.duration,
+          tracklist: detail.tracklist.map((track) => ({
+            position: track.position,
+            title: track.title,
+            duration: track.duration,
           })),
           images: detail.images?.map((img) => ({
             type: img.type,
