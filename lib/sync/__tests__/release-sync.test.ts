@@ -19,6 +19,7 @@ jest.mock("@/db/client", () => ({
     update: jest.fn().mockReturnThis(),
     set: jest.fn().mockReturnThis(),
     where: jest.fn().mockReturnThis(),
+    delete: jest.fn().mockReturnThis(),
   },
   expo: {
     withTransactionSync: jest.fn((fn: () => void) => fn()),
@@ -198,6 +199,20 @@ describe("syncBasicReleases", () => {
     expect(mockFetchReleasesInFolder).toHaveBeenCalledTimes(2);
     expect(mockFetchReleasesInFolder).toHaveBeenCalledWith("rlustin", 9182214, 1, 100, undefined);
     expect(mockFetchReleasesInFolder).toHaveBeenCalledWith("rlustin", 9182214, 2, 100, undefined);
+  });
+
+  it("deletes local releases that are no longer in the Discogs folder", async () => {
+    mockGetAllFolders.mockReturnValue([
+      { id: 9182214, name: "Jungle", count: 29 },
+    ]);
+    mockFetchReleasesInFolder.mockResolvedValue({
+      pagination: { page: 1, pages: 1, per_page: 100, items: 3, urls: {} },
+      releases: collectionFixture.releases,
+    } as any);
+
+    await syncBasicReleases("rlustin");
+
+    expect((db as any).delete).toHaveBeenCalled();
   });
 
   it("reports progress via setProgress", async () => {

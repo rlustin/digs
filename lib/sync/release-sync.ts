@@ -1,4 +1,4 @@
-import { eq } from "drizzle-orm";
+import { eq, and, notInArray } from "drizzle-orm";
 import { db, expo } from "@/db/client";
 import { releases } from "@/db/schema";
 import { getAllFolders } from "@/db/queries/folders";
@@ -76,6 +76,7 @@ export async function syncBasicReleases(username: string, signal?: AbortSignal) 
     if (signal?.aborted) return;
     let page = 1;
     let totalPages = 1;
+    const syncedInstanceIds: number[] = [];
 
     while (page <= totalPages) {
       if (signal?.aborted) return;
@@ -85,8 +86,24 @@ export async function syncBasicReleases(username: string, signal?: AbortSignal) 
       totalProcessed += response.releases.length;
       store.setProgress(totalProcessed, totalItems);
 
+      for (const r of response.releases) {
+        syncedInstanceIds.push(r.instance_id);
+      }
+
       upsertReleasePage(response.releases, folder.id);
       page++;
+    }
+
+    // Remove local releases that were deleted from this folder on Discogs
+    if (syncedInstanceIds.length > 0) {
+      db.delete(releases)
+        .where(
+          and(
+            eq(releases.folderId, folder.id),
+            notInArray(releases.instanceId, syncedInstanceIds),
+          ),
+        )
+        .run();
     }
   }
 }
