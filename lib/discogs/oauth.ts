@@ -11,7 +11,7 @@ import {
   DISCOGS_USER_AGENT,
 } from "@/constants/discogs";
 import { signRequest } from "@/lib/utils/oauth-signer";
-import { setClientCredentials } from "./client";
+import { setClientCredentials, clearClientCredentials } from "./client";
 
 // SecureStore keys
 const KEY_TOKEN = "discogs_token";
@@ -159,6 +159,27 @@ export async function restoreSession(): Promise<string | null> {
     token,
     tokenSecret,
   });
+
+  // Validate the session is still valid
+  try {
+    const identityAuth = signRequest("GET", DISCOGS_IDENTITY_URL, {
+      consumerKey: DISCOGS_CONSUMER_KEY,
+      consumerSecret: DISCOGS_CONSUMER_SECRET,
+      token,
+      tokenSecret,
+    });
+    const res = await fetch(DISCOGS_IDENTITY_URL, {
+      headers: {
+        Authorization: identityAuth,
+        "User-Agent": DISCOGS_USER_AGENT,
+      },
+    });
+    if (!res.ok) throw new Error("invalid");
+  } catch {
+    await logout();
+    clearClientCredentials();
+    return null;
+  }
 
   return username;
 }
