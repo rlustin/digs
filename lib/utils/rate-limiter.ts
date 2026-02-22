@@ -33,11 +33,13 @@ export class RateLimiter {
   private startDraining() {
     if (this.draining) return;
     this.draining = true;
+    this.drainNext();
+  }
 
-    const interval = setInterval(() => {
+  private drainNext() {
+    setTimeout(() => {
       if (this.queue.length === 0) {
         this.draining = false;
-        clearInterval(interval);
         return;
       }
 
@@ -47,6 +49,7 @@ export class RateLimiter {
         this.remaining = 2;
         next();
       }
+      this.drainNext();
     }, 1000);
   }
 }
