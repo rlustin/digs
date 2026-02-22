@@ -6,10 +6,15 @@ import {
   fetchReleasesInFolder,
   fetchReleaseDetail,
 } from "@/lib/discogs/endpoints";
-import { useSyncStore } from "@/stores/sync-store";
 import { getReleasesNeedingDetailSync } from "@/db/queries/releases";
 import type { CollectionRelease } from "@/lib/discogs/types";
+import type { SyncPhase } from "@/stores/sync-store";
 import { mapReleaseDetailToRow } from "./detail-mapper";
+
+export interface ReleaseSyncCallbacks {
+  setPhase: (phase: SyncPhase) => void;
+  setProgress: (current: number, total: number) => void;
+}
 
 /**
  * Map a Discogs collection release to a DB row for basic sync.
@@ -60,9 +65,12 @@ function upsertReleasePage(
  * Sync releases from each real folder (skipping folder 0 which is virtual).
  * This ensures each release gets its correct folder_id.
  */
-export async function syncBasicReleases(username: string, signal?: AbortSignal) {
-  const store = useSyncStore.getState();
-  store.setPhase("basic-releases");
+export async function syncBasicReleases(
+  username: string,
+  signal?: AbortSignal,
+  callbacks?: ReleaseSyncCallbacks,
+) {
+  callbacks?.setPhase("basic-releases");
 
   const folders = getAllFolders().filter((f) => f.id !== 0);
 
@@ -84,7 +92,7 @@ export async function syncBasicReleases(username: string, signal?: AbortSignal) 
       totalPages = response.pagination.pages;
 
       totalProcessed += response.releases.length;
-      store.setProgress(totalProcessed, totalItems);
+      callbacks?.setProgress(totalProcessed, totalItems);
 
       for (const r of response.releases) {
         syncedInstanceIds.push(r.instance_id);

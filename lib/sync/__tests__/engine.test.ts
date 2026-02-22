@@ -18,6 +18,7 @@ jest.mock("@/stores/sync-store", () => {
     isSyncing: false,
     setSyncing: jest.fn(),
     setPhase: jest.fn(),
+    setProgress: jest.fn(),
     setLastFullSyncAt: jest.fn(),
     setError: jest.fn(),
     startSync: jest.fn(() => new AbortController()),
@@ -103,11 +104,19 @@ describe("runFullSync", () => {
     expect(store.setSyncing).toHaveBeenCalledWith(false);
   });
 
-  it("passes signal to sync functions", async () => {
+  it("passes signal and callbacks to sync functions", async () => {
     await runFullSync("testuser");
 
-    expect(mockSyncFolders).toHaveBeenCalledWith("testuser", expect.any(AbortSignal));
-    expect(mockSyncBasicReleases).toHaveBeenCalledWith("testuser", expect.any(AbortSignal));
+    expect(mockSyncFolders).toHaveBeenCalledWith(
+      "testuser",
+      expect.any(AbortSignal),
+      expect.objectContaining({ setPhase: expect.any(Function), setProgress: expect.any(Function) }),
+    );
+    expect(mockSyncBasicReleases).toHaveBeenCalledWith(
+      "testuser",
+      expect.any(AbortSignal),
+      expect.objectContaining({ setPhase: expect.any(Function), setProgress: expect.any(Function) }),
+    );
   });
 });
 

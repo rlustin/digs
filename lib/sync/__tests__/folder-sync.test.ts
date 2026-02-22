@@ -2,7 +2,6 @@ import foldersFixture from "@/__fixtures__/folders.json";
 
 import { syncFolders } from "../folder-sync";
 import { fetchFolders } from "@/lib/discogs/endpoints";
-import { useSyncStore } from "@/stores/sync-store";
 import { db } from "@/db/client";
 
 jest.mock("@/db/client", () => {
@@ -28,21 +27,14 @@ jest.mock("@/lib/discogs/endpoints", () => ({
   fetchFolders: jest.fn(),
 }));
 
-jest.mock("@/stores/sync-store", () => {
-  const state = {
-    setPhase: jest.fn(),
-  };
-  return {
-    useSyncStore: { getState: () => state },
-  };
-});
-
 const mockFetchFolders = fetchFolders as jest.MockedFunction<typeof fetchFolders>;
 const mockDb = db as any;
 
-describe("syncFolders", () => {
-  const store = useSyncStore.getState();
+const mockCallbacks = {
+  setPhase: jest.fn(),
+};
 
+describe("syncFolders", () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockDb.insert.mockReturnThis();
@@ -50,12 +42,12 @@ describe("syncFolders", () => {
     mockDb.onConflictDoUpdate.mockReturnThis();
   });
 
-  it("sets sync phase to folders", async () => {
+  it("sets sync phase to folders via callback", async () => {
     mockFetchFolders.mockResolvedValue({ folders: [] });
 
-    await syncFolders("rlustin");
+    await syncFolders("rlustin", undefined, mockCallbacks);
 
-    expect(store.setPhase).toHaveBeenCalledWith("folders");
+    expect(mockCallbacks.setPhase).toHaveBeenCalledWith("folders");
   });
 
   it("upserts Jungle folder via onConflictDoUpdate", async () => {

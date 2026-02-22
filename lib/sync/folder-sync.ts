@@ -1,14 +1,21 @@
 import { db, expo } from "@/db/client";
 import { folders } from "@/db/schema";
 import { fetchFolders } from "@/lib/discogs/endpoints";
-import { useSyncStore } from "@/stores/sync-store";
+import type { SyncPhase } from "@/stores/sync-store";
+
+export interface FolderSyncCallbacks {
+  setPhase: (phase: SyncPhase) => void;
+}
 
 /**
  * Fetch all folders from Discogs and upsert into SQLite.
  */
-export async function syncFolders(username: string, signal?: AbortSignal) {
-  const store = useSyncStore.getState();
-  store.setPhase("folders");
+export async function syncFolders(
+  username: string,
+  signal?: AbortSignal,
+  callbacks?: FolderSyncCallbacks,
+) {
+  callbacks?.setPhase("folders");
 
   const response = await fetchFolders(username, signal);
 

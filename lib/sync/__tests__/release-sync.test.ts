@@ -6,7 +6,6 @@ import { mapBasicRelease, syncBasicReleases, syncReleaseDetails } from "../relea
 import { getAllFolders } from "@/db/queries/folders";
 import { getReleasesNeedingDetailSync } from "@/db/queries/releases";
 import { fetchReleasesInFolder, fetchReleaseDetail } from "@/lib/discogs/endpoints";
-import { useSyncStore } from "@/stores/sync-store";
 import { db } from "@/db/client";
 
 // ── Mocks ──────────────────────────────────────────────────
@@ -43,17 +42,12 @@ jest.mock("@/lib/discogs/endpoints", () => ({
   fetchReleaseDetail: jest.fn(),
 }));
 
-jest.mock("@/stores/sync-store", () => {
-  const state = {
-    setPhase: jest.fn(),
-    setProgress: jest.fn(),
-  };
-  return {
-    useSyncStore: { getState: () => state },
-  };
-});
-
 const mockGetAllFolders = getAllFolders as jest.MockedFunction<typeof getAllFolders>;
+
+const mockCallbacks = {
+  setPhase: jest.fn(),
+  setProgress: jest.fn(),
+};
 const mockGetReleasesNeedingDetailSync = getReleasesNeedingDetailSync as jest.MockedFunction<typeof getReleasesNeedingDetailSync>;
 const mockFetchReleasesInFolder = fetchReleasesInFolder as jest.MockedFunction<typeof fetchReleasesInFolder>;
 const mockFetchReleaseDetail = fetchReleaseDetail as jest.MockedFunction<typeof fetchReleaseDetail>;
@@ -125,13 +119,11 @@ describe("mapBasicRelease", () => {
 });
 
 describe("syncBasicReleases", () => {
-  const store = useSyncStore.getState();
-
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
-  it("sets sync phase to basic-releases", async () => {
+  it("sets sync phase to basic-releases via callback", async () => {
     mockGetAllFolders.mockReturnValue([
       { id: 0, name: "All", count: 0 },
       { id: 1, name: "Uncategorized", count: 0 },
@@ -141,9 +133,9 @@ describe("syncBasicReleases", () => {
       releases: [],
     });
 
-    await syncBasicReleases("rlustin");
+    await syncBasicReleases("rlustin", undefined, mockCallbacks);
 
-    expect(store.setPhase).toHaveBeenCalledWith("basic-releases");
+    expect(mockCallbacks.setPhase).toHaveBeenCalledWith("basic-releases");
   });
 
   it("filters out folder 0 (virtual All folder)", async () => {
@@ -215,7 +207,7 @@ describe("syncBasicReleases", () => {
     expect((db as any).delete).toHaveBeenCalled();
   });
 
-  it("reports progress via setProgress", async () => {
+  it("reports progress via callback", async () => {
     mockGetAllFolders.mockReturnValue([
       { id: 9182214, name: "Jungle", count: 29 },
     ]);
@@ -224,9 +216,9 @@ describe("syncBasicReleases", () => {
       releases: collectionFixture.releases,
     } as any);
 
-    await syncBasicReleases("rlustin");
+    await syncBasicReleases("rlustin", undefined, mockCallbacks);
 
-    expect(store.setProgress).toHaveBeenCalledWith(3, 29);
+    expect(mockCallbacks.setProgress).toHaveBeenCalledWith(3, 29);
   });
 });
 

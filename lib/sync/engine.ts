@@ -17,13 +17,18 @@ export async function runFullSync(username: string) {
   const controller = store.startSync();
   const signal = controller.signal;
 
+  const callbacks = {
+    setPhase: store.setPhase,
+    setProgress: store.setProgress,
+  };
+
   try {
-    await syncFolders(username, signal);
+    await syncFolders(username, signal, callbacks);
     queryClient.invalidateQueries({ queryKey: ["folders"] });
 
     if (signal.aborted) return;
 
-    await syncBasicReleases(username, signal);
+    await syncBasicReleases(username, signal, callbacks);
     queryClient.invalidateQueries({ queryKey: ["releases"] });
 
     if (signal.aborted) return;
