@@ -9,7 +9,7 @@ export const folders = sqliteTable("folders", {
 export const releases = sqliteTable("releases", {
   instanceId: integer("instance_id").primaryKey(),
   releaseId: integer("release_id").notNull(),
-  folderId: integer("folder_id").notNull(),
+  folderId: integer("folder_id").notNull().references(() => folders.id),
   title: text("title").notNull(),
   year: integer("year"),
   artists: text("artists", { mode: "json" }).$type<

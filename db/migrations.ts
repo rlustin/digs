@@ -38,7 +38,7 @@ function migrateV1() {
     CREATE TABLE IF NOT EXISTS releases (
       instance_id INTEGER PRIMARY KEY,
       release_id INTEGER NOT NULL,
-      folder_id INTEGER NOT NULL,
+      folder_id INTEGER NOT NULL REFERENCES folders(id),
       title TEXT NOT NULL,
       year INTEGER,
       artists TEXT,
