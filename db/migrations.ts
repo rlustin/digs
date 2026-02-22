@@ -1,10 +1,31 @@
 import { expo } from "./client";
 
+const CURRENT_VERSION = 1;
+
 /**
  * Run all schema migrations. Call once at app startup before any queries.
- * Creates tables if they don't exist and sets up FTS5 virtual table with triggers.
+ * Uses PRAGMA user_version to track which migrations have been applied.
  */
 export function runMigrations() {
+  const row = expo.getFirstSync<{ user_version: number }>(
+    "PRAGMA user_version"
+  );
+  const version = row?.user_version ?? 0;
+
+  if (version < 1) {
+    migrateV1();
+  }
+
+  // Future migrations go here:
+  // if (version < 2) { migrateV2(); }
+
+  if (version < CURRENT_VERSION) {
+    expo.execSync(`PRAGMA user_version = ${CURRENT_VERSION}`);
+  }
+}
+
+/** V1: Initial schema — folders, releases, FTS5, indexes, triggers. */
+function migrateV1() {
   expo.execSync(`
     CREATE TABLE IF NOT EXISTS folders (
       id INTEGER PRIMARY KEY,
