@@ -258,4 +258,33 @@ describe("syncReleaseDetails", () => {
     expect(result).toBe(2);
     expect(mockFetchReleaseDetail).toHaveBeenCalledTimes(2);
   });
+
+  it("continues processing after a single release fetch fails", async () => {
+    const warnSpy = jest.spyOn(console, "warn").mockImplementation(() => {});
+    mockGetReleasesNeedingDetailSync.mockReturnValue([
+      { instanceId: 1304522474, releaseId: 20068396 },
+      { instanceId: 1287191732, releaseId: 25213822 },
+    ] as any);
+
+    mockFetchReleaseDetail
+      .mockRejectedValueOnce(new Error("Discogs API error: 500"))
+      .mockResolvedValueOnce(releaseDetailFixture as any);
+
+    const result = await syncReleaseDetails(10);
+
+    expect(result).toBe(1);
+    expect(mockFetchReleaseDetail).toHaveBeenCalledTimes(2);
+    expect(mockDb.update).toHaveBeenCalledTimes(1);
+    warnSpy.mockRestore();
+  });
+
+  it("re-throws authentication_expired errors", async () => {
+    mockGetReleasesNeedingDetailSync.mockReturnValue([
+      { instanceId: 1304522474, releaseId: 20068396 },
+    ] as any);
+
+    mockFetchReleaseDetail.mockRejectedValue(new Error("authentication_expired"));
+
+    await expect(syncReleaseDetails(10)).rejects.toThrow("authentication_expired");
+  });
 });

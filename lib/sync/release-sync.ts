@@ -102,17 +102,28 @@ export async function syncReleaseDetails(
   const pending = getReleasesNeedingDetailSync(batchSize);
   if (pending.length === 0) return 0;
 
+  let processed = 0;
   for (let i = 0; i < pending.length; i++) {
-    if (signal?.aborted) return i;
+    if (signal?.aborted) return processed;
     const release = pending[i];
 
-    const detail = await fetchReleaseDetail(release.releaseId, signal);
+    try {
+      const detail = await fetchReleaseDetail(release.releaseId, signal);
 
-    db.update(releases)
-      .set(mapReleaseDetailToRow(detail))
-      .where(eq(releases.releaseId, release.releaseId))
-      .run();
+      db.update(releases)
+        .set(mapReleaseDetailToRow(detail))
+        .where(eq(releases.releaseId, release.releaseId))
+        .run();
+      processed++;
+    } catch (err) {
+      if (signal?.aborted) return processed;
+      // Re-throw auth errors so the caller can handle them
+      if (err instanceof Error && err.message === "authentication_expired") {
+        throw err;
+      }
+      console.warn(`Detail sync failed for release ${release.releaseId}:`, err);
+    }
   }
 
-  return pending.length;
+  return processed;
 }
