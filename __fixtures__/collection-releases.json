@@ -1,0 +1,163 @@
+{
+  "pagination": {
+    "page": 1,
+    "pages": 10,
+    "per_page": 3,
+    "items": 29,
+    "urls": {
+      "last": "https://api.discogs.com/users/rlustin/collection/folders/9182214/releases?page=10&per_page=3",
+      "next": "https://api.discogs.com/users/rlustin/collection/folders/9182214/releases?page=2&per_page=3"
+    }
+  },
+  "releases": [
+    {
+      "id": 20068396,
+      "instance_id": 1304522474,
+      "date_added": "2023-03-23T06:57:57-07:00",
+      "rating": 0,
+      "basic_information": {
+        "id": 20068396,
+        "master_id": 2889385,
+        "master_url": "https://api.discogs.com/masters/2889385",
+        "resource_url": "https://api.discogs.com/releases/20068396",
+        "thumb": "https://i.discogs.com/ynGDHHgTbZG626Q49sKbUwi6y0M7_UmKPffQbLnoFWE/rs:fit/g:sm/q:40/h:150/w:150/czM6Ly9kaXNjb2dz/LWRhdGFiYXNlLWlt/YWdlcy9SLTIwMDY4/Mzk2LTE2NzU2MjUw/ODktMTMwMi5qcGVn.jpeg",
+        "cover_image": "https://i.discogs.com/gyZutyuoJE59ixb6bZSaA1OWN0aHXemkkrtjF5AIBt4/rs:fit/g:sm/q:90/h:600/w:600/czM6Ly9kaXNjb2dz/LWRhdGFiYXNlLWlt/YWdlcy9SLTIwMDY4/Mzk2LTE2NzU2MjUw/ODktMTMwMi5qcGVn.jpeg",
+        "title": "AMENFR001",
+        "year": 2022,
+        "formats": [
+          {
+            "name": "Vinyl",
+            "qty": "1",
+            "descriptions": ["12\"", "33 \u2153 RPM", "EP", "Limited Edition"]
+          }
+        ],
+        "labels": [
+          {
+            "name": "Amenology",
+            "catno": "AMENFR001",
+            "entity_type": "1",
+            "entity_type_name": "Label",
+            "id": 1372034,
+            "resource_url": "https://api.discogs.com/labels/1372034"
+          },
+          {
+            "name": "Future Retro London",
+            "catno": "AMENFR001",
+            "entity_type": "1",
+            "entity_type_name": "Label",
+            "id": 1922115,
+            "resource_url": "https://api.discogs.com/labels/1922115"
+          }
+        ],
+        "artists": [
+          {
+            "name": "Tim Reaper",
+            "anv": "",
+            "join": "",
+            "role": "",
+            "tracks": "",
+            "id": 1881856,
+            "resource_url": "https://api.discogs.com/artists/1881856"
+          }
+        ],
+        "genres": ["Electronic"],
+        "styles": ["Jungle"]
+      },
+      "folder_id": 9182214
+    },
+    {
+      "id": 34581454,
+      "instance_id": 2042596190,
+      "date_added": "2025-07-19T03:04:33-07:00",
+      "rating": 0,
+      "basic_information": {
+        "id": 34581454,
+        "master_id": 0,
+        "master_url": null,
+        "resource_url": "https://api.discogs.com/releases/34581454",
+        "thumb": "https://i.discogs.com/WbfSgVxkte1T-ggdkaIqcsnFAlL4qV7zPmOMf9ajYr4/rs:fit/g:sm/q:40/h:150/w:150/czM6Ly9kaXNjb2dz/LWRhdGFiYXNlLWlt/YWdlcy9SLTM0NTgx/NDU0LTE3NTU5Mjg4/NzgtNjY1MS5qcGVn.jpeg",
+        "cover_image": "https://i.discogs.com/3UjrppxqoXaz6oLc7jPhkageHHRzYMmIT7HJq4H2wEc/rs:fit/g:sm/q:90/h:600/w:600/czM6Ly9kaXNjb2dz/LWRhdGFiYXNlLWlt/YWdlcy9SLTM0NTgx/NDU0LTE3NTU5Mjg4/NzgtNjY1MS5qcGVn.jpeg",
+        "title": "Spiritual Rhythms",
+        "year": 2025,
+        "formats": [
+          {
+            "name": "Vinyl",
+            "qty": "1",
+            "descriptions": ["12\"", "EP"]
+          }
+        ],
+        "labels": [
+          {
+            "name": "Angel (29)",
+            "catno": "ANGEL004",
+            "entity_type": "1",
+            "entity_type_name": "Label",
+            "id": 4194052,
+            "resource_url": "https://api.discogs.com/labels/4194052"
+          }
+        ],
+        "artists": [
+          {
+            "name": "Mix'Elle",
+            "anv": "",
+            "join": "",
+            "role": "",
+            "tracks": "",
+            "id": 16413970,
+            "resource_url": "https://api.discogs.com/artists/16413970"
+          }
+        ],
+        "genres": ["Electronic"],
+        "styles": ["Jungle"]
+      },
+      "folder_id": 9182214
+    },
+    {
+      "id": 25213822,
+      "instance_id": 1287191732,
+      "date_added": "2023-03-05T10:50:50-08:00",
+      "rating": 0,
+      "basic_information": {
+        "id": 25213822,
+        "master_id": 2905495,
+        "master_url": "https://api.discogs.com/masters/2905495",
+        "resource_url": "https://api.discogs.com/releases/25213822",
+        "thumb": "https://i.discogs.com/SBkYHXOUxB9lvKiAMXr_XUvDrQ-fLNnBp9IbzaBHIok/rs:fit/g:sm/q:40/h:150/w:150/czM6Ly9kaXNjb2dz/LWRhdGFiYXNlLWlt/YWdlcy9SLTI1MjEz/ODIyLTE2Njg4NTk4/OTEtNDY2Ny5qcGVn.jpeg",
+        "cover_image": "https://i.discogs.com/CS8IPkn_xocpXX6-KM98tJMv4eo0276-K2pRivEMcoc/rs:fit/g:sm/q:90/h:600/w:600/czM6Ly9kaXNjb2dz/LWRhdGFiYXNlLWlt/YWdlcy9SLTI1MjEz/ODIyLTE2Njg4NTk4/OTEtNDY2Ny5qcGVn.jpeg",
+        "title": "0860",
+        "year": 2022,
+        "formats": [
+          {
+            "name": "Vinyl",
+            "qty": "2",
+            "descriptions": ["12\"", "33 \u2153 RPM", "Album"]
+          }
+        ],
+        "labels": [
+          {
+            "name": "Astrophonica",
+            "catno": "APHA0860",
+            "entity_type": "1",
+            "entity_type_name": "Label",
+            "id": 161315,
+            "resource_url": "https://api.discogs.com/labels/161315"
+          }
+        ],
+        "artists": [
+          {
+            "name": "Fracture (2)",
+            "anv": "",
+            "join": "",
+            "role": "",
+            "tracks": "",
+            "id": 434256,
+            "resource_url": "https://api.discogs.com/artists/434256"
+          }
+        ],
+        "genres": ["Electronic"],
+        "styles": ["Jungle", "Drum n Bass"]
+      },
+      "folder_id": 9182214
+    }
+  ]
+}

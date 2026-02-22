@@ -1,0 +1,102 @@
+{
+  "id": 25213822,
+  "title": "0860",
+  "year": 2022,
+  "artists": [
+    {
+      "name": "Fracture (2)",
+      "anv": "",
+      "join": "",
+      "role": "",
+      "tracks": "",
+      "id": 434256,
+      "resource_url": "https://api.discogs.com/artists/434256"
+    }
+  ],
+  "labels": [
+    {
+      "name": "Astrophonica",
+      "catno": "APHA0860",
+      "entity_type": "1",
+      "entity_type_name": "Label",
+      "id": 161315,
+      "resource_url": "https://api.discogs.com/labels/161315"
+    }
+  ],
+  "formats": [
+    {
+      "name": "Vinyl",
+      "qty": "2",
+      "descriptions": ["12\"", "33 \u2153 RPM", "Album"]
+    }
+  ],
+  "genres": ["Electronic"],
+  "styles": ["Jungle", "Drum n Bass"],
+  "tracklist": [
+    { "position": "A1", "type_": "track", "title": "0860", "duration": "" },
+    { "position": "A2", "type_": "track", "title": "Buzzing Crew", "duration": "" },
+    { "position": "B1", "type_": "track", "title": "Booyaka Style", "duration": "" },
+    { "position": "B2", "type_": "track", "title": "Telepathy", "duration": "" },
+    { "position": "C1", "type_": "track", "title": "First Aid Kit", "duration": "" },
+    { "position": "C2", "type_": "track", "title": "Blaze", "duration": "" },
+    { "position": "D1", "type_": "track", "title": "From The Very Top", "duration": "" },
+    { "position": "D2", "type_": "track", "title": "Kinda Late For A Sunday Night", "duration": "" }
+  ],
+  "images": [
+    {
+      "type": "secondary",
+      "uri": "https://i.discogs.com/CS8IPkn_xocpXX6-KM98tJMv4eo0276-K2pRivEMcoc/rs:fit/g:sm/q:90/h:600/w:600/czM6Ly9kaXNjb2dz/LWRhdGFiYXNlLWlt/YWdlcy9SLTI1MjEz/ODIyLTE2Njg4NTk4/OTEtNDY2Ny5qcGVn.jpeg",
+      "resource_url": "",
+      "uri150": "",
+      "width": 600,
+      "height": 600
+    },
+    {
+      "type": "secondary",
+      "uri": "https://i.discogs.com/iwOsPNSUu7fbxsNnh_ta88qd7t35NpEBz4UfXDHlKPU/rs:fit/g:sm/q:90/h:600/w:600/czM6Ly9kaXNjb2dz/LWRhdGFiYXNlLWlt/YWdlcy9SLTI1MjEz/ODIyLTE2Njg4NTk4/OTgtODc2Ny5qcGVn.jpeg",
+      "resource_url": "",
+      "uri150": "",
+      "width": 600,
+      "height": 600
+    }
+  ],
+  "videos": [
+    {
+      "uri": "https://www.youtube.com/watch?v=jVR8cO04UQo",
+      "title": "0860",
+      "description": "",
+      "duration": 360,
+      "embed": true
+    },
+    {
+      "uri": "https://www.youtube.com/watch?v=fJX_i21cPOo",
+      "title": "Buzzing Crew",
+      "description": "",
+      "duration": 288,
+      "embed": true
+    },
+    {
+      "uri": "https://www.youtube.com/watch?v=_yPTHJ5zsvA",
+      "title": "Booyaka Style",
+      "description": "",
+      "duration": 260,
+      "embed": true
+    }
+  ],
+  "community": {
+    "have": 416,
+    "want": 249,
+    "rating": {
+      "count": 69,
+      "average": 4.83
+    },
+    "submitter": {
+      "username": "drumbeatvideo",
+      "resource_url": ""
+    },
+    "contributors": [],
+    "data_quality": "Needs Vote",
+    "status": "Accepted"
+  },
+  "thumb": "https://i.discogs.com/SBkYHXOUxB9lvKiAMXr_XUvDrQ-fLNnBp9IbzaBHIok/rs:fit/g:sm/q:40/h:150/w:150/czM6Ly9kaXNjb2dz/LWRhdGFiYXNlLWlt/YWdlcy9SLTI1MjEz/ODIyLTE2Njg4NTk4/OTEtNDY2Ny5qcGVn.jpeg"
+}

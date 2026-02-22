@@ -1,3 +1,5 @@
+import foldersFixture from "@/__fixtures__/folders.json";
+
 jest.mock("@/db/client", () => {
   const mockDb = {
     select: jest.fn().mockReturnThis(),
@@ -60,40 +62,48 @@ describe("syncFolders", () => {
   it("sets sync phase to folders", async () => {
     mockFetchFolders.mockResolvedValue({ folders: [] });
 
-    await syncFolders("testuser");
+    await syncFolders("rlustin");
 
     expect(store.setPhase).toHaveBeenCalledWith("folders");
   });
 
-  it("inserts new folders when no existing row", async () => {
+  it("inserts new Jungle folder when no existing row", async () => {
     mockDb.get.mockReturnValue(null);
+    const jungleFolder = foldersFixture.folders.find((f) => f.name === "Jungle")!;
     mockFetchFolders.mockResolvedValue({
-      folders: [
-        { id: 1, name: "Uncategorized", count: 10, resource_url: "" },
-      ],
+      folders: [jungleFolder],
     });
 
-    await syncFolders("testuser");
+    await syncFolders("rlustin");
 
     expect(mockDb.insert).toHaveBeenCalled();
     expect(mockDb.values).toHaveBeenCalledWith({
-      id: 1,
-      name: "Uncategorized",
-      count: 10,
+      id: 9182214,
+      name: "Jungle",
+      count: 29,
     });
   });
 
-  it("updates existing folders when row exists", async () => {
-    mockDb.get.mockReturnValue({ id: 1, name: "Old Name", count: 5 });
+  it("updates existing Ambient folder when row exists", async () => {
+    const ambientFolder = foldersFixture.folders.find((f) => f.name === "Ambient")!;
+    mockDb.get.mockReturnValue({ id: 9182196, name: "Ambient", count: 10 });
     mockFetchFolders.mockResolvedValue({
-      folders: [
-        { id: 1, name: "New Name", count: 15, resource_url: "" },
-      ],
+      folders: [ambientFolder],
     });
 
-    await syncFolders("testuser");
+    await syncFolders("rlustin");
 
     expect(mockDb.update).toHaveBeenCalled();
-    expect(mockDb.set).toHaveBeenCalledWith({ name: "New Name", count: 15 });
+    expect(mockDb.set).toHaveBeenCalledWith({ name: "Ambient", count: 15 });
+  });
+
+  it("syncs all 30 real folders from fixture", async () => {
+    mockDb.get.mockReturnValue(null);
+    mockFetchFolders.mockResolvedValue(foldersFixture as any);
+
+    await syncFolders("rlustin");
+
+    // insert called once per folder
+    expect(mockDb.values).toHaveBeenCalledTimes(30);
   });
 });

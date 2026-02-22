@@ -1,0 +1,184 @@
+{
+  "folders": [
+    {
+      "id": 0,
+      "name": "All",
+      "count": 429,
+      "resource_url": "https://api.discogs.com/users/rlustin/collection/folders/0"
+    },
+    {
+      "id": 9182196,
+      "name": "Ambient",
+      "count": 15,
+      "resource_url": "https://api.discogs.com/users/rlustin/collection/folders/9182196"
+    },
+    {
+      "id": 9182197,
+      "name": "Breakbeat & Breaks",
+      "count": 19,
+      "resource_url": "https://api.discogs.com/users/rlustin/collection/folders/9182197"
+    },
+    {
+      "id": 9184543,
+      "name": "Breakbeat Techno",
+      "count": 8,
+      "resource_url": "https://api.discogs.com/users/rlustin/collection/folders/9184543"
+    },
+    {
+      "id": 9184542,
+      "name": "Deep & Atmospheric Techno",
+      "count": 13,
+      "resource_url": "https://api.discogs.com/users/rlustin/collection/folders/9184542"
+    },
+    {
+      "id": 9182198,
+      "name": "Downtempo",
+      "count": 12,
+      "resource_url": "https://api.discogs.com/users/rlustin/collection/folders/9182198"
+    },
+    {
+      "id": 9182199,
+      "name": "Drum & Bass",
+      "count": 17,
+      "resource_url": "https://api.discogs.com/users/rlustin/collection/folders/9182199"
+    },
+    {
+      "id": 9182200,
+      "name": "Dub",
+      "count": 2,
+      "resource_url": "https://api.discogs.com/users/rlustin/collection/folders/9182200"
+    },
+    {
+      "id": 9182201,
+      "name": "Dubstep",
+      "count": 16,
+      "resource_url": "https://api.discogs.com/users/rlustin/collection/folders/9182201"
+    },
+    {
+      "id": 9182202,
+      "name": "Electro",
+      "count": 7,
+      "resource_url": "https://api.discogs.com/users/rlustin/collection/folders/9182202"
+    },
+    {
+      "id": 9182203,
+      "name": "Experimental & Leftfield",
+      "count": 58,
+      "resource_url": "https://api.discogs.com/users/rlustin/collection/folders/9182203"
+    },
+    {
+      "id": 9182204,
+      "name": "Footwork & Juke",
+      "count": 8,
+      "resource_url": "https://api.discogs.com/users/rlustin/collection/folders/9182204"
+    },
+    {
+      "id": 9182205,
+      "name": "Funk & Disco",
+      "count": 3,
+      "resource_url": "https://api.discogs.com/users/rlustin/collection/folders/9182205"
+    },
+    {
+      "id": 9182206,
+      "name": "Global Club",
+      "count": 25,
+      "resource_url": "https://api.discogs.com/users/rlustin/collection/folders/9182206"
+    },
+    {
+      "id": 9182207,
+      "name": "Grime & UK Bass",
+      "count": 23,
+      "resource_url": "https://api.discogs.com/users/rlustin/collection/folders/9182207"
+    },
+    {
+      "id": 9182208,
+      "name": "Hardcore",
+      "count": 9,
+      "resource_url": "https://api.discogs.com/users/rlustin/collection/folders/9182208"
+    },
+    {
+      "id": 9182209,
+      "name": "Hip Hop",
+      "count": 11,
+      "resource_url": "https://api.discogs.com/users/rlustin/collection/folders/9182209"
+    },
+    {
+      "id": 9182210,
+      "name": "House",
+      "count": 27,
+      "resource_url": "https://api.discogs.com/users/rlustin/collection/folders/9182210"
+    },
+    {
+      "id": 9182211,
+      "name": "Hyperpop",
+      "count": 10,
+      "resource_url": "https://api.discogs.com/users/rlustin/collection/folders/9182211"
+    },
+    {
+      "id": 9182212,
+      "name": "IDM & Acid",
+      "count": 32,
+      "resource_url": "https://api.discogs.com/users/rlustin/collection/folders/9182212"
+    },
+    {
+      "id": 9182213,
+      "name": "Jazz",
+      "count": 7,
+      "resource_url": "https://api.discogs.com/users/rlustin/collection/folders/9182213"
+    },
+    {
+      "id": 9182214,
+      "name": "Jungle",
+      "count": 29,
+      "resource_url": "https://api.discogs.com/users/rlustin/collection/folders/9182214"
+    },
+    {
+      "id": 9184544,
+      "name": "Melodic & Trance Techno",
+      "count": 8,
+      "resource_url": "https://api.discogs.com/users/rlustin/collection/folders/9184544"
+    },
+    {
+      "id": 9182215,
+      "name": "Pop & Synth-pop",
+      "count": 3,
+      "resource_url": "https://api.discogs.com/users/rlustin/collection/folders/9182215"
+    },
+    {
+      "id": 9182216,
+      "name": "R&B & Soul",
+      "count": 15,
+      "resource_url": "https://api.discogs.com/users/rlustin/collection/folders/9182216"
+    },
+    {
+      "id": 9182217,
+      "name": "Rock & Indie",
+      "count": 27,
+      "resource_url": "https://api.discogs.com/users/rlustin/collection/folders/9182217"
+    },
+    {
+      "id": 9184541,
+      "name": "Techno (Hard / Peak-Time)",
+      "count": 15,
+      "resource_url": "https://api.discogs.com/users/rlustin/collection/folders/9184541"
+    },
+    {
+      "id": 9182220,
+      "name": "Traditional",
+      "count": 6,
+      "resource_url": "https://api.discogs.com/users/rlustin/collection/folders/9182220"
+    },
+    {
+      "id": 9182221,
+      "name": "UK Garage",
+      "count": 4,
+      "resource_url": "https://api.discogs.com/users/rlustin/collection/folders/9182221"
+    },
+    {
+      "id": 1,
+      "name": "Uncategorized",
+      "count": 0,
+      "resource_url": "https://api.discogs.com/users/rlustin/collection/folders/1"
+    }
+  ]
+}
