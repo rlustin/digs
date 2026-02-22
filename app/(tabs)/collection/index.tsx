@@ -1,4 +1,5 @@
 import { View, Text, FlatList, Pressable, RefreshControl } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "expo-router";
 import { FolderOpen, ChevronRight } from "lucide-react-native";
@@ -47,26 +48,26 @@ export default function CollectionScreen() {
 
   if (isLoading) {
     return (
-      <View className="flex-1 bg-white">
+      <SafeAreaView className="flex-1 bg-white" edges={["top"]}>
         <ListSkeleton type="folder" count={4} />
-      </View>
+      </SafeAreaView>
     );
   }
 
   if (folders.length === 0) {
     return (
-      <View className="flex-1 bg-white">
+      <SafeAreaView className="flex-1 bg-white" edges={["top"]}>
         <EmptyState
           icon={FolderOpen}
           title="No folders yet"
           message="Your collection will appear here after syncing"
         />
-      </View>
+      </SafeAreaView>
     );
   }
 
   return (
-    <View className="flex-1 bg-white">
+    <SafeAreaView className="flex-1 bg-white" edges={["top"]}>
       <FlatList
         data={folders}
         keyExtractor={(item) => String(item.id)}
@@ -97,7 +98,7 @@ export default function CollectionScreen() {
             <FolderCoverCollage thumbnails={thumbnails[item.id] ?? []} />
             <View className="flex-1 ml-4 justify-center">
               <Text
-                className="text-gray-900 text-base font-sans-semibold"
+                className="text-gray-900 text-base font-mono"
                 numberOfLines={1}
               >
                 {item.name}
@@ -110,6 +111,6 @@ export default function CollectionScreen() {
           </Pressable>
         )}
       />
-    </View>
+    </SafeAreaView>
   );
 }

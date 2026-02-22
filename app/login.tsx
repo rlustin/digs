@@ -111,7 +111,7 @@ const styles = StyleSheet.create({
   buttonText: {
     color: "#FFFFFF",
     fontSize: 17,
-    fontFamily: "Inter-SemiBold",
+    fontFamily: "GeistMono-Bold",
     textAlign: "center",
   },
   error: {

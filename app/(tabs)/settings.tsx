@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { View, Text, Pressable, Alert, ScrollView } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { CircleAlert, RefreshCw, X } from "lucide-react-native";
 
 import { useAuthStore } from "@/stores/auth-store";
@@ -77,13 +78,14 @@ export default function SettingsScreen() {
   const initial = username ? username.charAt(0).toUpperCase() : "?";
 
   return (
-    <ScrollView className="flex-1 bg-gray-50">
+    <SafeAreaView className="flex-1 bg-gray-50" edges={["top"]}>
+    <ScrollView className="flex-1">
       {/* Profile area */}
       <View className="items-center pt-8 pb-6">
         <View className="w-16 h-16 rounded-full bg-accent items-center justify-center mb-3">
           <Text className="text-white text-2xl font-sans-bold">{initial}</Text>
         </View>
-        <Text className="text-gray-900 text-lg font-sans-semibold">{username}</Text>
+        <Text className="text-gray-900 text-lg font-mono-bold">{username}</Text>
         <Text className="text-gray-400 text-sm font-sans">Discogs account</Text>
       </View>
 
@@ -195,7 +197,7 @@ export default function SettingsScreen() {
         className="mx-4 mt-3 rounded-2xl bg-white overflow-hidden active:opacity-80"
       >
         <Text
-          className={`text-center py-3 text-base font-sans-semibold ${
+          className={`text-center py-3 text-base font-mono-bold ${
             isSyncing ? "text-gray-300" : "text-accent"
           }`}
         >
@@ -209,7 +211,7 @@ export default function SettingsScreen() {
       </Text>
       <View className="mx-4 rounded-2xl bg-white overflow-hidden">
         <Pressable onPress={handleLogout} className="active:opacity-80">
-          <Text className="text-red-500 text-base font-sans-semibold text-center py-3">
+          <Text className="text-red-500 text-base font-mono-bold text-center py-3">
             Log out
           </Text>
         </Pressable>
@@ -218,5 +220,6 @@ export default function SettingsScreen() {
       {/* Bottom padding */}
       <View className="h-24" />
     </ScrollView>
+    </SafeAreaView>
   );
 }

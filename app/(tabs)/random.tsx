@@ -1,4 +1,5 @@
 import { View, Text, Pressable, ScrollView } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { useState, useCallback } from "react";
 import { Image } from "expo-image";
 import { useRouter } from "expo-router";
@@ -32,7 +33,8 @@ export default function RandomScreen() {
     "Unknown Artist";
 
   return (
-    <ScrollView className="flex-1 bg-white" contentContainerClassName="pb-24">
+    <SafeAreaView className="flex-1 bg-white" edges={["top"]}>
+    <ScrollView className="flex-1" contentContainerClassName="pb-24">
       {/* Folder chips */}
       <ScrollView
         horizontal
@@ -48,7 +50,7 @@ export default function RandomScreen() {
         >
           <Text
             className={`text-sm ${
-              selectedFolder === undefined ? "text-white font-sans-semibold" : "text-gray-500 font-sans"
+              selectedFolder === undefined ? "text-white font-mono-bold" : "text-gray-500 font-mono"
             }`}
           >
             All
@@ -67,8 +69,8 @@ export default function RandomScreen() {
               <Text
                 className={`text-sm ${
                   selectedFolder === folder.id
-                    ? "text-white font-sans-semibold"
-                    : "text-gray-500 font-sans"
+                    ? "text-white font-mono-bold"
+                    : "text-gray-500 font-mono"
                 }`}
               >
                 {folder.name}
@@ -89,14 +91,14 @@ export default function RandomScreen() {
             contentFit="cover"
             transition={300}
           />
-          <Text className="text-gray-900 text-xl font-sans-bold mt-4 text-center">
+          <Text className="text-gray-900 text-xl font-mono-bold mt-4 text-center">
             {release.title}
           </Text>
           <Text className="text-gray-500 text-base mt-1 text-center font-sans">
             {artistNames}
           </Text>
           {release.year ? (
-            <Text className="text-gray-500 text-sm mt-1 font-sans">{release.year}</Text>
+            <Text className="text-gray-500 text-sm mt-1 font-mono">{release.year}</Text>
           ) : null}
         </Pressable>
       ) : (
@@ -114,11 +116,12 @@ export default function RandomScreen() {
           onPress={pick}
           className="bg-accent rounded-xl px-8 py-4 w-full items-center active:opacity-80"
         >
-          <Text className="text-white text-lg font-sans-semibold">
+          <Text className="text-white text-lg font-mono-bold">
             <Dices size={18} color="#fff" /> Pick Random
           </Text>
         </Pressable>
       </View>
     </ScrollView>
+    </SafeAreaView>
   );
 }

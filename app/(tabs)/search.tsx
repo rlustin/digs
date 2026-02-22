@@ -1,4 +1,5 @@
 import { View, TextInput, FlatList, StyleSheet } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { useState, useMemo, useCallback, useRef, useEffect } from "react";
 import { useNavigation } from "@react-navigation/native";
 import type { BottomTabNavigationProp } from "@react-navigation/bottom-tabs";
@@ -69,7 +70,7 @@ export default function SearchScreen() {
   );
 
   return (
-    <View className="flex-1 bg-white">
+    <SafeAreaView className="flex-1 bg-white" edges={["top"]}>
       <View style={styles.searchWrapper}>
         <Animated.View
           style={[styles.inputContainer, animatedContainerStyle]}
@@ -131,7 +132,7 @@ export default function SearchScreen() {
           )}
         />
       )}
-    </View>
+    </SafeAreaView>
   );
 }
 

@@ -15,7 +15,7 @@ export function TrackList({ tracks }: TrackListProps) {
 
   return (
     <View className="mt-4">
-      <Text className="text-gray-900 text-lg font-sans-semibold mb-2 px-4">
+      <Text className="text-gray-900 text-lg font-mono mb-2 px-4">
         Tracklist
       </Text>
       {tracks.map((track, i) => (
@@ -28,7 +28,7 @@ export function TrackList({ tracks }: TrackListProps) {
             {track.title}
           </Text>
           {track.duration ? (
-            <Text className="text-gray-500 text-sm ml-2 font-sans">
+            <Text className="text-gray-500 text-sm ml-2 font-mono">
               {track.duration}
             </Text>
           ) : null}

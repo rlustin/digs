@@ -9,7 +9,7 @@ export const unstable_settings = {
 };
 
 function TabBarIcon({ Icon, color }: { Icon: LucideIcon; color: string }) {
-  return <Icon size={25} color={color} strokeWidth={1.75} />;
+  return <Icon size={22} color={color} strokeWidth={1.75} />;
 }
 
 export default function TabLayout() {
@@ -45,6 +45,7 @@ export default function TabLayout() {
           name="search"
           options={{
             title: "Search",
+            headerShown: false,
             tabBarIcon: ({ color }) => (
               <TabBarIcon Icon={Search} color={color} />
             ),
@@ -54,6 +55,7 @@ export default function TabLayout() {
           name="random"
           options={{
             title: "Random",
+            headerShown: false,
             tabBarIcon: ({ color }) => (
               <TabBarIcon Icon={Dices} color={color} />
             ),
@@ -63,6 +65,7 @@ export default function TabLayout() {
           name="settings"
           options={{
             title: "Settings",
+            headerShown: false,
             tabBarIcon: ({ color }) => <TabBarIcon Icon={Settings} color={color} />,
           }}
         />

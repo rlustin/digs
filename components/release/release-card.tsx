@@ -49,7 +49,7 @@ export const ReleaseCard = memo(function ReleaseCard({
         />
       </View>
       <View className="flex-1 ml-4 justify-center">
-        <Text className="text-gray-900 text-lg font-sans-medium" numberOfLines={1}>
+        <Text className="text-gray-900 text-lg font-mono-bold" numberOfLines={1}>
           {title}
         </Text>
         <Text className="text-gray-400 text-sm mt-0.5 font-sans" numberOfLines={1}>
@@ -57,13 +57,13 @@ export const ReleaseCard = memo(function ReleaseCard({
         </Text>
         <View className="flex-row items-center mt-0.5">
           {year ? (
-            <Text className="text-gray-500 text-xs font-sans">{year}</Text>
+            <Text className="text-gray-500 text-xs font-mono">{year}</Text>
           ) : null}
           {year && formatDesc ? (
-            <Text className="text-gray-600 text-xs mx-1 font-sans">·</Text>
+            <Text className="text-gray-600 text-xs mx-1 font-mono">·</Text>
           ) : null}
           {formatDesc ? (
-            <Text className="text-gray-500 text-xs font-sans" numberOfLines={1}>
+            <Text className="text-gray-500 text-xs font-mono" numberOfLines={1}>
               {formatDesc}
             </Text>
           ) : null}

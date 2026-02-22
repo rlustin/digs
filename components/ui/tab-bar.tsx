@@ -1,4 +1,4 @@
-import { View, Pressable, StyleSheet } from "react-native";
+import { View, Text, Pressable, StyleSheet } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { BlurView } from "expo-blur";
 import type { BottomTabBarProps } from "@react-navigation/bottom-tabs";
@@ -45,6 +45,8 @@ export function FloatingTabBar({
               });
             };
 
+            const label = options.title ?? route.name;
+
             return (
               <Pressable
                 key={route.key}
@@ -55,7 +57,8 @@ export function FloatingTabBar({
                 onLongPress={onLongPress}
                 style={styles.tab}
               >
-                {options.tabBarIcon?.({ color, focused: isFocused, size: 25 })}
+                {options.tabBarIcon?.({ color, focused: isFocused, size: 22 })}
+                <Text style={[styles.label, { color }]}>{label}</Text>
               </Pressable>
             );
           })}
@@ -94,5 +97,10 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     paddingHorizontal: 16,
     paddingVertical: 4,
+  },
+  label: {
+    fontFamily: "GeistMono-Regular",
+    fontSize: 10,
+    marginTop: 3,
   },
 });

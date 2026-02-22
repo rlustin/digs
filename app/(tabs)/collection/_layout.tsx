@@ -7,9 +7,10 @@ export default function CollectionLayout() {
         headerStyle: { backgroundColor: "#FFFFFF" },
         headerTintColor: "#111",
         headerShadowVisible: false,
+        headerTitleStyle: { fontFamily: "GeistMono-Regular" },
       }}
     >
-      <Stack.Screen name="index" options={{ title: "Collection" }} />
+      <Stack.Screen name="index" options={{ title: "Collection", headerShown: false }} />
     </Stack>
   );
 }

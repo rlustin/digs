@@ -1,26 +1,26 @@
-import {
-  View,
-  Text,
-  ScrollView,
-  ActivityIndicator,
-  Pressable,
-  useWindowDimensions,
-} from "react-native";
-import { useLocalSearchParams, useRouter } from "expo-router";
 import { useQuery } from "@tanstack/react-query";
 import { Image } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
+import { useLocalSearchParams, useRouter } from "expo-router";
+import {
+  ActivityIndicator,
+  Pressable,
+  ScrollView,
+  Text,
+  useWindowDimensions,
+  View,
+} from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-import { getReleaseByReleaseId } from "@/db/queries/releases";
-import { getFolderById } from "@/db/queries/folders";
-import { fetchReleaseDetail } from "@/lib/discogs/endpoints";
-import { TrackList } from "@/components/release/track-list";
 import { CommunityRating } from "@/components/release/community-rating";
 import { ImageGallery } from "@/components/release/image-gallery";
+import { TrackList } from "@/components/release/track-list";
 import { DetailSkeleton } from "@/components/ui/detail-skeleton";
 import { db } from "@/db/client";
+import { getFolderById } from "@/db/queries/folders";
+import { getReleaseByReleaseId } from "@/db/queries/releases";
 import { releases } from "@/db/schema";
+import { fetchReleaseDetail } from "@/lib/discogs/endpoints";
 import { eq } from "drizzle-orm";
 
 const COVER_WIDTH_RATIO = 0.75;
@@ -177,33 +177,38 @@ export default function ReleaseDetailScreen() {
 
       {/* Title block */}
       <View className="px-4 mt-3">
-        <Text className="text-gray-900 text-2xl font-sans-bold">
+        <Text className="text-gray-900 text-2xl font-mono-bold">
           {release.title}
         </Text>
         <Text className="text-gray-400 text-base mt-1 font-sans">{artistNames}</Text>
         <View className="flex-row items-center mt-2">
           {release.year ? (
-            <Text className="text-gray-500 text-sm font-sans">{release.year}</Text>
+            <Text className="text-gray-500 text-sm font-mono">{release.year}</Text>
           ) : null}
           {release.year && formatDesc ? (
-            <Text className="text-gray-600 text-sm mx-2 font-sans">·</Text>
+            <Text className="text-gray-600 text-sm mx-2 font-mono">·</Text>
           ) : null}
           {formatDesc ? (
-            <Text className="text-gray-500 text-sm font-sans">{formatDesc}</Text>
+            <Text className="text-gray-500 text-sm font-mono">{formatDesc}</Text>
           ) : null}
         </View>
         {release.labels && release.labels.length > 0 && (
-          <Text className="text-gray-500 text-sm mt-1 font-sans">
-            {release.labels
-              .map(
-                (l: { name: string; catno: string }) =>
-                  `${l.name}${l.catno ? ` — ${l.catno}` : ""}`
+          <Text className="text-gray-500 text-sm mt-1">
+            {release.labels.map(
+              (l: { name: string; catno: string }, i: number) => (
+                <Text key={i}>
+                  {i > 0 && ", "}
+                  <Text className="font-sans">{l.name}</Text>
+                  {l.catno ? (
+                    <Text className="font-mono"> — {l.catno}</Text>
+                  ) : null}
+                </Text>
               )
-              .join(", ")}
+            )}
           </Text>
         )}
         {genresAndStyles ? (
-          <Text className="text-gray-500 text-sm mt-1 font-sans">{genresAndStyles}</Text>
+          <Text className="text-gray-500 text-sm mt-1">{genresAndStyles}</Text>
         ) : null}
 
         {/* Folder badge + community rating on same row */}
@@ -213,7 +218,7 @@ export default function ReleaseDetailScreen() {
               onPress={() => router.push(`/(tabs)/collection/${folder.id}`)}
               className="bg-accent rounded-full px-3 py-1 mr-3 active:opacity-70"
             >
-              <Text className="text-white text-sm font-sans-semibold">
+              <Text className="text-white text-sm font-mono">
                 {folder.name}
               </Text>
             </Pressable>
