@@ -8,6 +8,7 @@ import { ReleaseCard } from "@/components/release/release-card";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Music } from "lucide-react-native";
 import { ListSkeleton } from "@/components/ui/skeleton";
+import { Colors } from "@/constants/Colors";
 import { t } from "@/lib/i18n";
 
 const ITEM_HEIGHT = 104;
@@ -57,7 +58,7 @@ export default function FolderReleasesScreen() {
             <RefreshControl
               refreshing={false}
               onRefresh={() => refetch()}
-              tintColor="#F97316"
+              tintColor={Colors.accent}
             />
           }
           renderItem={({ item }) => (

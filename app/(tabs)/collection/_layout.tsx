@@ -1,11 +1,12 @@
 import { Stack } from "expo-router";
+import { Colors } from "@/constants/Colors";
 
 export default function CollectionLayout() {
   return (
     <Stack
       screenOptions={{
-        headerStyle: { backgroundColor: "#FFFFFF" },
-        headerTintColor: "#111",
+        headerStyle: { backgroundColor: Colors.white },
+        headerTintColor: Colors.gray900,
         headerShadowVisible: false,
         headerTitleStyle: { fontFamily: "GeistMono-Regular" },
       }}

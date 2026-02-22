@@ -11,6 +11,7 @@ import Animated, {
 } from "react-native-reanimated";
 import { login } from "@/lib/discogs/oauth";
 import { useAuthStore } from "@/stores/auth-store";
+import { Colors } from "@/constants/Colors";
 import { t } from "@/lib/i18n";
 
 export default function LoginScreen() {
@@ -46,7 +47,7 @@ export default function LoginScreen() {
   };
 
   return (
-    <LinearGradient colors={["#FFFFFF", "#F3F4F6"]} style={{ flex: 1 }}>
+    <LinearGradient colors={[Colors.white, Colors.gray100]} style={{ flex: 1 }}>
       <View style={styles.content}>
         <Animated.View style={spinStyle}>
           <Disc3 size={160} color="rgba(249,115,22,0.12)" strokeWidth={1} />
@@ -63,7 +64,7 @@ export default function LoginScreen() {
           style={styles.button}
         >
           {loading ? (
-            <ActivityIndicator color="#fff" />
+            <ActivityIndicator color={Colors.white} />
           ) : (
             <Text style={styles.buttonText}>{t("login.signIn")}</Text>
           )}
@@ -84,14 +85,14 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 52,
     fontFamily: "GeistMono-ExtraBold",
-    color: "#111111",
+    color: Colors.gray900,
     marginTop: 28,
     letterSpacing: -1.5,
   },
   tagline: {
     fontSize: 17,
     fontFamily: "Inter-Regular",
-    color: "#9CA3AF",
+    color: Colors.gray400,
     marginTop: 8,
   },
   bottom: {
@@ -99,24 +100,24 @@ const styles = StyleSheet.create({
     paddingBottom: 56,
   },
   button: {
-    backgroundColor: "#F97316",
+    backgroundColor: Colors.accent,
     borderRadius: 16,
     paddingVertical: 18,
     alignItems: "center",
-    shadowColor: "#F97316",
+    shadowColor: Colors.accent,
     shadowOffset: { width: 0, height: 6 },
     shadowOpacity: 0.4,
     shadowRadius: 16,
     elevation: 8,
   },
   buttonText: {
-    color: "#FFFFFF",
+    color: Colors.white,
     fontSize: 17,
     fontFamily: "GeistMono-Bold",
     textAlign: "center",
   },
   error: {
-    color: "#f87171",
+    color: Colors.red400,
     fontSize: 14,
     fontFamily: "Inter-Regular",
     textAlign: "center",

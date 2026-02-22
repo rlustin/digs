@@ -121,7 +121,7 @@ function AuthGate() {
           headerBackTitle: t("common.back"),
           headerTransparent: true,
           headerStyle: { backgroundColor: "transparent" },
-          headerTintColor: "#fff",
+          headerTintColor: Colors.white,
           headerShadowVisible: false,
         }}
       />

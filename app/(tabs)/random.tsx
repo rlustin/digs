@@ -26,6 +26,7 @@ import Animated, {
 
 import { getRandomRelease } from "@/db/queries/releases";
 import { getAllFolders } from "@/db/queries/folders";
+import { Colors } from "@/constants/Colors";
 import { t } from "@/lib/i18n";
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
@@ -232,7 +233,7 @@ export default function RandomScreen() {
         ) : (
           <View style={styles.emptyContainer}>
             <View style={styles.emptyDiceCircle}>
-              <Dices size={56} color="#F97316" strokeWidth={1.2} />
+              <Dices size={56} color={Colors.accent} strokeWidth={1.2} />
             </View>
             <Text style={styles.emptyTitle}>{t("random.feelingLucky")}</Text>
             <Text style={styles.emptyMessage}>
@@ -247,7 +248,7 @@ export default function RandomScreen() {
             <BlurView intensity={70} tint="light" style={styles.buttonBlur}>
               <View style={styles.buttonFill} />
               <View style={styles.buttonContent}>
-                <Dices size={20} color="#fff" strokeWidth={2} />
+                <Dices size={20} color={Colors.white} strokeWidth={2} />
                 <Text style={styles.buttonText}>{t("random.pickRandom")}</Text>
               </View>
             </BlurView>
@@ -289,16 +290,16 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(0,0,0,0.04)",
   },
   chipActive: {
-    backgroundColor: "#F97316",
+    backgroundColor: Colors.accent,
   },
   chipText: {
     fontSize: 13,
     fontFamily: "GeistMono-Regular",
-    color: "#9CA3AF",
+    color: Colors.gray400,
   },
   chipTextActive: {
     fontFamily: "GeistMono-Bold",
-    color: "#FFFFFF",
+    color: Colors.white,
   },
 
   /* ── Release display ── */
@@ -313,7 +314,7 @@ const styles = StyleSheet.create({
   artworkShadow: {
     borderRadius: 16,
     marginBottom: 20,
-    shadowColor: "#000",
+    shadowColor: Colors.black,
     shadowOffset: { width: 0, height: 10 },
     shadowOpacity: 0.25,
     shadowRadius: 20,
@@ -322,20 +323,20 @@ const styles = StyleSheet.create({
   title: {
     fontFamily: "GeistMono-Bold",
     fontSize: 20,
-    color: "#111827",
+    color: Colors.gray900,
     textAlign: "center",
   },
   artist: {
     fontFamily: "Inter-Regular",
     fontSize: 16,
-    color: "#9CA3AF",
+    color: Colors.gray400,
     textAlign: "center",
     marginTop: 4,
   },
   year: {
     fontFamily: "GeistMono-Regular",
     fontSize: 13,
-    color: "#9CA3AF",
+    color: Colors.gray400,
     textAlign: "center",
     marginTop: 4,
   },
@@ -359,12 +360,12 @@ const styles = StyleSheet.create({
   emptyTitle: {
     fontFamily: "GeistMono-Bold",
     fontSize: 22,
-    color: "#111827",
+    color: Colors.gray900,
   },
   emptyMessage: {
     fontFamily: "Inter-Regular",
     fontSize: 15,
-    color: "#9CA3AF",
+    color: Colors.gray400,
     textAlign: "center",
     marginTop: 8,
     lineHeight: 22,
@@ -378,7 +379,7 @@ const styles = StyleSheet.create({
   buttonOuter: {
     borderRadius: 18,
     overflow: "hidden",
-    shadowColor: "#F97316",
+    shadowColor: Colors.accent,
     shadowOffset: { width: 0, height: 6 },
     shadowOpacity: 0.35,
     shadowRadius: 16,
@@ -390,7 +391,7 @@ const styles = StyleSheet.create({
   },
   buttonFill: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: "#F97316",
+    backgroundColor: Colors.accent,
   },
   buttonContent: {
     flexDirection: "row",
@@ -402,6 +403,6 @@ const styles = StyleSheet.create({
   buttonText: {
     fontFamily: "GeistMono-Bold",
     fontSize: 17,
-    color: "#FFFFFF",
+    color: Colors.white,
   },
 });

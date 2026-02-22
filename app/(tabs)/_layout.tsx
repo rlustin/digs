@@ -3,6 +3,7 @@ import { Tabs } from "expo-router";
 
 import { useInitialSync } from "@/hooks/use-sync";
 import { FloatingTabBar } from "@/components/ui/tab-bar";
+import { Colors } from "@/constants/Colors";
 import { t } from "@/lib/i18n";
 
 export const unstable_settings = {
@@ -21,11 +22,11 @@ export default function TabLayout() {
         tabBar={(props) => <FloatingTabBar {...props} />}
         screenOptions={{
           tabBarShowLabel: false,
-          tabBarActiveTintColor: "#F97316",
-          tabBarInactiveTintColor: "#AAAAAA",
+          tabBarActiveTintColor: Colors.accent,
+          tabBarInactiveTintColor: Colors.gray400,
           tabBarStyle: { position: "absolute" },
-          headerStyle: { backgroundColor: "#FFFFFF" },
-          headerTintColor: "#111",
+          headerStyle: { backgroundColor: Colors.white },
+          headerTintColor: Colors.gray900,
         }}
       >
         <Tabs.Screen

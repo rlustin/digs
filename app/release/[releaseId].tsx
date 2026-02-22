@@ -137,7 +137,7 @@ export default function ReleaseDetailScreen() {
             width: coverSize,
             height: coverSize,
             borderRadius: 12,
-            shadowColor: "#000",
+            shadowColor: Colors.black,
             shadowOffset: { width: 0, height: 8 },
             shadowOpacity: 0.3,
             shadowRadius: 16,
