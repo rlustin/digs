@@ -82,13 +82,14 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 52,
-    fontWeight: "800",
+    fontFamily: "GeistMono-ExtraBold",
     color: "#111111",
     marginTop: 28,
     letterSpacing: -1.5,
   },
   tagline: {
     fontSize: 17,
+    fontFamily: "Inter-Regular",
     color: "#9CA3AF",
     marginTop: 8,
   },
@@ -110,12 +111,13 @@ const styles = StyleSheet.create({
   buttonText: {
     color: "#FFFFFF",
     fontSize: 17,
-    fontWeight: "600",
+    fontFamily: "Inter-SemiBold",
     textAlign: "center",
   },
   error: {
     color: "#f87171",
     fontSize: 14,
+    fontFamily: "Inter-Regular",
     textAlign: "center",
     marginTop: 16,
   },

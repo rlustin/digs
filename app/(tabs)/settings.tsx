@@ -81,27 +81,27 @@ export default function SettingsScreen() {
       {/* Profile area */}
       <View className="items-center pt-8 pb-6">
         <View className="w-16 h-16 rounded-full bg-accent items-center justify-center mb-3">
-          <Text className="text-white text-2xl font-bold">{initial}</Text>
+          <Text className="text-white text-2xl font-sans-bold">{initial}</Text>
         </View>
-        <Text className="text-gray-900 text-lg font-semibold">{username}</Text>
-        <Text className="text-gray-400 text-sm">Discogs account</Text>
+        <Text className="text-gray-900 text-lg font-sans-semibold">{username}</Text>
+        <Text className="text-gray-400 text-sm font-sans">Discogs account</Text>
       </View>
 
       {/* SYNC section */}
-      <Text className="text-gray-400 text-xs uppercase tracking-wider mx-4 mb-2 ml-8">
+      <Text className="text-gray-400 text-xs uppercase tracking-wider mx-4 mb-2 ml-8 font-mono">
         Sync
       </Text>
       <View className="mx-4 rounded-2xl bg-white overflow-hidden">
         {/* Last full sync */}
         <View className="flex-row justify-between px-4 py-3 border-b border-gray-100">
-          <Text className="text-gray-500 text-sm">Last full sync</Text>
-          <Text className="text-gray-900 text-sm">{formatDate(lastFullSyncAt)}</Text>
+          <Text className="text-gray-500 text-sm font-sans">Last full sync</Text>
+          <Text className="text-gray-900 text-sm font-sans">{formatDate(lastFullSyncAt)}</Text>
         </View>
 
         {/* Collection status */}
         <View className={`flex-row justify-between px-4 py-3 ${syncActive || detailPending ? "border-b border-gray-100" : ""}`}>
-          <Text className="text-gray-500 text-sm">Collection</Text>
-          <Text className="text-gray-900 text-sm">
+          <Text className="text-gray-500 text-sm font-sans">Collection</Text>
+          <Text className="text-gray-900 text-sm font-sans">
             {isSyncing ? "Syncing..." : "Idle"}
           </Text>
         </View>
@@ -109,8 +109,8 @@ export default function SettingsScreen() {
         {/* Release details */}
         {(detailCounts.total > 0 || !syncActive) && (
           <View className={`flex-row justify-between px-4 py-3 ${syncActive || detailPending ? "border-b border-gray-100" : ""}`}>
-            <Text className="text-gray-500 text-sm">Release details</Text>
-            <Text className="text-gray-900 text-sm">
+            <Text className="text-gray-500 text-sm font-sans">Release details</Text>
+            <Text className="text-gray-900 text-sm font-sans">
               {detailCounts.total === 0
                 ? "No releases"
                 : detailPending
@@ -126,12 +126,12 @@ export default function SettingsScreen() {
             <View className="flex-row items-center justify-between">
               <View className="flex-row items-center flex-1">
                 <RefreshCw size={12} color="#F97316" />
-                <Text className="text-sm font-medium ml-2 text-gray-900" numberOfLines={1}>
+                <Text className="text-sm font-sans-medium ml-2 text-gray-900" numberOfLines={1}>
                   {syncLabel}
                 </Text>
               </View>
               {progress ? (
-                <Text className="text-gray-500 text-xs ml-2">{syncPct}%</Text>
+                <Text className="text-gray-500 text-xs ml-2 font-mono">{syncPct}%</Text>
               ) : null}
             </View>
             {progress && progress.total > 0 && (
@@ -151,7 +151,7 @@ export default function SettingsScreen() {
             <View className="flex-row items-center justify-between">
               <View className="flex-row items-center flex-1">
                 <CircleAlert size={14} color="#f87171" />
-                <Text className="text-sm font-medium ml-2 text-red-600" numberOfLines={1}>
+                <Text className="text-sm font-sans-medium ml-2 text-red-600" numberOfLines={1}>
                   {error}
                 </Text>
               </View>
@@ -168,11 +168,11 @@ export default function SettingsScreen() {
             <View className="flex-row items-center justify-between mb-2">
               <View className="flex-row items-center">
                 <RefreshCw size={12} color="#F97316" />
-                <Text className="text-gray-900 text-sm font-medium ml-2">
+                <Text className="text-gray-900 text-sm font-sans-medium ml-2">
                   Syncing release details
                 </Text>
               </View>
-              <Text className="text-gray-500 text-xs">
+              <Text className="text-gray-500 text-xs font-mono">
                 {Math.round((detailCounts.synced / detailCounts.total) * 100)}%
               </Text>
             </View>
@@ -195,7 +195,7 @@ export default function SettingsScreen() {
         className="mx-4 mt-3 rounded-2xl bg-white overflow-hidden active:opacity-80"
       >
         <Text
-          className={`text-center py-3 text-base font-semibold ${
+          className={`text-center py-3 text-base font-sans-semibold ${
             isSyncing ? "text-gray-300" : "text-accent"
           }`}
         >
@@ -204,12 +204,12 @@ export default function SettingsScreen() {
       </Pressable>
 
       {/* ACCOUNT section */}
-      <Text className="text-gray-400 text-xs uppercase tracking-wider mx-4 mt-8 mb-2 ml-8">
+      <Text className="text-gray-400 text-xs uppercase tracking-wider mx-4 mt-8 mb-2 ml-8 font-mono">
         Account
       </Text>
       <View className="mx-4 rounded-2xl bg-white overflow-hidden">
         <Pressable onPress={handleLogout} className="active:opacity-80">
-          <Text className="text-red-500 text-base font-semibold text-center py-3">
+          <Text className="text-red-500 text-base font-sans-semibold text-center py-3">
             Log out
           </Text>
         </Pressable>

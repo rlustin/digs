@@ -27,19 +27,19 @@ export function CommunityRating({ rating, have, want }: CommunityRatingProps) {
               <Star key={n} size={14} color="#F97316" style={{ marginRight: 2 }} />
             );
           })}
-          <Text className="text-gray-400 text-xs ml-1">
+          <Text className="text-gray-400 text-xs ml-1 font-mono">
             {rating.toFixed(1)}
           </Text>
         </View>
       )}
       {have != null && (
-        <Text className="text-gray-500 text-xs mr-3">
-          {have.toLocaleString()} have
+        <Text className="text-gray-500 text-xs mr-3 font-sans">
+          <Text className="font-mono">{have.toLocaleString()}</Text> have
         </Text>
       )}
       {want != null && (
-        <Text className="text-gray-500 text-xs">
-          {want.toLocaleString()} want
+        <Text className="text-gray-500 text-xs font-sans">
+          <Text className="font-mono">{want.toLocaleString()}</Text> want
         </Text>
       )}
     </View>

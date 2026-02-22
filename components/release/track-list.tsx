@@ -15,7 +15,7 @@ export function TrackList({ tracks }: TrackListProps) {
 
   return (
     <View className="mt-4">
-      <Text className="text-gray-900 text-lg font-semibold mb-2 px-4">
+      <Text className="text-gray-900 text-lg font-sans-semibold mb-2 px-4">
         Tracklist
       </Text>
       {tracks.map((track, i) => (
@@ -23,12 +23,12 @@ export function TrackList({ tracks }: TrackListProps) {
           key={`${track.position}-${i}`}
           className="flex-row items-center px-4 py-2 border-b border-gray-100"
         >
-          <Text className="text-gray-500 text-sm w-10">{track.position}</Text>
-          <Text className="text-gray-900 text-sm flex-1" numberOfLines={1}>
+          <Text className="text-gray-500 text-sm w-10 font-mono">{track.position}</Text>
+          <Text className="text-gray-900 text-sm flex-1 font-sans" numberOfLines={1}>
             {track.title}
           </Text>
           {track.duration ? (
-            <Text className="text-gray-500 text-sm ml-2">
+            <Text className="text-gray-500 text-sm ml-2 font-sans">
               {track.duration}
             </Text>
           ) : null}

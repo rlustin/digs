@@ -97,12 +97,12 @@ export default function CollectionScreen() {
             <FolderCoverCollage thumbnails={thumbnails[item.id] ?? []} />
             <View className="flex-1 ml-4 justify-center">
               <Text
-                className="text-gray-900 text-base font-semibold"
+                className="text-gray-900 text-base font-sans-semibold"
                 numberOfLines={1}
               >
                 {item.name}
               </Text>
-              <Text className="text-gray-400 text-sm mt-1">
+              <Text className="text-gray-400 text-sm mt-1 font-sans">
                 {item.count} {item.count === 1 ? "release" : "releases"}
               </Text>
             </View>

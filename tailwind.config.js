@@ -7,6 +7,15 @@ module.exports = {
       colors: {
         accent: "#F97316",
       },
+      fontFamily: {
+        sans: ["Inter-Regular"],
+        "sans-medium": ["Inter-Medium"],
+        "sans-semibold": ["Inter-SemiBold"],
+        "sans-bold": ["Inter-Bold"],
+        mono: ["GeistMono-Regular"],
+        "mono-bold": ["GeistMono-Bold"],
+        "mono-extrabold": ["GeistMono-ExtraBold"],
+      },
     },
   },
   plugins: [],

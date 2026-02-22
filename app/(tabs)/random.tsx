@@ -48,7 +48,7 @@ export default function RandomScreen() {
         >
           <Text
             className={`text-sm ${
-              selectedFolder === undefined ? "text-white font-semibold" : "text-gray-500"
+              selectedFolder === undefined ? "text-white font-sans-semibold" : "text-gray-500 font-sans"
             }`}
           >
             All
@@ -67,8 +67,8 @@ export default function RandomScreen() {
               <Text
                 className={`text-sm ${
                   selectedFolder === folder.id
-                    ? "text-white font-semibold"
-                    : "text-gray-500"
+                    ? "text-white font-sans-semibold"
+                    : "text-gray-500 font-sans"
                 }`}
               >
                 {folder.name}
@@ -89,20 +89,20 @@ export default function RandomScreen() {
             contentFit="cover"
             transition={300}
           />
-          <Text className="text-gray-900 text-xl font-bold mt-4 text-center">
+          <Text className="text-gray-900 text-xl font-sans-bold mt-4 text-center">
             {release.title}
           </Text>
-          <Text className="text-gray-500 text-base mt-1 text-center">
+          <Text className="text-gray-500 text-base mt-1 text-center font-sans">
             {artistNames}
           </Text>
           {release.year ? (
-            <Text className="text-gray-500 text-sm mt-1">{release.year}</Text>
+            <Text className="text-gray-500 text-sm mt-1 font-sans">{release.year}</Text>
           ) : null}
         </Pressable>
       ) : (
         <View className="items-center justify-center py-20">
           <Dices size={48} color="#D1D5DB" strokeWidth={1.5} />
-          <Text className="text-gray-400 text-lg mt-4">
+          <Text className="text-gray-400 text-lg mt-4 font-sans">
             Tap the button to pick a random release
           </Text>
         </View>
@@ -114,7 +114,7 @@ export default function RandomScreen() {
           onPress={pick}
           className="bg-accent rounded-xl px-8 py-4 w-full items-center active:opacity-80"
         >
-          <Text className="text-white text-lg font-semibold">
+          <Text className="text-white text-lg font-sans-semibold">
             <Dices size={18} color="#fff" /> Pick Random
           </Text>
         </Pressable>

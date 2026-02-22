@@ -36,7 +36,13 @@ const appTheme = {
 
 export default function RootLayout() {
   const [loaded, error] = useFonts({
-    SpaceMono: require("../assets/fonts/SpaceMono-Regular.ttf"),
+    "Inter-Regular": require("../assets/fonts/Inter-Regular.ttf"),
+    "Inter-Medium": require("../assets/fonts/Inter-Medium.ttf"),
+    "Inter-SemiBold": require("../assets/fonts/Inter-SemiBold.ttf"),
+    "Inter-Bold": require("../assets/fonts/Inter-Bold.ttf"),
+    "GeistMono-Regular": require("../assets/fonts/GeistMono-Regular.ttf"),
+    "GeistMono-Bold": require("../assets/fonts/GeistMono-Bold.ttf"),
+    "GeistMono-ExtraBold": require("../assets/fonts/GeistMono-ExtraBold.ttf"),
   });
   const [dbReady, setDbReady] = useState(false);
   const [authChecked, setAuthChecked] = useState(false);

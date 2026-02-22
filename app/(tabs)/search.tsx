@@ -199,6 +199,7 @@ const styles = StyleSheet.create({
   input: {
     flex: 1,
     fontSize: 16,
+    fontFamily: "Inter-Regular",
     color: "#111827",
     paddingVertical: 14,
   },

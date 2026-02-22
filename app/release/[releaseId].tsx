@@ -177,23 +177,23 @@ export default function ReleaseDetailScreen() {
 
       {/* Title block */}
       <View className="px-4 mt-3">
-        <Text className="text-gray-900 text-2xl font-bold">
+        <Text className="text-gray-900 text-2xl font-sans-bold">
           {release.title}
         </Text>
-        <Text className="text-gray-400 text-base mt-1">{artistNames}</Text>
+        <Text className="text-gray-400 text-base mt-1 font-sans">{artistNames}</Text>
         <View className="flex-row items-center mt-2">
           {release.year ? (
-            <Text className="text-gray-500 text-sm">{release.year}</Text>
+            <Text className="text-gray-500 text-sm font-sans">{release.year}</Text>
           ) : null}
           {release.year && formatDesc ? (
-            <Text className="text-gray-600 text-sm mx-2">·</Text>
+            <Text className="text-gray-600 text-sm mx-2 font-sans">·</Text>
           ) : null}
           {formatDesc ? (
-            <Text className="text-gray-500 text-sm">{formatDesc}</Text>
+            <Text className="text-gray-500 text-sm font-sans">{formatDesc}</Text>
           ) : null}
         </View>
         {release.labels && release.labels.length > 0 && (
-          <Text className="text-gray-500 text-sm mt-1">
+          <Text className="text-gray-500 text-sm mt-1 font-sans">
             {release.labels
               .map(
                 (l: { name: string; catno: string }) =>
@@ -203,7 +203,7 @@ export default function ReleaseDetailScreen() {
           </Text>
         )}
         {genresAndStyles ? (
-          <Text className="text-gray-500 text-sm mt-1">{genresAndStyles}</Text>
+          <Text className="text-gray-500 text-sm mt-1 font-sans">{genresAndStyles}</Text>
         ) : null}
 
         {/* Folder badge + community rating on same row */}
@@ -213,7 +213,7 @@ export default function ReleaseDetailScreen() {
               onPress={() => router.push(`/(tabs)/collection/${folder.id}`)}
               className="bg-accent rounded-full px-3 py-1 mr-3 active:opacity-70"
             >
-              <Text className="text-white text-sm font-semibold">
+              <Text className="text-white text-sm font-sans-semibold">
                 {folder.name}
               </Text>
             </Pressable>
@@ -230,7 +230,7 @@ export default function ReleaseDetailScreen() {
       {fetchingDetail && (
         <View className="flex-row items-center justify-center mt-4">
           <ActivityIndicator color="#F97316" size="small" />
-          <Text className="text-gray-400 text-sm ml-2">
+          <Text className="text-gray-400 text-sm ml-2 font-sans">
             Loading details...
           </Text>
         </View>

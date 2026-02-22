@@ -39,7 +39,7 @@ export function SyncStatusCard() {
               <RefreshCw size={12} color="#F97316" />
             )}
             <Text
-              className={`text-sm font-medium ml-2 ${
+              className={`text-sm font-sans-medium ml-2 ${
                 isError ? "text-red-600" : "text-gray-900"
               }`}
               numberOfLines={1}
@@ -53,7 +53,7 @@ export function SyncStatusCard() {
               <X size={14} color="#9CA3AF" />
             </Pressable>
           ) : progress ? (
-            <Text className="text-gray-500 text-xs ml-2">{pct}%</Text>
+            <Text className="text-gray-500 text-xs ml-2 font-mono">{pct}%</Text>
           ) : null}
         </View>
 
