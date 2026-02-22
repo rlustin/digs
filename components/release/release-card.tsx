@@ -2,6 +2,7 @@ import { View, Text, Pressable } from "react-native";
 import { Image } from "expo-image";
 import { useRouter } from "expo-router";
 import { memo } from "react";
+import { Colors } from "@/constants/Colors";
 
 interface ReleaseCardProps {
   releaseId: number;
@@ -33,7 +34,7 @@ export const ReleaseCard = memo(function ReleaseCard({
     >
       <View
         style={{
-          shadowColor: "#000",
+          shadowColor: Colors.black,
           shadowOffset: { width: 0, height: 2 },
           shadowOpacity: 0.15,
           shadowRadius: 6,

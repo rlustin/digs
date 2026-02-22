@@ -22,6 +22,7 @@ import { getReleaseByReleaseId } from "@/db/queries/releases";
 import { releases } from "@/db/schema";
 import { fetchReleaseDetail } from "@/lib/discogs/endpoints";
 import { mapReleaseDetailToRow } from "@/lib/sync/detail-mapper";
+import { Colors } from "@/constants/Colors";
 import { eq } from "drizzle-orm";
 import { t } from "@/lib/i18n";
 
@@ -215,7 +216,7 @@ export default function ReleaseDetailScreen() {
       {/* Loading indicator for on-demand detail fetch */}
       {fetchingDetail && (
         <View className="flex-row items-center justify-center mt-4">
-          <ActivityIndicator color="#F97316" size="small" />
+          <ActivityIndicator color={Colors.accent} size="small" />
           <Text className="text-gray-400 text-sm ml-2 font-sans">
             {t("release.loadingDetails")}
           </Text>

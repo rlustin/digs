@@ -13,6 +13,7 @@ import { queryClient } from "@/lib/query-client";
 import { runMigrations } from "@/db/migrations";
 import { restoreSession } from "@/lib/discogs/oauth";
 import { useAuthStore } from "@/stores/auth-store";
+import { Colors } from "@/constants/Colors";
 import { t } from "@/lib/i18n";
 
 export { ErrorBoundary } from "expo-router";
@@ -28,10 +29,10 @@ const appTheme = {
   ...DefaultTheme,
   colors: {
     ...DefaultTheme.colors,
-    primary: "#F97316",
-    background: "#FFFFFF",
-    card: "#FFFFFF",
-    border: "#E5E7EB",
+    primary: Colors.accent,
+    background: Colors.white,
+    card: Colors.white,
+    border: Colors.gray200,
   },
 };
 

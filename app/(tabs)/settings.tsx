@@ -11,6 +11,7 @@ import { runFullSync } from "@/lib/sync/engine";
 import { clearAllReleases, getDetailSyncCounts } from "@/db/queries/releases";
 import { clearAllFolders } from "@/db/queries/folders";
 import { queryClient } from "@/lib/query-client";
+import { Colors } from "@/constants/Colors";
 import { t } from "@/lib/i18n";
 
 const syncPhaseKeys: Record<string, string> = {
@@ -135,7 +136,7 @@ export default function SettingsScreen() {
           <View className={`px-4 py-3 ${detailPending ? "border-b border-gray-100" : ""}`}>
             <View className="flex-row items-center justify-between">
               <View className="flex-row items-center flex-1">
-                <RefreshCw size={12} color="#F97316" />
+                <RefreshCw size={12} color={Colors.accent} />
                 <Text className="text-sm font-sans-medium ml-2 text-gray-900" numberOfLines={1}>
                   {syncLabel}
                 </Text>
@@ -160,13 +161,13 @@ export default function SettingsScreen() {
           <View className="px-4 py-3 bg-red-50">
             <View className="flex-row items-center justify-between">
               <View className="flex-row items-center flex-1">
-                <CircleAlert size={14} color="#f87171" />
+                <CircleAlert size={14} color={Colors.red400} />
                 <Text className="text-sm font-sans-medium ml-2 text-red-600" numberOfLines={1}>
                   {error}
                 </Text>
               </View>
               <Pressable onPress={reset} hitSlop={8}>
-                <X size={14} color="#9CA3AF" />
+                <X size={14} color={Colors.gray400} />
               </Pressable>
             </View>
           </View>
@@ -177,7 +178,7 @@ export default function SettingsScreen() {
           <View className="px-4 py-3">
             <View className="flex-row items-center justify-between mb-2">
               <View className="flex-row items-center">
-                <RefreshCw size={12} color="#F97316" />
+                <RefreshCw size={12} color={Colors.accent} />
                 <Text className="text-gray-900 text-sm font-sans-medium ml-2">
                   {t("settings.syncingReleaseDetails")}
                 </Text>

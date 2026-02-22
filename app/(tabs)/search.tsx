@@ -17,6 +17,7 @@ import { searchReleases } from "@/db/queries/releases";
 import { ReleaseCard } from "@/components/release/release-card";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Search } from "lucide-react-native";
+import { Colors } from "@/constants/Colors";
 import { t } from "@/lib/i18n";
 
 const ITEM_HEIGHT = 104;
@@ -87,7 +88,7 @@ export default function SearchScreen() {
                 onFocus={handleFocus}
                 onBlur={handleBlur}
                 placeholder={t("search.placeholder")}
-                placeholderTextColor="#9CA3AF"
+                placeholderTextColor={Colors.gray400}
                 autoCorrect={false}
                 autoCapitalize="none"
                 returnKeyType="search"
@@ -151,10 +152,10 @@ function AnimatedSearchIcon({
   return (
     <View style={{ width: size, height: size, marginRight: 10 }}>
       <Animated.View style={unfocusedStyle}>
-        <Search size={size} color="#9CA3AF" />
+        <Search size={size} color={Colors.gray400} />
       </Animated.View>
       <Animated.View style={focusedStyle}>
-        <Search size={size} color="#F97316" />
+        <Search size={size} color={Colors.accent} />
       </Animated.View>
     </View>
   );
@@ -171,7 +172,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "rgba(0,0,0,0.06)",
     overflow: "hidden",
-    shadowColor: "#F97316",
+    shadowColor: Colors.accent,
     shadowOffset: { width: 0, height: 2 },
     shadowRadius: 8,
     shadowOpacity: 0,
@@ -194,7 +195,7 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: 16,
     fontFamily: "Inter-Regular",
-    color: "#111827",
+    color: Colors.gray900,
     paddingVertical: 14,
   },
 });

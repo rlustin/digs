@@ -1,6 +1,7 @@
 import { View, Text, Pressable } from "react-native";
 import { CircleAlert, RefreshCw, X } from "lucide-react-native";
 import { useSyncStore } from "@/stores/sync-store";
+import { Colors } from "@/constants/Colors";
 import { t } from "@/lib/i18n";
 
 const syncPhaseKeys: Record<string, string> = {
@@ -35,9 +36,9 @@ export function SyncStatusCard() {
         <View className="flex-row items-center justify-between">
           <View className="flex-row items-center flex-1">
             {isError ? (
-              <CircleAlert size={14} color="#f87171" />
+              <CircleAlert size={14} color={Colors.red400} />
             ) : (
-              <RefreshCw size={12} color="#F97316" />
+              <RefreshCw size={12} color={Colors.accent} />
             )}
             <Text
               className={`text-sm font-sans-medium ml-2 ${
@@ -51,7 +52,7 @@ export function SyncStatusCard() {
 
           {isError ? (
             <Pressable onPress={reset} hitSlop={8}>
-              <X size={14} color="#9CA3AF" />
+              <X size={14} color={Colors.gray400} />
             </Pressable>
           ) : progress ? (
             <Text className="text-gray-500 text-xs ml-2 font-mono">{pct}%</Text>

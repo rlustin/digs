@@ -14,6 +14,7 @@ import { FolderCoverCollage } from "@/components/collection/folder-cover-collage
 import { useAuthStore } from "@/stores/auth-store";
 import { runFullSync } from "@/lib/sync/engine";
 import { useSyncStore } from "@/stores/sync-store";
+import { Colors } from "@/constants/Colors";
 import { t } from "@/lib/i18n";
 
 export default function CollectionScreen() {
@@ -88,7 +89,7 @@ export default function CollectionScreen() {
           <RefreshControl
             refreshing={isSyncing}
             onRefresh={onRefresh}
-            tintColor="#F97316"
+            tintColor={Colors.accent}
           />
         }
         renderItem={({ item }) => (
@@ -108,7 +109,7 @@ export default function CollectionScreen() {
                 {item.count} {t("stats.release", { count: item.count })}
               </Text>
             </View>
-            <ChevronRight size={18} color="#D1D5DB" />
+            <ChevronRight size={18} color={Colors.gray300} />
           </Pressable>
         )}
       />
