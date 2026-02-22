@@ -1,32 +1,140 @@
-import { View, Text, Pressable, ScrollView } from "react-native";
+import {
+  View,
+  Text,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  useWindowDimensions,
+  PanResponder,
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
 import { Image } from "expo-image";
 import { useRouter } from "expo-router";
-import { useQuery } from "@tanstack/react-query";
+import { keepPreviousData, useQuery } from "@tanstack/react-query";
+import { BlurView } from "expo-blur";
 import { Dices } from "lucide-react-native";
+import Animated, {
+  useSharedValue,
+  useAnimatedStyle,
+  withTiming,
+  withSequence,
+  withSpring,
+  Easing,
+  runOnJS,
+} from "react-native-reanimated";
 
 import { getRandomRelease } from "@/db/queries/releases";
 import { getAllFolders } from "@/db/queries/folders";
 
+const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
+const SWIPE_THRESHOLD = 80;
+
 export default function RandomScreen() {
   const router = useRouter();
+  const { width: screenWidth } = useWindowDimensions();
   const [selectedFolder, setSelectedFolder] = useState<number | undefined>();
   const [pickCount, setPickCount] = useState(0);
+
+  const coverSize = screenWidth - 48;
+
+  const translateX = useSharedValue(0);
+  const cardScale = useSharedValue(1);
+  const cardOpacity = useSharedValue(1);
 
   const { data: folders = [] } = useQuery({
     queryKey: ["folders"],
     queryFn: getAllFolders,
   });
 
-  const { data: release } = useQuery({
+  const { data: release, dataUpdatedAt } = useQuery({
     queryKey: ["random", selectedFolder, pickCount],
     queryFn: () => getRandomRelease(selectedFolder),
+    placeholderData: keepPreviousData,
   });
 
-  const pick = useCallback(() => {
+  // Reveal new release only after data has actually changed
+  const pendingReveal = useRef(false);
+  useEffect(() => {
+    if (pendingReveal.current) {
+      pendingReveal.current = false;
+      cardOpacity.value = withTiming(1, { duration: 100 }, () => {
+        cardScale.value = withTiming(1, { duration: 300 });
+      });
+    }
+  }, [dataUpdatedAt, cardOpacity, cardScale]);
+
+  // ── Swipe gesture ──
+
+  const screenWidthRef = useRef(screenWidth);
+  screenWidthRef.current = screenWidth;
+
+  const onSwipeOff = useCallback(
+    (direction: number) => {
+      pendingReveal.current = true;
+      setPickCount((c) => c + 1);
+      const sw = screenWidthRef.current;
+      translateX.value = -direction * sw;
+      translateX.value = withTiming(0, { duration: 300 });
+      cardOpacity.value = 0;
+      cardScale.value = 0.95;
+    },
+    [translateX, cardOpacity, cardScale],
+  );
+
+  const panResponder = useRef(
+    PanResponder.create({
+      onMoveShouldSetPanResponder: (_, gs) =>
+        Math.abs(gs.dx) > Math.abs(gs.dy) * 1.5 && Math.abs(gs.dx) > 12,
+      onPanResponderTerminationRequest: () => false,
+      onPanResponderMove: (_, gs) => {
+        translateX.value = gs.dx;
+      },
+      onPanResponderRelease: (_, gs) => {
+        const sw = screenWidthRef.current;
+        if (Math.abs(gs.dx) > SWIPE_THRESHOLD || Math.abs(gs.vx) > 0.5) {
+          const dir = gs.dx > 0 ? 1 : -1;
+          translateX.value = withTiming(
+            dir * sw,
+            { duration: 200, easing: Easing.in(Easing.ease) },
+            (finished) => {
+              if (finished) runOnJS(onSwipeOff)(dir);
+            },
+          );
+        } else {
+          translateX.value = withSpring(0, { damping: 20, stiffness: 300 });
+        }
+      },
+    }),
+  ).current;
+
+  // ── Button press ──
+
+  const incrementPick = useCallback(() => {
     setPickCount((c) => c + 1);
   }, []);
+
+  const startPick = useCallback(() => {
+    pendingReveal.current = true;
+    incrementPick();
+  }, [incrementPick]);
+
+  const pick = useCallback(() => {
+    cardScale.value = withTiming(0.96, { duration: 120 });
+    cardOpacity.value = withTiming(0, { duration: 120 }, () => {
+      runOnJS(startPick)();
+    });
+  }, [cardScale, cardOpacity, startPick]);
+
+  // ── Animated styles ──
+
+  const cardAnimStyle = useAnimatedStyle(() => ({
+    transform: [
+      { translateX: translateX.value },
+      { scale: cardScale.value },
+    ],
+    opacity: cardOpacity.value,
+  }));
 
   const artistNames =
     release?.artists?.map((a: { name: string }) => a.name).join(", ") ??
@@ -34,94 +142,266 @@ export default function RandomScreen() {
 
   return (
     <SafeAreaView className="flex-1 bg-white" edges={["top"]}>
-    <ScrollView className="flex-1" contentContainerClassName="pb-24">
-      {/* Folder chips */}
-      <ScrollView
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        contentContainerStyle={{ paddingHorizontal: 16, gap: 8 }}
-        className="mt-4 mb-4"
-      >
-        <Pressable
-          onPress={() => setSelectedFolder(undefined)}
-          className={`px-3 py-1.5 rounded-full ${
-            selectedFolder === undefined ? "bg-accent" : "bg-gray-100"
-          }`}
-        >
-          <Text
-            className={`text-sm ${
-              selectedFolder === undefined ? "text-white font-mono-bold" : "text-gray-500 font-mono"
-            }`}
-          >
-            All
-          </Text>
-        </Pressable>
-        {folders
-          .filter((f) => f.id !== 0)
-          .map((folder) => (
-            <Pressable
-              key={folder.id}
-              onPress={() => setSelectedFolder(folder.id)}
-              className={`px-3 py-1.5 rounded-full ${
-                selectedFolder === folder.id ? "bg-accent" : "bg-gray-100"
-              }`}
+      <ScrollView className="flex-1" contentContainerClassName="pb-24">
+        {/* Folder filter chips — frosted glass pills */}
+        <View style={styles.chipBar}>
+          <BlurView intensity={50} tint="light" style={styles.chipBlur}>
+            <View style={styles.chipBackdrop} />
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={styles.chipScroll}
             >
-              <Text
-                className={`text-sm ${
-                  selectedFolder === folder.id
-                    ? "text-white font-mono-bold"
-                    : "text-gray-500 font-mono"
-                }`}
+              <Pressable
+                onPress={() => setSelectedFolder(undefined)}
+                style={[
+                  styles.chip,
+                  selectedFolder === undefined && styles.chipActive,
+                ]}
               >
-                {folder.name}
-              </Text>
-            </Pressable>
-          ))}
-      </ScrollView>
-
-      {/* Release display */}
-      {release ? (
-        <Pressable
-          onPress={() => router.push(`/release/${release.releaseId}`)}
-          className="items-center px-4"
-        >
-          <Image
-            source={{ uri: release.coverUrl || release.thumbUrl || undefined }}
-            style={{ width: 300, height: 300, borderRadius: 12 }}
-            contentFit="cover"
-            transition={300}
-          />
-          <Text className="text-gray-900 text-xl font-mono-bold mt-4 text-center">
-            {release.title}
-          </Text>
-          <Text className="text-gray-500 text-base mt-1 text-center font-sans">
-            {artistNames}
-          </Text>
-          {release.year ? (
-            <Text className="text-gray-500 text-sm mt-1 font-mono">{release.year}</Text>
-          ) : null}
-        </Pressable>
-      ) : (
-        <View className="items-center justify-center py-20">
-          <Dices size={48} color="#D1D5DB" strokeWidth={1.5} />
-          <Text className="text-gray-400 text-lg mt-4 font-sans">
-            Tap the button to pick a random release
-          </Text>
+                <Text
+                  style={[
+                    styles.chipText,
+                    selectedFolder === undefined && styles.chipTextActive,
+                  ]}
+                >
+                  All
+                </Text>
+              </Pressable>
+              {folders
+                .filter((f) => f.id !== 0)
+                .map((folder) => (
+                  <Pressable
+                    key={folder.id}
+                    onPress={() => setSelectedFolder(folder.id)}
+                    style={[
+                      styles.chip,
+                      selectedFolder === folder.id && styles.chipActive,
+                    ]}
+                  >
+                    <Text
+                      style={[
+                        styles.chipText,
+                        selectedFolder === folder.id && styles.chipTextActive,
+                      ]}
+                    >
+                      {folder.name}
+                    </Text>
+                  </Pressable>
+                ))}
+            </ScrollView>
+          </BlurView>
         </View>
-      )}
 
-      {/* Pick button */}
-      <View className="items-center mt-8 px-4">
-        <Pressable
-          onPress={pick}
-          className="bg-accent rounded-xl px-8 py-4 w-full items-center active:opacity-80"
-        >
-          <Text className="text-white text-lg font-mono-bold">
-            <Dices size={18} color="#fff" /> Pick Random
-          </Text>
-        </Pressable>
-      </View>
-    </ScrollView>
+        {/* Release display */}
+        {release ? (
+          <View {...panResponder.panHandlers}>
+            <Animated.View style={[styles.releaseContainer, cardAnimStyle]}>
+              <Pressable
+                onPress={() => router.push(`/release/${release.releaseId}`)}
+                style={styles.releaseInner}
+              >
+                <View
+                  style={[
+                    styles.artworkShadow,
+                    { width: coverSize, height: coverSize },
+                  ]}
+                >
+                  <Image
+                    source={{
+                      uri: release.coverUrl || release.thumbUrl || undefined,
+                    }}
+                    style={{
+                      width: coverSize,
+                      height: coverSize,
+                      borderRadius: 16,
+                    }}
+                    contentFit="cover"
+                    transition={300}
+                  />
+                </View>
+                <Text style={styles.title}>{release.title}</Text>
+                <Text style={styles.artist}>{artistNames}</Text>
+                {release.year ? (
+                  <Text style={styles.year}>{release.year}</Text>
+                ) : null}
+              </Pressable>
+            </Animated.View>
+          </View>
+        ) : (
+          <View style={styles.emptyContainer}>
+            <View style={styles.emptyDiceCircle}>
+              <Dices size={56} color="#F97316" strokeWidth={1.2} />
+            </View>
+            <Text style={styles.emptyTitle}>Feeling lucky?</Text>
+            <Text style={styles.emptyMessage}>
+              Hit the button below to discover{"\n"}something from your
+              collection
+            </Text>
+          </View>
+        )}
+
+        {/* Pick button */}
+        <View style={styles.buttonWrapper}>
+          <AnimatedPressable onPress={pick} style={styles.buttonOuter}>
+            <BlurView intensity={70} tint="light" style={styles.buttonBlur}>
+              <View style={styles.buttonFill} />
+              <View style={styles.buttonContent}>
+                <Dices size={20} color="#fff" strokeWidth={2} />
+                <Text style={styles.buttonText}>Pick Random</Text>
+              </View>
+            </BlurView>
+          </AnimatedPressable>
+        </View>
+      </ScrollView>
     </SafeAreaView>
   );
 }
+
+const styles = StyleSheet.create({
+  /* ── Folder chips ── */
+  chipBar: {
+    marginHorizontal: 16,
+    marginTop: 12,
+    marginBottom: 8,
+    borderRadius: 20,
+    overflow: "hidden",
+    borderWidth: 1,
+    borderColor: "rgba(0,0,0,0.05)",
+  },
+  chipBlur: {
+    borderRadius: 20,
+    overflow: "hidden",
+  },
+  chipBackdrop: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: "rgba(255,255,255,0.7)",
+  },
+  chipScroll: {
+    paddingHorizontal: 6,
+    paddingVertical: 6,
+    gap: 6,
+  },
+  chip: {
+    paddingHorizontal: 14,
+    paddingVertical: 7,
+    borderRadius: 14,
+    backgroundColor: "rgba(0,0,0,0.04)",
+  },
+  chipActive: {
+    backgroundColor: "#F97316",
+  },
+  chipText: {
+    fontSize: 13,
+    fontFamily: "GeistMono-Regular",
+    color: "#9CA3AF",
+  },
+  chipTextActive: {
+    fontFamily: "GeistMono-Bold",
+    color: "#FFFFFF",
+  },
+
+  /* ── Release display ── */
+  releaseContainer: {
+    alignItems: "center",
+    paddingHorizontal: 24,
+    paddingTop: 16,
+  },
+  releaseInner: {
+    alignItems: "center",
+  },
+  artworkShadow: {
+    borderRadius: 16,
+    marginBottom: 20,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.25,
+    shadowRadius: 20,
+    elevation: 12,
+  },
+  title: {
+    fontFamily: "GeistMono-Bold",
+    fontSize: 20,
+    color: "#111827",
+    textAlign: "center",
+  },
+  artist: {
+    fontFamily: "Inter-Regular",
+    fontSize: 16,
+    color: "#9CA3AF",
+    textAlign: "center",
+    marginTop: 4,
+  },
+  year: {
+    fontFamily: "GeistMono-Regular",
+    fontSize: 13,
+    color: "#9CA3AF",
+    textAlign: "center",
+    marginTop: 4,
+  },
+
+  /* ── Empty state ── */
+  emptyContainer: {
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: 72,
+    paddingHorizontal: 32,
+  },
+  emptyDiceCircle: {
+    width: 100,
+    height: 100,
+    borderRadius: 50,
+    backgroundColor: "rgba(249,115,22,0.08)",
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 20,
+  },
+  emptyTitle: {
+    fontFamily: "GeistMono-Bold",
+    fontSize: 22,
+    color: "#111827",
+  },
+  emptyMessage: {
+    fontFamily: "Inter-Regular",
+    fontSize: 15,
+    color: "#9CA3AF",
+    textAlign: "center",
+    marginTop: 8,
+    lineHeight: 22,
+  },
+
+  /* ── Pick button ── */
+  buttonWrapper: {
+    paddingHorizontal: 24,
+    marginTop: 28,
+  },
+  buttonOuter: {
+    borderRadius: 18,
+    overflow: "hidden",
+    shadowColor: "#F97316",
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.35,
+    shadowRadius: 16,
+    elevation: 8,
+  },
+  buttonBlur: {
+    borderRadius: 18,
+    overflow: "hidden",
+  },
+  buttonFill: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: "#F97316",
+  },
+  buttonContent: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: 16,
+    gap: 10,
+  },
+  buttonText: {
+    fontFamily: "GeistMono-Bold",
+    fontSize: 17,
+    color: "#FFFFFF",
+  },
+});
