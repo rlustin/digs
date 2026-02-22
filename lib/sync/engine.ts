@@ -48,8 +48,8 @@ export async function runDetailSyncLoop() {
 
       // Pause between batches to respect rate limits
       await new Promise((r) => setTimeout(r, 12000));
-    } catch {
-      // Silently stop on error during background detail sync
+    } catch (err) {
+      console.warn("Detail sync loop stopped:", err);
       break;
     }
   }

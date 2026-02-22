@@ -1,3 +1,9 @@
+import { runFullSync, runDetailSyncLoop, runDetailSyncBatch } from "../engine";
+import { syncFolders } from "../folder-sync";
+import { syncBasicReleases, syncReleaseDetails } from "../release-sync";
+import { useSyncStore } from "@/stores/sync-store";
+import { queryClient } from "@/lib/query-client";
+
 jest.mock("../folder-sync", () => ({
   syncFolders: jest.fn().mockResolvedValue(undefined),
 }));
@@ -25,12 +31,6 @@ jest.mock("@/lib/query-client", () => ({
     invalidateQueries: jest.fn(),
   },
 }));
-
-import { runFullSync, runDetailSyncLoop, runDetailSyncBatch } from "../engine";
-import { syncFolders } from "../folder-sync";
-import { syncBasicReleases, syncReleaseDetails } from "../release-sync";
-import { useSyncStore } from "@/stores/sync-store";
-import { queryClient } from "@/lib/query-client";
 
 const mockSyncFolders = syncFolders as jest.MockedFunction<typeof syncFolders>;
 const mockSyncBasicReleases = syncBasicReleases as jest.MockedFunction<typeof syncBasicReleases>;
@@ -144,11 +144,17 @@ describe("runDetailSyncLoop", () => {
     expect(mockSyncReleaseDetails).toHaveBeenCalledTimes(2);
   });
 
-  it("breaks silently on error", async () => {
+  it("logs and breaks on error", async () => {
+    const warnSpy = jest.spyOn(console, "warn").mockImplementation(() => {});
     mockSyncReleaseDetails.mockRejectedValue(new Error("oops"));
 
-    // Should not throw
     await expect(runDetailSyncLoop()).resolves.toBeUndefined();
+
+    expect(warnSpy).toHaveBeenCalledWith(
+      "Detail sync loop stopped:",
+      expect.any(Error)
+    );
+    warnSpy.mockRestore();
   });
 });
 
