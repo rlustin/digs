@@ -1,13 +1,15 @@
 .DEFAULT_GOAL := help
 
-.PHONY: help install start test lint lintfix
+.PHONY: help setup start test lint lintfix
 
 help: ## Show this help
 	@grep -E '^[a-zA-Z_-]+:.*##' $(MAKEFILE_LIST) | awk -F ':.*## ' '{printf "  \033[36m%-10s\033[0m %s\n", $$1, $$2}'
 
-install: ## Install dependencies
+setup: ## Install dependencies and git hooks
 	@echo "Installing dependencies..."
 	npm install
+	@echo "Installing git hooks..."
+	npx lefthook install
 
 start: ## Start the Expo dev server
 	npx expo start
