@@ -1,4 +1,3 @@
-import { eq } from "drizzle-orm";
 import { db, expo } from "@/db/client";
 import { folders } from "@/db/schema";
 import { fetchFolders } from "@/lib/discogs/endpoints";
@@ -15,22 +14,13 @@ export async function syncFolders(username: string) {
 
   expo.withTransactionSync(() => {
     for (const folder of response.folders) {
-      const existing = db
-        .select()
-        .from(folders)
-        .where(eq(folders.id, folder.id))
-        .get();
-
-      if (existing) {
-        db.update(folders)
-          .set({ name: folder.name, count: folder.count })
-          .where(eq(folders.id, folder.id))
-          .run();
-      } else {
-        db.insert(folders)
-          .values({ id: folder.id, name: folder.name, count: folder.count })
-          .run();
-      }
+      db.insert(folders)
+        .values({ id: folder.id, name: folder.name, count: folder.count })
+        .onConflictDoUpdate({
+          target: folders.id,
+          set: { name: folder.name, count: folder.count },
+        })
+        .run();
     }
   });
 }

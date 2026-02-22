@@ -1,16 +1,16 @@
 import foldersFixture from "@/__fixtures__/folders.json";
 
+import { syncFolders } from "../folder-sync";
+import { fetchFolders } from "@/lib/discogs/endpoints";
+import { useSyncStore } from "@/stores/sync-store";
+import { db } from "@/db/client";
+
 jest.mock("@/db/client", () => {
   const mockDb = {
-    select: jest.fn().mockReturnThis(),
-    from: jest.fn().mockReturnThis(),
-    where: jest.fn().mockReturnThis(),
-    get: jest.fn(),
     insert: jest.fn().mockReturnThis(),
     values: jest.fn().mockReturnThis(),
+    onConflictDoUpdate: jest.fn().mockReturnThis(),
     run: jest.fn(),
-    update: jest.fn().mockReturnThis(),
-    set: jest.fn().mockReturnThis(),
   };
   return {
     db: mockDb,
@@ -37,11 +37,6 @@ jest.mock("@/stores/sync-store", () => {
   };
 });
 
-import { syncFolders } from "../folder-sync";
-import { fetchFolders } from "@/lib/discogs/endpoints";
-import { useSyncStore } from "@/stores/sync-store";
-import { db } from "@/db/client";
-
 const mockFetchFolders = fetchFolders as jest.MockedFunction<typeof fetchFolders>;
 const mockDb = db as any;
 
@@ -50,13 +45,9 @@ describe("syncFolders", () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    mockDb.select.mockReturnThis();
-    mockDb.from.mockReturnThis();
-    mockDb.where.mockReturnThis();
     mockDb.insert.mockReturnThis();
     mockDb.values.mockReturnThis();
-    mockDb.update.mockReturnThis();
-    mockDb.set.mockReturnThis();
+    mockDb.onConflictDoUpdate.mockReturnThis();
   });
 
   it("sets sync phase to folders", async () => {
@@ -67,8 +58,7 @@ describe("syncFolders", () => {
     expect(store.setPhase).toHaveBeenCalledWith("folders");
   });
 
-  it("inserts new Jungle folder when no existing row", async () => {
-    mockDb.get.mockReturnValue(null);
+  it("upserts Jungle folder via onConflictDoUpdate", async () => {
     const jungleFolder = foldersFixture.folders.find((f) => f.name === "Jungle")!;
     mockFetchFolders.mockResolvedValue({
       folders: [jungleFolder],
@@ -82,23 +72,33 @@ describe("syncFolders", () => {
       name: "Jungle",
       count: 29,
     });
+    expect(mockDb.onConflictDoUpdate).toHaveBeenCalledWith({
+      target: "id",
+      set: { name: "Jungle", count: 29 },
+    });
   });
 
-  it("updates existing Ambient folder when row exists", async () => {
+  it("upserts Ambient folder via onConflictDoUpdate", async () => {
     const ambientFolder = foldersFixture.folders.find((f) => f.name === "Ambient")!;
-    mockDb.get.mockReturnValue({ id: 9182196, name: "Ambient", count: 10 });
     mockFetchFolders.mockResolvedValue({
       folders: [ambientFolder],
     });
 
     await syncFolders("rlustin");
 
-    expect(mockDb.update).toHaveBeenCalled();
-    expect(mockDb.set).toHaveBeenCalledWith({ name: "Ambient", count: 15 });
+    expect(mockDb.insert).toHaveBeenCalled();
+    expect(mockDb.values).toHaveBeenCalledWith({
+      id: 9182196,
+      name: "Ambient",
+      count: 15,
+    });
+    expect(mockDb.onConflictDoUpdate).toHaveBeenCalledWith({
+      target: "id",
+      set: { name: "Ambient", count: 15 },
+    });
   });
 
   it("syncs all 30 real folders from fixture", async () => {
-    mockDb.get.mockReturnValue(null);
     mockFetchFolders.mockResolvedValue(foldersFixture as any);
 
     await syncFolders("rlustin");

@@ -2,18 +2,23 @@ import type { CollectionRelease } from "@/lib/discogs/types";
 import collectionFixture from "@/__fixtures__/collection-releases.json";
 import releaseDetailFixture from "@/__fixtures__/release-detail.json";
 
+import { mapBasicRelease, syncBasicReleases, syncReleaseDetails } from "../release-sync";
+import { getAllFolders } from "@/db/queries/folders";
+import { getReleasesNeedingDetailSync } from "@/db/queries/releases";
+import { fetchReleasesInFolder, fetchReleaseDetail } from "@/lib/discogs/endpoints";
+import { useSyncStore } from "@/stores/sync-store";
+import { db } from "@/db/client";
+
 // ── Mocks ──────────────────────────────────────────────────
 jest.mock("@/db/client", () => ({
   db: {
-    select: jest.fn().mockReturnThis(),
-    from: jest.fn().mockReturnThis(),
-    where: jest.fn().mockReturnThis(),
-    get: jest.fn().mockReturnValue(null),
     insert: jest.fn().mockReturnThis(),
     values: jest.fn().mockReturnThis(),
+    onConflictDoUpdate: jest.fn().mockReturnThis(),
     run: jest.fn(),
     update: jest.fn().mockReturnThis(),
     set: jest.fn().mockReturnThis(),
+    where: jest.fn().mockReturnThis(),
   },
   expo: {
     withTransactionSync: jest.fn((fn: () => void) => fn()),
@@ -46,13 +51,6 @@ jest.mock("@/stores/sync-store", () => {
     useSyncStore: { getState: () => state },
   };
 });
-
-import { mapBasicRelease, syncBasicReleases, syncReleaseDetails } from "../release-sync";
-import { getAllFolders } from "@/db/queries/folders";
-import { getReleasesNeedingDetailSync } from "@/db/queries/releases";
-import { fetchReleasesInFolder, fetchReleaseDetail } from "@/lib/discogs/endpoints";
-import { useSyncStore } from "@/stores/sync-store";
-import { db } from "@/db/client";
 
 const mockGetAllFolders = getAllFolders as jest.MockedFunction<typeof getAllFolders>;
 const mockGetReleasesNeedingDetailSync = getReleasesNeedingDetailSync as jest.MockedFunction<typeof getReleasesNeedingDetailSync>;

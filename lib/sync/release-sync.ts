@@ -45,20 +45,13 @@ function upsertReleasePage(
   expo.withTransactionSync(() => {
     for (const r of releasePage) {
       const row = mapBasicRelease(r, folderId);
-      const existing = db
-        .select()
-        .from(releases)
-        .where(eq(releases.instanceId, r.instance_id))
-        .get();
-
-      if (existing) {
-        db.update(releases)
-          .set(row)
-          .where(eq(releases.instanceId, r.instance_id))
-          .run();
-      } else {
-        db.insert(releases).values(row).run();
-      }
+      db.insert(releases)
+        .values(row)
+        .onConflictDoUpdate({
+          target: releases.instanceId,
+          set: row,
+        })
+        .run();
     }
   });
 }
