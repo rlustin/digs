@@ -34,18 +34,23 @@ export function FloatingTabBar({
                 target: route.key,
                 canPreventDefault: true,
               });
-              if (!event.defaultPrevented) {
-                if (isFocused) {
+
+              if (isFocused) {
+                // Prevent the native stack's built-in tabPress listener
+                // from dispatching an unhandled popToTop in the next rAF
+                event.preventDefault();
+                const nestedState = state.routes[index].state;
+                if (nestedState?.key) {
                   navigation.dispatch({
                     ...CommonActions.reset({
                       index: 0,
-                      routes: [{ name: route.name, params: route.params }],
+                      routes: [{ name: "index" }],
                     }),
-                    target: state.routes[index].state?.key,
+                    target: nestedState.key,
                   });
-                } else {
-                  navigation.navigate(route.name, route.params);
                 }
+              } else if (!event.defaultPrevented) {
+                navigation.navigate(route.name, route.params);
               }
             };
 

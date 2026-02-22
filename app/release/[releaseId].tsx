@@ -216,7 +216,7 @@ export default function ReleaseDetailScreen() {
         <View className="flex-row items-center mt-2">
           {folder ? (
             <Pressable
-              onPress={() => router.push(`/(tabs)/collection/${folder.id}`)}
+              onPress={() => router.navigate(`/(tabs)/collection/${folder.id}`)}
               className="bg-accent rounded-full px-3 py-1 mr-3 active:opacity-70"
             >
               <Text className="text-white text-sm font-mono">
