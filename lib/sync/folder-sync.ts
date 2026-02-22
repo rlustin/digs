@@ -6,11 +6,11 @@ import { useSyncStore } from "@/stores/sync-store";
 /**
  * Fetch all folders from Discogs and upsert into SQLite.
  */
-export async function syncFolders(username: string) {
+export async function syncFolders(username: string, signal?: AbortSignal) {
   const store = useSyncStore.getState();
   store.setPhase("folders");
 
-  const response = await fetchFolders(username);
+  const response = await fetchFolders(username, signal);
 
   expo.withTransactionSync(() => {
     for (const folder of response.folders) {

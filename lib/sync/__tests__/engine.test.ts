@@ -20,6 +20,7 @@ jest.mock("@/stores/sync-store", () => {
     setPhase: jest.fn(),
     setLastFullSyncAt: jest.fn(),
     setError: jest.fn(),
+    startSync: jest.fn(() => new AbortController()),
   };
   return {
     useSyncStore: { getState: () => state },
@@ -44,6 +45,9 @@ describe("runFullSync", () => {
     jest.useFakeTimers();
     jest.clearAllMocks();
     (store as any).isSyncing = false;
+    (store.startSync as jest.Mock).mockReturnValue(new AbortController());
+    mockSyncFolders.mockResolvedValue(undefined);
+    mockSyncBasicReleases.mockResolvedValue(undefined);
     mockSyncReleaseDetails.mockResolvedValue(0);
   });
 
@@ -57,7 +61,7 @@ describe("runFullSync", () => {
     await runFullSync("testuser");
 
     expect(mockSyncFolders).not.toHaveBeenCalled();
-    expect(store.setSyncing).not.toHaveBeenCalled();
+    expect(store.startSync).not.toHaveBeenCalled();
   });
 
   it("runs pipeline in order: folders → basic releases → detail loop", async () => {
@@ -97,6 +101,13 @@ describe("runFullSync", () => {
 
     expect(store.setError).toHaveBeenCalledWith("network down");
     expect(store.setSyncing).toHaveBeenCalledWith(false);
+  });
+
+  it("passes signal to sync functions", async () => {
+    await runFullSync("testuser");
+
+    expect(mockSyncFolders).toHaveBeenCalledWith("testuser", expect.any(AbortSignal));
+    expect(mockSyncBasicReleases).toHaveBeenCalledWith("testuser", expect.any(AbortSignal));
   });
 });
 
@@ -155,6 +166,15 @@ describe("runDetailSyncLoop", () => {
       expect.any(Error)
     );
     warnSpy.mockRestore();
+  });
+
+  it("stops when signal is aborted", async () => {
+    const controller = new AbortController();
+    controller.abort();
+
+    await runDetailSyncLoop(controller.signal);
+
+    expect(mockSyncReleaseDetails).not.toHaveBeenCalled();
   });
 });
 

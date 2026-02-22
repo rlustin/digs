@@ -30,7 +30,8 @@ export function clearClientCredentials() {
 export async function discogsRequest<T>(
   path: string,
   method: string = "GET",
-  retries: number = 3
+  retries: number = 3,
+  signal?: AbortSignal
 ): Promise<T> {
   if (!credentials) {
     throw new Error("Discogs client not authenticated");
@@ -49,6 +50,7 @@ export async function discogsRequest<T>(
 
   const response = await fetch(url, {
     method,
+    signal,
     headers: {
       Authorization: authHeader,
       "User-Agent": DISCOGS_USER_AGENT,
@@ -69,7 +71,7 @@ export async function discogsRequest<T>(
       10
     );
     await new Promise((r) => setTimeout(r, retryAfter * 1000));
-    return discogsRequest<T>(path, method, retries - 1);
+    return discogsRequest<T>(path, method, retries - 1, signal);
   }
 
   if (!response.ok) {

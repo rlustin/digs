@@ -22,6 +22,7 @@ export default function SettingsScreen() {
   const username = useAuthStore((s) => s.username);
   const clearAuth = useAuthStore((s) => s.clearAuth);
   const isSyncing = useSyncStore((s) => s.isSyncing);
+  const cancelSync = useSyncStore((s) => s.cancelSync);
   const lastFullSyncAt = useSyncStore((s) => s.lastFullSyncAt);
   const phase = useSyncStore((s) => s.phase);
   const progress = useSyncStore((s) => s.progress);
@@ -55,6 +56,7 @@ export default function SettingsScreen() {
         text: t("settings.logOut"),
         style: "destructive",
         onPress: async () => {
+          cancelSync();
           await logout();
           clearClientCredentials();
           clearAuth();

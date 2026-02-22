@@ -1,7 +1,6 @@
 import { View, FlatList, RefreshControl } from "react-native";
-import { useLocalSearchParams } from "expo-router";
+import { useLocalSearchParams , Stack } from "expo-router";
 import { useQuery } from "@tanstack/react-query";
-import { Stack } from "expo-router";
 
 import { getReleasesByFolder } from "@/db/queries/releases";
 import { getAllFolders } from "@/db/queries/folders";

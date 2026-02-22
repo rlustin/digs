@@ -5,6 +5,8 @@ import SettingsScreen from "../(tabs)/settings";
 import { useAuthStore } from "@/stores/auth-store";
 import { useSyncStore } from "@/stores/sync-store";
 
+import { runFullSync } from "@/lib/sync/engine";
+
 jest.mock("@/lib/discogs/oauth", () => ({
   logout: jest.fn().mockResolvedValue(undefined),
 }));
@@ -20,8 +22,6 @@ jest.mock("@/lib/sync/engine", () => ({
 jest.mock("@/db/queries/releases", () => ({
   getDetailSyncCounts: jest.fn().mockReturnValue({ synced: 0, total: 0 }),
 }));
-
-import { runFullSync } from "@/lib/sync/engine";
 
 const mockRunFullSync = runFullSync as jest.MockedFunction<typeof runFullSync>;
 

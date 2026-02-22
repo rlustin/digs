@@ -60,7 +60,7 @@ function upsertReleasePage(
  * Sync releases from each real folder (skipping folder 0 which is virtual).
  * This ensures each release gets its correct folder_id.
  */
-export async function syncBasicReleases(username: string) {
+export async function syncBasicReleases(username: string, signal?: AbortSignal) {
   const store = useSyncStore.getState();
   store.setPhase("basic-releases");
 
@@ -73,11 +73,13 @@ export async function syncBasicReleases(username: string) {
   const totalItems = foldersToSync.reduce((sum, f) => sum + f.count, 0);
 
   for (const folder of foldersToSync) {
+    if (signal?.aborted) return;
     let page = 1;
     let totalPages = 1;
 
     while (page <= totalPages) {
-      const response = await fetchReleasesInFolder(username, folder.id, page);
+      if (signal?.aborted) return;
+      const response = await fetchReleasesInFolder(username, folder.id, page, 100, signal);
       totalPages = response.pagination.pages;
 
       totalProcessed += response.releases.length;
@@ -94,15 +96,17 @@ export async function syncBasicReleases(username: string) {
  * Returns the number of releases processed (0 means all done).
  */
 export async function syncReleaseDetails(
-  batchSize: number = 10
+  batchSize: number = 10,
+  signal?: AbortSignal
 ): Promise<number> {
   const pending = getReleasesNeedingDetailSync(batchSize);
   if (pending.length === 0) return 0;
 
   for (let i = 0; i < pending.length; i++) {
+    if (signal?.aborted) return i;
     const release = pending[i];
 
-    const detail = await fetchReleaseDetail(release.releaseId);
+    const detail = await fetchReleaseDetail(release.releaseId, signal);
 
     db.update(releases)
       .set(mapReleaseDetailToRow(detail))

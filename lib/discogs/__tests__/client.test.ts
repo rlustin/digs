@@ -1,3 +1,9 @@
+import {
+  discogsRequest,
+  setClientCredentials,
+  clearClientCredentials,
+} from "../client";
+
 jest.mock("@/lib/utils/oauth-signer", () => ({
   signRequest: jest.fn().mockReturnValue('OAuth oauth_consumer_key="key"'),
 }));
@@ -13,12 +19,6 @@ jest.mock("@/constants/discogs", () => ({
   DISCOGS_BASE_URL: "https://api.discogs.com",
   DISCOGS_USER_AGENT: "Digs/1.0.0",
 }));
-
-import {
-  discogsRequest,
-  setClientCredentials,
-  clearClientCredentials,
-} from "../client";
 
 const mockFetch = jest.fn();
 global.fetch = mockFetch;
@@ -179,6 +179,24 @@ describe("discogsRequest", () => {
 
     await expect(discogsRequest("/test")).rejects.toThrow(
       "Discogs API error: 500"
+    );
+  });
+
+  it("passes signal to fetch", async () => {
+    setClientCredentials({
+      consumerKey: "ck",
+      consumerSecret: "cs",
+      token: "t",
+      tokenSecret: "ts",
+    });
+    mockFetch.mockResolvedValue(jsonResponse({ ok: true }));
+
+    const controller = new AbortController();
+    await discogsRequest("/test", "GET", 3, controller.signal);
+
+    expect(mockFetch).toHaveBeenCalledWith(
+      "https://api.discogs.com/test",
+      expect.objectContaining({ signal: controller.signal })
     );
   });
 });

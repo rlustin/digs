@@ -3,11 +3,11 @@ import collectionFixture from "@/__fixtures__/collection-releases.json";
 import releaseDetailFixture from "@/__fixtures__/release-detail.json";
 import { fetchFolders, fetchReleasesInFolder, fetchReleaseDetail } from "../endpoints";
 
+import { discogsRequest } from "../client";
+
 jest.mock("../client", () => ({
   discogsRequest: jest.fn(),
 }));
-
-import { discogsRequest } from "../client";
 
 const mockDiscogsRequest = discogsRequest as jest.MockedFunction<typeof discogsRequest>;
 
@@ -23,7 +23,10 @@ describe("endpoints", () => {
       const result = await fetchFolders("rlustin");
 
       expect(mockDiscogsRequest).toHaveBeenCalledWith(
-        "/users/rlustin/collection/folders"
+        "/users/rlustin/collection/folders",
+        "GET",
+        3,
+        undefined
       );
       expect(result.folders).toHaveLength(30);
       expect(result.folders[0]).toEqual(
@@ -39,7 +42,10 @@ describe("endpoints", () => {
       const result = await fetchReleasesInFolder("rlustin", 9182214);
 
       expect(mockDiscogsRequest).toHaveBeenCalledWith(
-        "/users/rlustin/collection/folders/9182214/releases?per_page=100&page=1"
+        "/users/rlustin/collection/folders/9182214/releases?per_page=100&page=1",
+        "GET",
+        3,
+        undefined
       );
       expect(result.releases).toHaveLength(3);
       expect(result.releases[0].basic_information.title).toBe("AMENFR001");
@@ -51,7 +57,10 @@ describe("endpoints", () => {
       fetchReleasesInFolder("rlustin", 9182214, 2, 50);
 
       expect(mockDiscogsRequest).toHaveBeenCalledWith(
-        "/users/rlustin/collection/folders/9182214/releases?per_page=50&page=2"
+        "/users/rlustin/collection/folders/9182214/releases?per_page=50&page=2",
+        "GET",
+        3,
+        undefined
       );
     });
   });
@@ -62,7 +71,7 @@ describe("endpoints", () => {
 
       const result = await fetchReleaseDetail(25213822);
 
-      expect(mockDiscogsRequest).toHaveBeenCalledWith("/releases/25213822");
+      expect(mockDiscogsRequest).toHaveBeenCalledWith("/releases/25213822", "GET", 3, undefined);
       expect(result.title).toBe("0860");
       expect(result.tracklist).toHaveLength(8);
       expect(result.tracklist[0].title).toBe("0860");

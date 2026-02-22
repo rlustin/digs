@@ -13,22 +13,28 @@ export async function runFullSync(username: string) {
   const store = useSyncStore.getState();
 
   if (store.isSyncing) return;
-  store.setSyncing(true);
+  const controller = store.startSync();
+  const signal = controller.signal;
 
   try {
-    await syncFolders(username);
+    await syncFolders(username, signal);
     queryClient.invalidateQueries({ queryKey: ["folders"] });
 
-    await syncBasicReleases(username);
+    if (signal.aborted) return;
+
+    await syncBasicReleases(username, signal);
     queryClient.invalidateQueries({ queryKey: ["releases"] });
+
+    if (signal.aborted) return;
 
     store.setLastFullSyncAt(new Date().toISOString());
     store.setSyncing(false);
     store.setPhase("idle");
 
     // Detail sync continues silently in the background
-    await runDetailSyncLoop();
+    await runDetailSyncLoop(signal);
   } catch (err) {
+    if (signal.aborted) return;
     store.setError(err instanceof Error ? err.message : "Sync failed");
     store.setSyncing(false);
   }
@@ -38,10 +44,11 @@ export async function runFullSync(username: string) {
  * Run detail sync in batches of 10, with a 12s pause between batches
  * to stay within rate limits.
  */
-export async function runDetailSyncLoop() {
+export async function runDetailSyncLoop(signal?: AbortSignal) {
   while (true) {
+    if (signal?.aborted) break;
     try {
-      const processed = await syncReleaseDetails(10);
+      const processed = await syncReleaseDetails(10, signal);
       queryClient.invalidateQueries({ queryKey: ["releases"] });
 
       if (processed === 0) break;
@@ -49,6 +56,7 @@ export async function runDetailSyncLoop() {
       // Pause between batches to respect rate limits
       await new Promise((r) => setTimeout(r, 12000));
     } catch (err) {
+      if (signal?.aborted) break;
       console.warn("Detail sync loop stopped:", err);
       break;
     }

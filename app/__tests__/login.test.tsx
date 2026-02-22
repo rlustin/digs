@@ -3,11 +3,11 @@ import { render, screen, fireEvent, waitFor } from "@testing-library/react-nativ
 import LoginScreen from "../login";
 import { useAuthStore } from "@/stores/auth-store";
 
+import { login } from "@/lib/discogs/oauth";
+
 jest.mock("@/lib/discogs/oauth", () => ({
   login: jest.fn(),
 }));
-
-import { login } from "@/lib/discogs/oauth";
 
 const mockLogin = login as jest.MockedFunction<typeof login>;
 

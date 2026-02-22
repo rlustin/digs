@@ -6,6 +6,9 @@ import { useAuthStore } from "@/stores/auth-store";
 import { useSyncStore } from "@/stores/sync-store";
 import foldersFixture from "@/__fixtures__/folders.json";
 
+import { getAllFolders, getFolderThumbnails } from "@/db/queries/folders";
+import { getCollectionStats } from "@/db/queries/releases";
+
 jest.mock("@/db/queries/folders", () => ({
   getAllFolders: jest.fn(),
   getFolderThumbnails: jest.fn(),
@@ -22,9 +25,6 @@ jest.mock("@/lib/sync/engine", () => ({
 jest.mock("@/components/sync/sync-status-bar", () => ({
   SyncStatusCard: () => null,
 }));
-
-import { getAllFolders, getFolderThumbnails } from "@/db/queries/folders";
-import { getCollectionStats } from "@/db/queries/releases";
 
 const mockGetAllFolders = getAllFolders as jest.MockedFunction<typeof getAllFolders>;
 const mockGetFolderThumbnails = getFolderThumbnails as jest.MockedFunction<typeof getFolderThumbnails>;

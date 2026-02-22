@@ -175,7 +175,7 @@ describe("syncBasicReleases", () => {
 
     await syncBasicReleases("rlustin");
 
-    expect(mockFetchReleasesInFolder).toHaveBeenCalledWith("rlustin", 1, 1);
+    expect(mockFetchReleasesInFolder).toHaveBeenCalledWith("rlustin", 1, 1, 100, undefined);
   });
 
   it("paginates through all pages using real collection data", async () => {
@@ -196,8 +196,8 @@ describe("syncBasicReleases", () => {
     await syncBasicReleases("rlustin");
 
     expect(mockFetchReleasesInFolder).toHaveBeenCalledTimes(2);
-    expect(mockFetchReleasesInFolder).toHaveBeenCalledWith("rlustin", 9182214, 1);
-    expect(mockFetchReleasesInFolder).toHaveBeenCalledWith("rlustin", 9182214, 2);
+    expect(mockFetchReleasesInFolder).toHaveBeenCalledWith("rlustin", 9182214, 1, 100, undefined);
+    expect(mockFetchReleasesInFolder).toHaveBeenCalledWith("rlustin", 9182214, 2, 100, undefined);
   });
 
   it("reports progress via setProgress", async () => {
@@ -241,7 +241,7 @@ describe("syncReleaseDetails", () => {
     const result = await syncReleaseDetails(10);
 
     expect(result).toBe(1);
-    expect(mockFetchReleaseDetail).toHaveBeenCalledWith(25213822);
+    expect(mockFetchReleaseDetail).toHaveBeenCalledWith(25213822, undefined);
     expect(mockDb.update).toHaveBeenCalled();
   });
 

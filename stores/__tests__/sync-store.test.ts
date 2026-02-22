@@ -72,4 +72,25 @@ describe("useSyncStore", () => {
     expect(state.error).toBeNull();
     expect(state.lastFullSyncAt).toBe("2025-01-15T10:30:00.000Z");
   });
+
+  it("startSync sets isSyncing and returns an AbortController", () => {
+    const controller = useSyncStore.getState().startSync();
+    const state = useSyncStore.getState();
+    expect(state.isSyncing).toBe(true);
+    expect(state.abortController).toBe(controller);
+    expect(controller).toBeInstanceOf(AbortController);
+  });
+
+  it("cancelSync aborts the controller and resets state", () => {
+    const controller = useSyncStore.getState().startSync();
+    const abortSpy = jest.spyOn(controller, "abort");
+
+    useSyncStore.getState().cancelSync();
+    const state = useSyncStore.getState();
+
+    expect(abortSpy).toHaveBeenCalled();
+    expect(state.isSyncing).toBe(false);
+    expect(state.phase).toBe("idle");
+    expect(state.abortController).toBeNull();
+  });
 });
