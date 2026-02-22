@@ -104,19 +104,18 @@ export function searchReleases(query: string): SearchResult[] {
 }
 
 export function getCollectionStats() {
-  const row = expo.getFirstSync<{
-    total_releases: number;
-    total_artists: number;
-  }>(
-    `SELECT
-      COUNT(*) as total_releases,
-      COUNT(DISTINCT json_each.value) as total_artists
-    FROM releases, json_each(releases.artists, '$[*].name')
-    WHERE releases.artists IS NOT NULL`
+  const releaseCount = expo.getFirstSync<{ total: number }>(
+    "SELECT COUNT(*) as total FROM releases"
+  );
+  const artistCount = expo.getFirstSync<{ total: number }>(
+    `SELECT COUNT(*) as total FROM (
+      SELECT DISTINCT value FROM releases, json_each(releases.artists, '$[*].name')
+      WHERE releases.artists IS NOT NULL
+    )`
   );
   return {
-    totalReleases: row?.total_releases ?? 0,
-    totalArtists: row?.total_artists ?? 0,
+    totalReleases: releaseCount?.total ?? 0,
+    totalArtists: artistCount?.total ?? 0,
   };
 }
 
