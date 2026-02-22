@@ -1,6 +1,7 @@
 import { View, Text, Pressable, StyleSheet } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { BlurView } from "expo-blur";
+import { CommonActions } from "@react-navigation/native";
 import type { BottomTabBarProps } from "@react-navigation/bottom-tabs";
 
 export function FloatingTabBar({
@@ -33,8 +34,18 @@ export function FloatingTabBar({
                 target: route.key,
                 canPreventDefault: true,
               });
-              if (!isFocused && !event.defaultPrevented) {
-                navigation.navigate(route.name, route.params);
+              if (!event.defaultPrevented) {
+                if (isFocused) {
+                  navigation.dispatch({
+                    ...CommonActions.reset({
+                      index: 0,
+                      routes: [{ name: route.name, params: route.params }],
+                    }),
+                    target: state.routes[index].state?.key,
+                  });
+                } else {
+                  navigation.navigate(route.name, route.params);
+                }
               }
             };
 
