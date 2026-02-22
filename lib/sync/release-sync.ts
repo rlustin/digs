@@ -110,7 +110,7 @@ export async function syncReleaseDetails(
 
     db.update(releases)
       .set(mapReleaseDetailToRow(detail))
-      .where(eq(releases.instanceId, release.instanceId))
+      .where(eq(releases.releaseId, release.releaseId))
       .run();
   }
 
