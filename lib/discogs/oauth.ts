@@ -176,8 +176,8 @@ export async function restoreSession(): Promise<string | null> {
     });
     if (!res.ok) throw new Error("invalid");
   } catch {
-    await logout();
     clearClientCredentials();
+    await logout();
     return null;
   }
 
