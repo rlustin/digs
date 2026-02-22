@@ -37,7 +37,23 @@ export function getDetailSyncCounts() {
   return { total: row?.total ?? 0, synced: row?.synced ?? 0 };
 }
 
-export function searchReleases(query: string) {
+export interface SearchResult {
+  instanceId: number;
+  releaseId: number;
+  folderId: number;
+  title: string;
+  year: number | null;
+  artists: { name: string; id: number }[] | null;
+  labels: { name: string; catno: string }[] | null;
+  formats: { name: string; qty: string; descriptions?: string[] }[] | null;
+  genres: string[] | null;
+  styles: string[] | null;
+  thumbUrl: string | null;
+  coverUrl: string | null;
+  dateAdded: string | null;
+}
+
+export function searchReleases(query: string): SearchResult[] {
   if (!query.trim()) return [];
 
   // Add prefix matching wildcard for partial word matches
@@ -49,7 +65,7 @@ export function searchReleases(query: string) {
     .map((term) => `"${term}"*`)
     .join(" ");
 
-  const results = expo.getAllSync<{
+  const rows = expo.getAllSync<{
     instance_id: number;
     release_id: number;
     folder_id: number;
@@ -63,14 +79,6 @@ export function searchReleases(query: string) {
     thumb_url: string | null;
     cover_url: string | null;
     date_added: string | null;
-    tracklist: string | null;
-    images: string | null;
-    community_rating: number | null;
-    community_have: number | null;
-    community_want: number | null;
-    videos: string | null;
-    detail_synced_at: string | null;
-    basic_synced_at: string | null;
   }>(
     `SELECT r.* FROM releases r
      JOIN releases_fts fts ON r.instance_id = fts.rowid
@@ -78,7 +86,21 @@ export function searchReleases(query: string) {
     [ftsQuery]
   );
 
-  return results;
+  return rows.map((row) => ({
+    instanceId: row.instance_id,
+    releaseId: row.release_id,
+    folderId: row.folder_id,
+    title: row.title,
+    year: row.year,
+    artists: row.artists ? JSON.parse(row.artists) : null,
+    labels: row.labels ? JSON.parse(row.labels) : null,
+    formats: row.formats ? JSON.parse(row.formats) : null,
+    genres: row.genres ? JSON.parse(row.genres) : null,
+    styles: row.styles ? JSON.parse(row.styles) : null,
+    thumbUrl: row.thumb_url,
+    coverUrl: row.cover_url,
+    dateAdded: row.date_added,
+  }));
 }
 
 export function getCollectionStats() {

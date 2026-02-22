@@ -108,27 +108,19 @@ export default function SearchScreen() {
       ) : (
         <FlatList
           data={results}
-          keyExtractor={(item) => String(item.instance_id)}
+          keyExtractor={(item) => String(item.instanceId)}
           getItemLayout={getItemLayout}
           keyboardShouldPersistTaps="handled"
           keyboardDismissMode="on-drag"
           contentContainerStyle={{ paddingBottom: 90 }}
           renderItem={({ item }) => (
             <ReleaseCard
-              releaseId={item.release_id}
+              releaseId={item.releaseId}
               title={item.title}
-              artists={
-                typeof item.artists === "string"
-                  ? JSON.parse(item.artists)
-                  : item.artists
-              }
+              artists={item.artists}
               year={item.year}
-              formats={
-                typeof item.formats === "string"
-                  ? JSON.parse(item.formats)
-                  : item.formats
-              }
-              thumbUrl={item.thumb_url}
+              formats={item.formats}
+              thumbUrl={item.thumbUrl}
             />
           )}
         />
