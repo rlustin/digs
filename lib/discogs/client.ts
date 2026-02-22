@@ -1,5 +1,8 @@
+import * as SecureStore from "expo-secure-store";
 import {
   DISCOGS_BASE_URL,
+  DISCOGS_CONSUMER_KEY,
+  DISCOGS_CONSUMER_SECRET,
   DISCOGS_USER_AGENT,
 } from "@/constants/discogs";
 import { signRequest } from "@/lib/utils/oauth-signer";
@@ -25,6 +28,26 @@ export function clearClientCredentials() {
 }
 
 /**
+ * Restore credentials from SecureStore if not already in memory.
+ * Returns true if credentials are available after the attempt.
+ */
+async function ensureCredentials(): Promise<boolean> {
+  if (credentials) return true;
+
+  const token = await SecureStore.getItemAsync("discogs_token");
+  const tokenSecret = await SecureStore.getItemAsync("discogs_token_secret");
+  if (!token || !tokenSecret) return false;
+
+  credentials = {
+    consumerKey: DISCOGS_CONSUMER_KEY,
+    consumerSecret: DISCOGS_CONSUMER_SECRET,
+    token,
+    tokenSecret,
+  };
+  return true;
+}
+
+/**
  * Make an authenticated, rate-limited request to the Discogs API.
  */
 export async function discogsRequest<T>(
@@ -33,7 +56,7 @@ export async function discogsRequest<T>(
   retries: number = 3,
   signal?: AbortSignal
 ): Promise<T> {
-  if (!credentials) {
+  if (!(await ensureCredentials())) {
     throw new Error("Discogs client not authenticated");
   }
 
@@ -42,10 +65,10 @@ export async function discogsRequest<T>(
   const url = path.startsWith("http") ? path : `${DISCOGS_BASE_URL}${path}`;
 
   const authHeader = signRequest(method, url, {
-    consumerKey: credentials.consumerKey,
-    consumerSecret: credentials.consumerSecret,
-    token: credentials.token,
-    tokenSecret: credentials.tokenSecret,
+    consumerKey: credentials!.consumerKey,
+    consumerSecret: credentials!.consumerSecret,
+    token: credentials!.token,
+    tokenSecret: credentials!.tokenSecret,
   });
 
   const response = await fetch(url, {

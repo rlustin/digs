@@ -17,8 +17,16 @@ jest.mock("@/lib/utils/rate-limiter", () => ({
 
 jest.mock("@/constants/discogs", () => ({
   DISCOGS_BASE_URL: "https://api.discogs.com",
+  DISCOGS_CONSUMER_KEY: "test-consumer-key",
+  DISCOGS_CONSUMER_SECRET: "test-consumer-secret",
   DISCOGS_USER_AGENT: "Digs/1.0.0",
 }));
+
+jest.mock("expo-secure-store", () => ({
+  getItemAsync: jest.fn().mockResolvedValue(null),
+}));
+
+const SecureStore = require("expo-secure-store");
 
 const mockFetch = jest.fn();
 global.fetch = mockFetch;
@@ -196,6 +204,31 @@ describe("discogsRequest", () => {
     );
 
     // Credentials should be cleared — next call should throw "not authenticated"
+    await expect(discogsRequest("/test")).rejects.toThrow(
+      "Discogs client not authenticated"
+    );
+  });
+
+  it("auto-restores credentials from SecureStore when not in memory", async () => {
+    // Don't call setClientCredentials — credentials are null
+    SecureStore.getItemAsync.mockImplementation((key: string) => {
+      if (key === "discogs_token") return Promise.resolve("stored-token");
+      if (key === "discogs_token_secret") return Promise.resolve("stored-secret");
+      return Promise.resolve(null);
+    });
+    mockFetch.mockResolvedValue(jsonResponse({ restored: true }));
+
+    const result = await discogsRequest("/test");
+
+    expect(result).toEqual({ restored: true });
+    expect(SecureStore.getItemAsync).toHaveBeenCalledWith("discogs_token");
+    expect(SecureStore.getItemAsync).toHaveBeenCalledWith("discogs_token_secret");
+  });
+
+  it("throws not authenticated when SecureStore has no credentials", async () => {
+    // Don't call setClientCredentials — credentials are null
+    SecureStore.getItemAsync.mockResolvedValue(null);
+
     await expect(discogsRequest("/test")).rejects.toThrow(
       "Discogs client not authenticated"
     );
