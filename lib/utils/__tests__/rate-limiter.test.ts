@@ -70,4 +70,25 @@ describe("RateLimiter", () => {
     await flushMicrotasks();
     expect(results).toContain(2);
   });
+
+  it("allows immediate acquire after queue drains", async () => {
+    const limiter = new RateLimiter(2);
+    await limiter.acquire(); // remaining = 1
+
+    // This queues because remaining <= 1
+    let queued = false;
+    const queuedPromise = limiter.acquire().then(() => { queued = true; });
+
+    await flushMicrotasks();
+    expect(queued).toBe(false);
+
+    // Drain the queue
+    jest.advanceTimersByTime(1100);
+    await flushMicrotasks();
+    await queuedPromise;
+    expect(queued).toBe(true);
+
+    // After drain, next acquire should resolve immediately (remaining was set to 1)
+    await expect(limiter.acquire()).resolves.toBeUndefined();
+  });
 });

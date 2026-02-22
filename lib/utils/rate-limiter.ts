@@ -43,7 +43,10 @@ export class RateLimiter {
 
       // Release one request per second when rate limited
       const next = this.queue.shift();
-      if (next) next();
+      if (next) {
+        this.remaining = 2;
+        next();
+      }
     }, 1000);
   }
 }
