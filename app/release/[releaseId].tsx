@@ -21,6 +21,7 @@ import { getFolderById } from "@/db/queries/folders";
 import { getReleaseByReleaseId } from "@/db/queries/releases";
 import { releases } from "@/db/schema";
 import { fetchReleaseDetail } from "@/lib/discogs/endpoints";
+import { mapReleaseDetailToRow } from "@/lib/sync/detail-mapper";
 import { eq } from "drizzle-orm";
 import { t } from "@/lib/i18n";
 
@@ -55,28 +56,7 @@ export default function ReleaseDetailScreen() {
     queryFn: async () => {
       const detail = await fetchReleaseDetail(id);
       db.update(releases)
-        .set({
-          tracklist: detail.tracklist.map((track) => ({
-            position: track.position,
-            title: track.title,
-            duration: track.duration,
-          })),
-          images: detail.images?.map((img) => ({
-            type: img.type,
-            uri: img.uri,
-            width: img.width,
-            height: img.height,
-          })),
-          communityRating: detail.community?.rating?.average ?? null,
-          communityHave: detail.community?.have ?? null,
-          communityWant: detail.community?.want ?? null,
-          videos: detail.videos?.map((v) => ({
-            uri: v.uri,
-            title: v.title,
-            duration: v.duration,
-          })),
-          detailSyncedAt: new Date().toISOString(),
-        })
+        .set(mapReleaseDetailToRow(detail))
         .where(eq(releases.releaseId, id))
         .run();
       refetch();

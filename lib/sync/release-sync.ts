@@ -9,6 +9,7 @@ import {
 import { useSyncStore } from "@/stores/sync-store";
 import { getReleasesNeedingDetailSync } from "@/db/queries/releases";
 import type { CollectionRelease } from "@/lib/discogs/types";
+import { mapReleaseDetailToRow } from "./detail-mapper";
 
 /**
  * Map a Discogs collection release to a DB row for basic sync.
@@ -111,28 +112,7 @@ export async function syncReleaseDetails(
     const detail = await fetchReleaseDetail(release.releaseId);
 
     db.update(releases)
-      .set({
-        tracklist: detail.tracklist.map((t) => ({
-          position: t.position,
-          title: t.title,
-          duration: t.duration,
-        })),
-        images: detail.images?.map((img) => ({
-          type: img.type,
-          uri: img.uri,
-          width: img.width,
-          height: img.height,
-        })),
-        communityRating: detail.community?.rating?.average ?? null,
-        communityHave: detail.community?.have ?? null,
-        communityWant: detail.community?.want ?? null,
-        videos: detail.videos?.map((v) => ({
-          uri: v.uri,
-          title: v.title,
-          duration: v.duration,
-        })),
-        detailSyncedAt: new Date().toISOString(),
-      })
+      .set(mapReleaseDetailToRow(detail))
       .where(eq(releases.instanceId, release.instanceId))
       .run();
   }
