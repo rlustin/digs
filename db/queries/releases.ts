@@ -2,11 +2,22 @@ import { desc, eq, sql } from "drizzle-orm";
 import { db, expo } from "../client";
 import { releases } from "../schema";
 
-export function getReleasesByFolder(folderId: number) {
-  if (folderId === 0) {
-    return db.select().from(releases).orderBy(desc(releases.dateAdded)).all();
+export function getReleasesByFolder(
+  folderId: number,
+  options?: { limit?: number; offset?: number },
+) {
+  let query = db.select().from(releases);
+  if (folderId !== 0) {
+    query = query.where(eq(releases.folderId, folderId)) as typeof query;
   }
-  return db.select().from(releases).where(eq(releases.folderId, folderId)).orderBy(desc(releases.dateAdded)).all();
+  query = query.orderBy(desc(releases.dateAdded)) as typeof query;
+  if (options?.limit) {
+    query = query.limit(options.limit) as typeof query;
+  }
+  if (options?.offset) {
+    query = query.offset(options.offset) as typeof query;
+  }
+  return query.all();
 }
 
 export function getReleaseByReleaseId(releaseId: number) {
