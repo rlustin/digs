@@ -44,6 +44,8 @@ export function searchReleases(query: string) {
   const ftsQuery = query
     .trim()
     .split(/\s+/)
+    .map((term) => term.replace(/"/g, ""))
+    .filter((term) => term.length > 0)
     .map((term) => `"${term}"*`)
     .join(" ");
 
