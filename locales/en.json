@@ -13,7 +13,9 @@
   },
   "collection": {
     "noFolders": "No folders yet",
-    "noFoldersMessage": "Your collection will appear here after syncing"
+    "noFoldersMessage": "Your collection will appear here after syncing",
+    "syncing": "Syncing your collection...",
+    "syncingMessage": "This may take a moment depending on the size of your collection"
   },
   "folder": {
     "noReleases": "No releases",

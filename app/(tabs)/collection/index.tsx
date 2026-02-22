@@ -2,7 +2,7 @@ import { View, Text, FlatList, Pressable, RefreshControl } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "expo-router";
-import { FolderOpen, ChevronRight } from "lucide-react-native";
+import { FolderOpen, ChevronRight, RefreshCw } from "lucide-react-native";
 
 import { getAllFolders, getFolderThumbnails } from "@/db/queries/folders";
 import { getCollectionStats } from "@/db/queries/releases";
@@ -52,6 +52,18 @@ export default function CollectionScreen() {
     return (
       <SafeAreaView className="flex-1 bg-white" edges={["top"]}>
         <ListSkeleton type="folder" count={4} />
+      </SafeAreaView>
+    );
+  }
+
+  if (folders.length === 0 && isSyncing) {
+    return (
+      <SafeAreaView className="flex-1 bg-white" edges={["top"]}>
+        <EmptyState
+          icon={RefreshCw}
+          title={t("collection.syncing")}
+          message={t("collection.syncingMessage")}
+        />
       </SafeAreaView>
     );
   }
