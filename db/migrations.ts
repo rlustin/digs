@@ -47,15 +47,6 @@ export function runMigrations() {
     CREATE INDEX IF NOT EXISTS idx_releases_folder_id ON releases(folder_id);
   `);
 
-  expo.execSync(`
-    CREATE TABLE IF NOT EXISTS sync_status (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      sync_type TEXT NOT NULL,
-      last_synced_at TEXT,
-      status TEXT NOT NULL DEFAULT 'idle'
-    );
-  `);
-
   // FTS5 virtual table for full-text search
   expo.execSync(`
     CREATE VIRTUAL TABLE IF NOT EXISTS releases_fts USING fts5(

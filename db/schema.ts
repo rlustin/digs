@@ -41,10 +41,3 @@ export const releases = sqliteTable("releases", {
   detailSyncedAt: text("detail_synced_at"),
   basicSyncedAt: text("basic_synced_at"),
 });
-
-export const syncStatus = sqliteTable("sync_status", {
-  id: integer("id").primaryKey({ autoIncrement: true }),
-  syncType: text("sync_type").notNull(),
-  lastSyncedAt: text("last_synced_at"),
-  status: text("status").notNull().default("idle"),
-});
