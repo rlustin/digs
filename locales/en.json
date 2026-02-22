@@ -1,0 +1,83 @@
+{
+  "login": {
+    "title": "Digs",
+    "tagline": "Your records, always with you",
+    "signIn": "Sign in with Discogs",
+    "loginFailed": "Login failed"
+  },
+  "tabs": {
+    "collection": "Collection",
+    "search": "Search",
+    "random": "Random",
+    "settings": "Settings"
+  },
+  "collection": {
+    "noFolders": "No folders yet",
+    "noFoldersMessage": "Your collection will appear here after syncing"
+  },
+  "folder": {
+    "noReleases": "No releases",
+    "folderEmpty": "This folder is empty"
+  },
+  "search": {
+    "placeholder": "Search artists, albums, labels...",
+    "noResults": "No results",
+    "nothingFoundFor": "Nothing found for \"%{query}\""
+  },
+  "random": {
+    "all": "All",
+    "feelingLucky": "Feeling lucky?",
+    "feelingLuckyMessage": "Hit the button below to discover\nsomething from your collection",
+    "pickRandom": "Pick Random"
+  },
+  "settings": {
+    "discogsAccount": "Discogs account",
+    "syncSection": "Sync",
+    "lastFullSync": "Last full sync",
+    "never": "Never",
+    "collection": "Collection",
+    "syncing": "Syncing...",
+    "idle": "Idle",
+    "releaseDetails": "Release details",
+    "noReleases": "No releases",
+    "allSynced": "All synced",
+    "syncingReleaseDetails": "Syncing release details",
+    "syncNow": "Sync Now",
+    "accountSection": "Account",
+    "logOut": "Log out",
+    "logOutConfirm": "Are you sure you want to log out?"
+  },
+  "sync": {
+    "folders": "Syncing folders",
+    "basicReleases": "Syncing collection",
+    "details": "Syncing release details",
+    "error": "Sync failed",
+    "syncing": "Syncing"
+  },
+  "release": {
+    "tracklist": "Tracklist",
+    "have": "have",
+    "want": "want",
+    "loadingDetails": "Loading details...",
+    "unknownArtist": "Unknown Artist"
+  },
+  "stats": {
+    "release": {
+      "one": "release",
+      "other": "releases"
+    },
+    "artist": {
+      "one": "artist",
+      "other": "artists"
+    }
+  },
+  "notFound": {
+    "title": "Oops!",
+    "message": "This screen doesn't exist.",
+    "goHome": "Go to home screen"
+  },
+  "common": {
+    "back": "Back",
+    "cancel": "Cancel"
+  }
+}

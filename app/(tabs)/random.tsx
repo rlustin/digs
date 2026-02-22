@@ -26,6 +26,7 @@ import Animated, {
 
 import { getRandomRelease } from "@/db/queries/releases";
 import { getAllFolders } from "@/db/queries/folders";
+import { t } from "@/lib/i18n";
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 const SWIPE_THRESHOLD = 80;
@@ -138,7 +139,7 @@ export default function RandomScreen() {
 
   const artistNames =
     release?.artists?.map((a: { name: string }) => a.name).join(", ") ??
-    "Unknown Artist";
+    t("release.unknownArtist");
 
   return (
     <SafeAreaView className="flex-1 bg-white" edges={["top"]}>
@@ -165,7 +166,7 @@ export default function RandomScreen() {
                     selectedFolder === undefined && styles.chipTextActive,
                   ]}
                 >
-                  All
+                  {t("random.all")}
                 </Text>
               </Pressable>
               {folders
@@ -233,10 +234,9 @@ export default function RandomScreen() {
             <View style={styles.emptyDiceCircle}>
               <Dices size={56} color="#F97316" strokeWidth={1.2} />
             </View>
-            <Text style={styles.emptyTitle}>Feeling lucky?</Text>
+            <Text style={styles.emptyTitle}>{t("random.feelingLucky")}</Text>
             <Text style={styles.emptyMessage}>
-              Hit the button below to discover{"\n"}something from your
-              collection
+              {t("random.feelingLuckyMessage")}
             </Text>
           </View>
         )}
@@ -248,7 +248,7 @@ export default function RandomScreen() {
               <View style={styles.buttonFill} />
               <View style={styles.buttonContent}>
                 <Dices size={20} color="#fff" strokeWidth={2} />
-                <Text style={styles.buttonText}>Pick Random</Text>
+                <Text style={styles.buttonText}>{t("random.pickRandom")}</Text>
               </View>
             </BlurView>
           </AnimatedPressable>

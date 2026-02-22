@@ -1,4 +1,5 @@
 import { View, Text } from "react-native";
+import { t } from "@/lib/i18n";
 
 interface Track {
   position: string;
@@ -16,7 +17,7 @@ export function TrackList({ tracks }: TrackListProps) {
   return (
     <View className="mt-4">
       <Text className="text-gray-900 text-lg font-mono mb-2 px-4">
-        Tracklist
+        {t("release.tracklist")}
       </Text>
       {tracks.map((track, i) => (
         <View

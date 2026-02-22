@@ -11,6 +11,7 @@ import Animated, {
 } from "react-native-reanimated";
 import { login } from "@/lib/discogs/oauth";
 import { useAuthStore } from "@/stores/auth-store";
+import { t } from "@/lib/i18n";
 
 export default function LoginScreen() {
   const [loading, setLoading] = useState(false);
@@ -38,7 +39,7 @@ export default function LoginScreen() {
       const { username } = await login();
       setAuthenticated(username);
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Login failed");
+      setError(e instanceof Error ? e.message : t("login.loginFailed"));
     } finally {
       setLoading(false);
     }
@@ -51,8 +52,8 @@ export default function LoginScreen() {
           <Disc3 size={160} color="rgba(249,115,22,0.12)" strokeWidth={1} />
         </Animated.View>
 
-        <Text style={styles.title}>Digs</Text>
-        <Text style={styles.tagline}>Your records, always with you</Text>
+        <Text style={styles.title}>{t("login.title")}</Text>
+        <Text style={styles.tagline}>{t("login.tagline")}</Text>
       </View>
 
       <View style={styles.bottom}>
@@ -64,7 +65,7 @@ export default function LoginScreen() {
           {loading ? (
             <ActivityIndicator color="#fff" />
           ) : (
-            <Text style={styles.buttonText}>Sign in with Discogs</Text>
+            <Text style={styles.buttonText}>{t("login.signIn")}</Text>
           )}
         </Pressable>
 

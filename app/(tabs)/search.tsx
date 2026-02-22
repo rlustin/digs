@@ -17,6 +17,7 @@ import { searchReleases } from "@/db/queries/releases";
 import { ReleaseCard } from "@/components/release/release-card";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Search } from "lucide-react-native";
+import { t } from "@/lib/i18n";
 
 const ITEM_HEIGHT = 104;
 
@@ -85,7 +86,7 @@ export default function SearchScreen() {
                 onChangeText={setQuery}
                 onFocus={handleFocus}
                 onBlur={handleBlur}
-                placeholder="Search artists, albums, labels..."
+                placeholder={t("search.placeholder")}
                 placeholderTextColor="#9CA3AF"
                 autoCorrect={false}
                 autoCapitalize="none"
@@ -101,8 +102,8 @@ export default function SearchScreen() {
       {query.trim().length >= 2 && results.length === 0 ? (
         <EmptyState
           icon={Search}
-          title="No results"
-          message={`Nothing found for "${query}"`}
+          title={t("search.noResults")}
+          message={t("search.nothingFoundFor", { query })}
         />
       ) : (
         <FlatList

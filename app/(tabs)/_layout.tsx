@@ -3,6 +3,7 @@ import { Tabs } from "expo-router";
 
 import { useInitialSync } from "@/hooks/use-sync";
 import { FloatingTabBar } from "@/components/ui/tab-bar";
+import { t } from "@/lib/i18n";
 
 export const unstable_settings = {
   initialRouteName: "collection",
@@ -34,7 +35,7 @@ export default function TabLayout() {
         <Tabs.Screen
           name="collection"
           options={{
-            title: "Collection",
+            title: t("tabs.collection"),
             headerShown: false,
             tabBarIcon: ({ color }) => (
               <TabBarIcon Icon={Disc3} color={color} />
@@ -44,7 +45,7 @@ export default function TabLayout() {
         <Tabs.Screen
           name="search"
           options={{
-            title: "Search",
+            title: t("tabs.search"),
             headerShown: false,
             tabBarIcon: ({ color }) => (
               <TabBarIcon Icon={Search} color={color} />
@@ -54,7 +55,7 @@ export default function TabLayout() {
         <Tabs.Screen
           name="random"
           options={{
-            title: "Random",
+            title: t("tabs.random"),
             headerShown: false,
             tabBarIcon: ({ color }) => (
               <TabBarIcon Icon={Dices} color={color} />
@@ -64,7 +65,7 @@ export default function TabLayout() {
         <Tabs.Screen
           name="settings"
           options={{
-            title: "Settings",
+            title: t("tabs.settings"),
             headerShown: false,
             tabBarIcon: ({ color }) => <TabBarIcon Icon={Settings} color={color} />,
           }}

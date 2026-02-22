@@ -1,5 +1,6 @@
 import { View, Text } from "react-native";
 import { Star, StarHalf } from "lucide-react-native";
+import { t } from "@/lib/i18n";
 
 interface CommunityRatingProps {
   rating: number | null;
@@ -34,12 +35,12 @@ export function CommunityRating({ rating, have, want }: CommunityRatingProps) {
       )}
       {have != null && (
         <Text className="text-gray-500 text-xs mr-3 font-sans">
-          <Text className="font-mono">{have.toLocaleString()}</Text> have
+          <Text className="font-mono">{have.toLocaleString()}</Text> {t("release.have")}
         </Text>
       )}
       {want != null && (
         <Text className="text-gray-500 text-xs font-sans">
-          <Text className="font-mono">{want.toLocaleString()}</Text> want
+          <Text className="font-mono">{want.toLocaleString()}</Text> {t("release.want")}
         </Text>
       )}
     </View>

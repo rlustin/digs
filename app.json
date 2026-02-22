@@ -40,7 +40,8 @@
       "expo-sqlite",
       "expo-secure-store",
       "expo-web-browser",
-      "expo-background-task"
+      "expo-background-task",
+      "expo-localization"
     ],
     "experiments": {
       "typedRoutes": true

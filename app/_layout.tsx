@@ -13,6 +13,7 @@ import { queryClient } from "@/lib/query-client";
 import { runMigrations } from "@/db/migrations";
 import { restoreSession } from "@/lib/discogs/oauth";
 import { useAuthStore } from "@/stores/auth-store";
+import { t } from "@/lib/i18n";
 
 export { ErrorBoundary } from "expo-router";
 
@@ -113,7 +114,7 @@ function AuthGate() {
         options={{
           headerShown: true,
           headerTitle: "",
-          headerBackTitle: "Back",
+          headerBackTitle: t("common.back"),
           headerTransparent: true,
           headerStyle: { backgroundColor: "transparent" },
           headerTintColor: "#fff",

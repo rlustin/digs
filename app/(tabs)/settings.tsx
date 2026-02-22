@@ -9,12 +9,13 @@ import { logout } from "@/lib/discogs/oauth";
 import { clearClientCredentials } from "@/lib/discogs/client";
 import { runFullSync } from "@/lib/sync/engine";
 import { getDetailSyncCounts } from "@/db/queries/releases";
+import { t } from "@/lib/i18n";
 
-const phaseLabels: Record<string, string> = {
-  folders: "Syncing folders",
-  "basic-releases": "Syncing collection",
-  details: "Syncing release details",
-  error: "Sync failed",
+const syncPhaseKeys: Record<string, string> = {
+  folders: "sync.folders",
+  "basic-releases": "sync.basicReleases",
+  details: "sync.details",
+  error: "sync.error",
 };
 
 export default function SettingsScreen() {
@@ -48,10 +49,10 @@ export default function SettingsScreen() {
   };
 
   const handleLogout = () => {
-    Alert.alert("Log out", "Are you sure you want to log out?", [
-      { text: "Cancel", style: "cancel" },
+    Alert.alert(t("settings.logOut"), t("settings.logOutConfirm"), [
+      { text: t("common.cancel"), style: "cancel" },
       {
-        text: "Log out",
+        text: t("settings.logOut"),
         style: "destructive",
         onPress: async () => {
           await logout();
@@ -63,13 +64,13 @@ export default function SettingsScreen() {
   };
 
   const formatDate = (iso: string | null) => {
-    if (!iso) return "Never";
+    if (!iso) return t("settings.never");
     return new Date(iso).toLocaleString();
   };
 
   const isError = phase === "error";
   const syncActive = phase !== "idle";
-  const syncLabel = phaseLabels[phase] ?? "Syncing";
+  const syncLabel = t(syncPhaseKeys[phase] ?? "sync.syncing");
   const syncPct =
     progress && progress.total > 0
       ? Math.round((progress.current / progress.total) * 100)
@@ -86,38 +87,38 @@ export default function SettingsScreen() {
           <Text className="text-white text-2xl font-sans-bold">{initial}</Text>
         </View>
         <Text className="text-gray-900 text-lg font-mono-bold">{username}</Text>
-        <Text className="text-gray-400 text-sm font-sans">Discogs account</Text>
+        <Text className="text-gray-400 text-sm font-sans">{t("settings.discogsAccount")}</Text>
       </View>
 
       {/* SYNC section */}
       <Text className="text-gray-400 text-xs uppercase tracking-wider mx-4 mb-2 ml-8 font-mono">
-        Sync
+        {t("settings.syncSection")}
       </Text>
       <View className="mx-4 rounded-2xl bg-white overflow-hidden">
         {/* Last full sync */}
         <View className="flex-row justify-between px-4 py-3 border-b border-gray-100">
-          <Text className="text-gray-500 text-sm font-sans">Last full sync</Text>
+          <Text className="text-gray-500 text-sm font-sans">{t("settings.lastFullSync")}</Text>
           <Text className="text-gray-900 text-sm font-sans">{formatDate(lastFullSyncAt)}</Text>
         </View>
 
         {/* Collection status */}
         <View className={`flex-row justify-between px-4 py-3 ${syncActive || detailPending ? "border-b border-gray-100" : ""}`}>
-          <Text className="text-gray-500 text-sm font-sans">Collection</Text>
+          <Text className="text-gray-500 text-sm font-sans">{t("settings.collection")}</Text>
           <Text className="text-gray-900 text-sm font-sans">
-            {isSyncing ? "Syncing..." : "Idle"}
+            {isSyncing ? t("settings.syncing") : t("settings.idle")}
           </Text>
         </View>
 
         {/* Release details */}
         {(detailCounts.total > 0 || !syncActive) && (
           <View className={`flex-row justify-between px-4 py-3 ${syncActive || detailPending ? "border-b border-gray-100" : ""}`}>
-            <Text className="text-gray-500 text-sm font-sans">Release details</Text>
+            <Text className="text-gray-500 text-sm font-sans">{t("settings.releaseDetails")}</Text>
             <Text className="text-gray-900 text-sm font-sans">
               {detailCounts.total === 0
-                ? "No releases"
+                ? t("settings.noReleases")
                 : detailPending
                   ? `${detailCounts.synced}/${detailCounts.total}`
-                  : "All synced"}
+                  : t("settings.allSynced")}
             </Text>
           </View>
         )}
@@ -171,7 +172,7 @@ export default function SettingsScreen() {
               <View className="flex-row items-center">
                 <RefreshCw size={12} color="#F97316" />
                 <Text className="text-gray-900 text-sm font-sans-medium ml-2">
-                  Syncing release details
+                  {t("settings.syncingReleaseDetails")}
                 </Text>
               </View>
               <Text className="text-gray-500 text-xs font-mono">
@@ -201,18 +202,18 @@ export default function SettingsScreen() {
             isSyncing ? "text-gray-300" : "text-accent"
           }`}
         >
-          {isSyncing ? "Syncing..." : "Sync Now"}
+          {isSyncing ? t("settings.syncing") : t("settings.syncNow")}
         </Text>
       </Pressable>
 
       {/* ACCOUNT section */}
       <Text className="text-gray-400 text-xs uppercase tracking-wider mx-4 mt-8 mb-2 ml-8 font-mono">
-        Account
+        {t("settings.accountSection")}
       </Text>
       <View className="mx-4 rounded-2xl bg-white overflow-hidden">
         <Pressable onPress={handleLogout} className="active:opacity-80">
           <Text className="text-red-500 text-base font-mono-bold text-center py-3">
-            Log out
+            {t("settings.logOut")}
           </Text>
         </Pressable>
       </View>

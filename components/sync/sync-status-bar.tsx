@@ -1,12 +1,13 @@
 import { View, Text, Pressable } from "react-native";
 import { CircleAlert, RefreshCw, X } from "lucide-react-native";
 import { useSyncStore } from "@/stores/sync-store";
+import { t } from "@/lib/i18n";
 
-const phaseLabels: Record<string, string> = {
-  folders: "Syncing folders",
-  "basic-releases": "Syncing collection",
-  details: "Syncing release details",
-  error: "Sync failed",
+const syncPhaseKeys: Record<string, string> = {
+  folders: "sync.folders",
+  "basic-releases": "sync.basicReleases",
+  details: "sync.details",
+  error: "sync.error",
 };
 
 export function SyncStatusCard() {
@@ -18,7 +19,7 @@ export function SyncStatusCard() {
   if (phase === "idle") return null;
 
   const isError = phase === "error";
-  const label = phaseLabels[phase] ?? "Syncing";
+  const label = t(syncPhaseKeys[phase] ?? "sync.syncing");
   const pct =
     progress && progress.total > 0
       ? Math.round((progress.current / progress.total) * 100)

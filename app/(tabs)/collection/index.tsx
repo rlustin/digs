@@ -14,6 +14,7 @@ import { FolderCoverCollage } from "@/components/collection/folder-cover-collage
 import { useAuthStore } from "@/stores/auth-store";
 import { runFullSync } from "@/lib/sync/engine";
 import { useSyncStore } from "@/stores/sync-store";
+import { t } from "@/lib/i18n";
 
 export default function CollectionScreen() {
   const router = useRouter();
@@ -59,8 +60,8 @@ export default function CollectionScreen() {
       <SafeAreaView className="flex-1 bg-white" edges={["top"]}>
         <EmptyState
           icon={FolderOpen}
-          title="No folders yet"
-          message="Your collection will appear here after syncing"
+          title={t("collection.noFolders")}
+          message={t("collection.noFoldersMessage")}
         />
       </SafeAreaView>
     );
@@ -104,7 +105,7 @@ export default function CollectionScreen() {
                 {item.name}
               </Text>
               <Text className="text-gray-400 text-sm mt-1 font-sans">
-                {item.count} {item.count === 1 ? "release" : "releases"}
+                {item.count} {t("stats.release", { count: item.count })}
               </Text>
             </View>
             <ChevronRight size={18} color="#D1D5DB" />

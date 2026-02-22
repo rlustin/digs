@@ -22,6 +22,7 @@ import { getReleaseByReleaseId } from "@/db/queries/releases";
 import { releases } from "@/db/schema";
 import { fetchReleaseDetail } from "@/lib/discogs/endpoints";
 import { eq } from "drizzle-orm";
+import { t } from "@/lib/i18n";
 
 const COVER_WIDTH_RATIO = 0.88;
 const COVER_TOP_SPACING = 20;
@@ -92,7 +93,7 @@ export default function ReleaseDetailScreen() {
 
   const artistNames =
     release.artists?.map((a: { name: string }) => a.name).join(", ") ??
-    "Unknown Artist";
+    t("release.unknownArtist");
 
   const formatDesc = release.formats
     ?.map(
@@ -236,7 +237,7 @@ export default function ReleaseDetailScreen() {
         <View className="flex-row items-center justify-center mt-4">
           <ActivityIndicator color="#F97316" size="small" />
           <Text className="text-gray-400 text-sm ml-2 font-sans">
-            Loading details...
+            {t("release.loadingDetails")}
           </Text>
         </View>
       )}
