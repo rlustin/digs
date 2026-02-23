@@ -1,6 +1,6 @@
 import { expo } from "./client";
 
-const CURRENT_VERSION = 2;
+const CURRENT_VERSION = 3;
 
 /**
  * Run all schema migrations. Call once at app startup before any queries.
@@ -18,6 +18,10 @@ export function runMigrations() {
 
   if (version < 2) {
     migrateV2();
+  }
+
+  if (version < 3) {
+    migrateV3();
   }
 
   if (version < CURRENT_VERSION) {
@@ -162,5 +166,59 @@ function migrateV2() {
   `);
 
   // Rebuild FTS index to fix any existing corruption
+  expo.execSync(`INSERT INTO releases_fts(releases_fts) VALUES('rebuild')`);
+}
+
+/** V3: Guard FTS triggers against NULL artists/labels with COALESCE. */
+function migrateV3() {
+  expo.execSync(`DROP TRIGGER IF EXISTS releases_ai`);
+  expo.execSync(`DROP TRIGGER IF EXISTS releases_ad`);
+  expo.execSync(`DROP TRIGGER IF EXISTS releases_au`);
+
+  expo.execSync(`
+    CREATE TRIGGER releases_ai AFTER INSERT ON releases BEGIN
+      INSERT INTO releases_fts(rowid, title, artists, labels)
+      VALUES (
+        new.instance_id,
+        new.title,
+        COALESCE((SELECT GROUP_CONCAT(json_extract(value, '$.name'), ', ') FROM json_each(new.artists)), ''),
+        COALESCE((SELECT GROUP_CONCAT(json_extract(value, '$.name'), ', ') FROM json_each(new.labels)), '')
+      );
+    END;
+  `);
+
+  expo.execSync(`
+    CREATE TRIGGER releases_ad AFTER DELETE ON releases BEGIN
+      INSERT INTO releases_fts(releases_fts, rowid, title, artists, labels)
+      VALUES (
+        'delete',
+        old.instance_id,
+        old.title,
+        COALESCE((SELECT GROUP_CONCAT(json_extract(value, '$.name'), ', ') FROM json_each(old.artists)), ''),
+        COALESCE((SELECT GROUP_CONCAT(json_extract(value, '$.name'), ', ') FROM json_each(old.labels)), '')
+      );
+    END;
+  `);
+
+  expo.execSync(`
+    CREATE TRIGGER releases_au AFTER UPDATE ON releases BEGIN
+      INSERT INTO releases_fts(releases_fts, rowid, title, artists, labels)
+      VALUES (
+        'delete',
+        old.instance_id,
+        old.title,
+        COALESCE((SELECT GROUP_CONCAT(json_extract(value, '$.name'), ', ') FROM json_each(old.artists)), ''),
+        COALESCE((SELECT GROUP_CONCAT(json_extract(value, '$.name'), ', ') FROM json_each(old.labels)), '')
+      );
+      INSERT INTO releases_fts(rowid, title, artists, labels)
+      VALUES (
+        new.instance_id,
+        new.title,
+        COALESCE((SELECT GROUP_CONCAT(json_extract(value, '$.name'), ', ') FROM json_each(new.artists)), ''),
+        COALESCE((SELECT GROUP_CONCAT(json_extract(value, '$.name'), ', ') FROM json_each(new.labels)), '')
+      );
+    END;
+  `);
+
   expo.execSync(`INSERT INTO releases_fts(releases_fts) VALUES('rebuild')`);
 }
