@@ -96,19 +96,8 @@ export default function ReleaseDetailScreen() {
     ...(release.styles ?? []),
   ].join(", ");
 
-  const tracklist =
-    (release.tracklist as {
-      position: string;
-      title: string;
-      duration: string;
-    }[]) ?? [];
-  const images =
-    (release.images as {
-      type: string;
-      uri: string;
-      width: number;
-      height: number;
-    }[]) ?? [];
+  const tracklist = release.tracklist ?? [];
+  const images = release.images ?? [];
 
   return (
     <ScrollView className="flex-1 bg-white" contentContainerClassName="pb-10">
