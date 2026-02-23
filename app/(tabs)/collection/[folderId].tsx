@@ -1,4 +1,4 @@
-import { View, FlatList, RefreshControl } from "react-native";
+import { View, Text, FlatList, RefreshControl } from "react-native";
 import { useLocalSearchParams , Stack } from "expo-router";
 import { useQuery } from "@tanstack/react-query";
 
@@ -34,6 +34,14 @@ export default function FolderReleasesScreen() {
     queryKey: ["releases", "folder", id],
     queryFn: () => getReleasesByFolder(id),
   });
+
+  if (Number.isNaN(id)) {
+    return (
+      <View className="flex-1 bg-white items-center justify-center">
+        <Text className="text-gray-400 text-base font-sans">{t("common.error")}</Text>
+      </View>
+    );
+  }
 
   return (
     <View className="flex-1 bg-white">

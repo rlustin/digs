@@ -80,6 +80,7 @@
   },
   "common": {
     "back": "Back",
-    "cancel": "Cancel"
+    "cancel": "Cancel",
+    "error": "Something went wrong"
   }
 }

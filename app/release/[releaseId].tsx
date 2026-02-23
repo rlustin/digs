@@ -66,6 +66,14 @@ export default function ReleaseDetailScreen() {
     enabled: !!release && !release.detailSyncedAt,
   });
 
+  if (Number.isNaN(id)) {
+    return (
+      <View className="flex-1 bg-white items-center justify-center">
+        <Text className="text-gray-400 text-base font-sans">{t("common.error")}</Text>
+      </View>
+    );
+  }
+
   if (!release) {
     return <DetailSkeleton />;
   }
