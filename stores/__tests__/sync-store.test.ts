@@ -109,6 +109,18 @@ describe("useSyncStore", () => {
     expect(controller).toBeInstanceOf(AbortController);
   });
 
+  it("startSync aborts the previous controller", () => {
+    const first = useSyncStore.getState().startSync();
+    const abortSpy = jest.spyOn(first, "abort");
+
+    const second = useSyncStore.getState().startSync();
+
+    expect(abortSpy).toHaveBeenCalled();
+    expect(first.signal.aborted).toBe(true);
+    expect(second.signal.aborted).toBe(false);
+    expect(useSyncStore.getState().abortController).toBe(second);
+  });
+
   it("cancelSync aborts the controller and resets state", () => {
     const controller = useSyncStore.getState().startSync();
     const abortSpy = jest.spyOn(controller, "abort");

@@ -48,6 +48,8 @@ export const useSyncStore = create<SyncState>((set, get) => ({
     SecureStore.deleteItemAsync(KEY_LAST_FULL_SYNC_AT);
   },
   startSync: () => {
+    const { abortController: previous } = get();
+    if (previous) previous.abort();
     const controller = new AbortController();
     set({ isSyncing: true, abortController: controller });
     return controller;
