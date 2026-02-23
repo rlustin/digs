@@ -7,7 +7,7 @@ import type {
 
 export function fetchFolders(username: string, signal?: AbortSignal) {
   return discogsRequest<FoldersResponse>(
-    `/users/${username}/collection/folders`,
+    `/users/${encodeURIComponent(username)}/collection/folders`,
     "GET",
     3,
     signal
@@ -23,7 +23,7 @@ export function fetchReleasesInFolder(
   sort?: string,
   sortOrder?: string
 ) {
-  let url = `/users/${username}/collection/folders/${folderId}/releases?per_page=${perPage}&page=${page}`;
+  let url = `/users/${encodeURIComponent(username)}/collection/folders/${folderId}/releases?per_page=${perPage}&page=${page}`;
   if (sort) url += `&sort=${sort}`;
   if (sortOrder) url += `&sort_order=${sortOrder}`;
   return discogsRequest<CollectionReleasesResponse>(url, "GET", 3, signal);

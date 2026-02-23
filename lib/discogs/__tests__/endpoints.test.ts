@@ -33,6 +33,19 @@ describe("endpoints", () => {
         expect.objectContaining({ id: 0, name: "All", count: 429 })
       );
     });
+
+    it("encodes special characters in username", async () => {
+      mockDiscogsRequest.mockResolvedValue(foldersFixture);
+
+      await fetchFolders("user name/special");
+
+      expect(mockDiscogsRequest).toHaveBeenCalledWith(
+        "/users/user%20name%2Fspecial/collection/folders",
+        "GET",
+        3,
+        undefined
+      );
+    });
   });
 
   describe("fetchReleasesInFolder", () => {
@@ -84,6 +97,19 @@ describe("endpoints", () => {
 
       expect(mockDiscogsRequest).toHaveBeenCalledWith(
         "/users/rlustin/collection/folders/9182214/releases?per_page=100&page=1",
+        "GET",
+        3,
+        undefined
+      );
+    });
+
+    it("encodes special characters in username", () => {
+      mockDiscogsRequest.mockResolvedValue(collectionFixture);
+
+      fetchReleasesInFolder("user name/special", 9182214);
+
+      expect(mockDiscogsRequest).toHaveBeenCalledWith(
+        "/users/user%20name%2Fspecial/collection/folders/9182214/releases?per_page=100&page=1",
         "GET",
         3,
         undefined
