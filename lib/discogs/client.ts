@@ -7,6 +7,7 @@ import {
 } from "@/constants/discogs";
 import { signRequest } from "@/lib/utils/oauth-signer";
 import { RateLimiter } from "@/lib/utils/rate-limiter";
+import { AuthExpiredError } from "./errors";
 
 const rateLimiter = new RateLimiter();
 
@@ -102,7 +103,7 @@ export async function discogsRequest<T>(
 
   if (response.status === 401) {
     clearClientCredentials();
-    throw new Error("authentication_expired");
+    throw new AuthExpiredError();
   }
 
   if (!response.ok) {

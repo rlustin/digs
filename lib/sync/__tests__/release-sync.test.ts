@@ -1,6 +1,7 @@
 import type { CollectionRelease } from "@/lib/discogs/types";
 import collectionFixture from "@/__fixtures__/collection-releases.json";
 import releaseDetailFixture from "@/__fixtures__/release-detail.json";
+import { AuthExpiredError } from "@/lib/discogs/errors";
 
 import { mapBasicRelease, syncBasicReleases, syncBasicReleasesIncremental, syncReleaseDetails } from "../release-sync";
 import { getAllFolders } from "@/db/queries/folders";
@@ -417,8 +418,8 @@ describe("syncReleaseDetails", () => {
       { instanceId: 1304522474, releaseId: 20068396 },
     ] as any);
 
-    mockFetchReleaseDetail.mockRejectedValue(new Error("authentication_expired"));
+    mockFetchReleaseDetail.mockRejectedValue(new AuthExpiredError());
 
-    await expect(syncReleaseDetails(10)).rejects.toThrow("authentication_expired");
+    await expect(syncReleaseDetails(10)).rejects.toThrow(AuthExpiredError);
   });
 });

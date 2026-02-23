@@ -12,6 +12,7 @@ import {
 } from "@/db/queries/releases";
 import type { CollectionRelease } from "@/lib/discogs/types";
 import type { SyncPhase } from "@/stores/sync-store";
+import { AuthExpiredError } from "@/lib/discogs/errors";
 import { mapReleaseDetailToRow } from "./detail-mapper";
 
 export interface ReleaseSyncCallbacks {
@@ -266,7 +267,7 @@ export async function syncReleaseDetails(
     } catch (err) {
       if (signal?.aborted) return processed;
       // Re-throw auth errors so the caller can handle them
-      if (err instanceof Error && err.message === "authentication_expired") {
+      if (err instanceof AuthExpiredError) {
         throw err;
       }
       console.warn(`Detail sync failed for release ${release.releaseId}:`, err);

@@ -6,6 +6,7 @@ import {
 } from "./release-sync";
 import { useSyncStore } from "@/stores/sync-store";
 import { useAuthStore } from "@/stores/auth-store";
+import { AuthExpiredError } from "@/lib/discogs/errors";
 import { queryClient } from "@/lib/query-client";
 
 /**
@@ -47,7 +48,7 @@ export async function runFullSync(username: string) {
     store.setPhase("idle");
   } catch (err) {
     if (signal.aborted) return;
-    if (err instanceof Error && err.message === "authentication_expired") {
+    if (err instanceof AuthExpiredError) {
       useAuthStore.getState().clearAuth();
       store.setSyncing(false);
       return;
@@ -101,7 +102,7 @@ export async function runIncrementalSync(username: string) {
     store.setPhase("idle");
   } catch (err) {
     if (signal.aborted) return;
-    if (err instanceof Error && err.message === "authentication_expired") {
+    if (err instanceof AuthExpiredError) {
       useAuthStore.getState().clearAuth();
       store.setSyncing(false);
       return;

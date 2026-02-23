@@ -3,6 +3,7 @@ import {
   setClientCredentials,
   clearClientCredentials,
 } from "../client";
+import { AuthExpiredError } from "../errors";
 
 jest.mock("@/lib/utils/oauth-signer", () => ({
   signRequest: jest.fn().mockReturnValue('OAuth oauth_consumer_key="key"'),
@@ -190,7 +191,7 @@ describe("discogsRequest", () => {
     );
   });
 
-  it("clears credentials and throws authentication_expired on 401", async () => {
+  it("clears credentials and throws AuthExpiredError on 401", async () => {
     setClientCredentials({
       consumerKey: "ck",
       consumerSecret: "cs",
@@ -199,9 +200,7 @@ describe("discogsRequest", () => {
     });
     mockFetch.mockResolvedValue(jsonResponse(null, 401));
 
-    await expect(discogsRequest("/test")).rejects.toThrow(
-      "authentication_expired"
-    );
+    await expect(discogsRequest("/test")).rejects.toThrow(AuthExpiredError);
 
     // Credentials should be cleared — next call should throw "not authenticated"
     await expect(discogsRequest("/test")).rejects.toThrow(
