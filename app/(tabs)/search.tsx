@@ -53,14 +53,21 @@ export default function SearchScreen() {
     shadowOpacity: interpolate(focusProgress.value, [0, 1], [0, 0.15]),
   }));
 
+  const [debouncedQuery, setDebouncedQuery] = useState("");
+
+  useEffect(() => {
+    const timer = setTimeout(() => setDebouncedQuery(query), 200);
+    return () => clearTimeout(timer);
+  }, [query]);
+
   const results = useMemo(() => {
-    if (query.trim().length < 2) return [];
+    if (debouncedQuery.trim().length < 2) return [];
     try {
-      return searchReleases(query);
+      return searchReleases(debouncedQuery);
     } catch {
       return [];
     }
-  }, [query]);
+  }, [debouncedQuery]);
 
   const getItemLayout = useCallback(
     (_: unknown, index: number) => ({
@@ -100,7 +107,7 @@ export default function SearchScreen() {
         </Animated.View>
       </View>
 
-      {query.trim().length >= 2 && results.length === 0 ? (
+      {debouncedQuery.trim().length >= 2 && results.length === 0 ? (
         <EmptyState
           icon={Search}
           title={t("search.noResults")}
