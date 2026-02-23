@@ -61,7 +61,7 @@ export default function SearchScreen() {
   }, [query]);
 
   const results = useMemo(() => {
-    if (debouncedQuery.trim().length < 2) return [];
+    if (debouncedQuery.trim().length < 1) return [];
     try {
       return searchReleases(debouncedQuery);
     } catch {
@@ -107,7 +107,7 @@ export default function SearchScreen() {
         </Animated.View>
       </View>
 
-      {debouncedQuery.trim().length >= 2 && results.length === 0 ? (
+      {debouncedQuery.trim().length >= 1 && results.length === 0 ? (
         <EmptyState
           icon={Search}
           title={t("search.noResults")}
