@@ -9,21 +9,22 @@ import { useAuthStore } from "@/stores/auth-store";
 import { AuthExpiredError } from "@/lib/discogs/errors";
 import { logout } from "@/lib/discogs/oauth";
 import { queryClient } from "@/lib/query-client";
+import type { ReleaseSyncCallbacks } from "./release-sync";
 
 /**
- * Run the full sync pipeline:
- * 1. Sync folders
- * 2. Sync basic release info (paginated)
- * 3. Start progressive detail sync
+ * Shared sync pipeline: guards, folder sync, release sync step, detail sync, cleanup.
  */
-export async function runFullSync(username: string) {
+async function runSyncPipeline(
+  username: string,
+  syncReleasesStep: (signal: AbortSignal, callbacks: ReleaseSyncCallbacks) => Promise<void>,
+) {
   const store = useSyncStore.getState();
 
   if (store.isSyncing) return;
   const controller = store.startSync();
   const signal = controller.signal;
 
-  const callbacks = {
+  const callbacks: ReleaseSyncCallbacks = {
     setPhase: store.setPhase,
     setProgress: store.setProgress,
   };
@@ -34,14 +35,13 @@ export async function runFullSync(username: string) {
 
     if (signal.aborted) return;
 
-    await syncBasicReleases(username, signal, callbacks);
+    await syncReleasesStep(signal, callbacks);
     queryClient.invalidateQueries({ queryKey: ["releases"] });
 
     if (signal.aborted) return;
 
     store.setLastFullSyncAt(new Date().toISOString());
 
-    // Detail sync continues while isSyncing remains true
     store.setPhase("details");
     await runDetailSyncLoop(signal);
 
@@ -59,56 +59,28 @@ export async function runFullSync(username: string) {
 }
 
 /**
+ * Run the full sync pipeline:
+ * 1. Sync folders
+ * 2. Sync basic release info (paginated)
+ * 3. Start progressive detail sync
+ */
+export async function runFullSync(username: string) {
+  return runSyncPipeline(username, (signal, callbacks) =>
+    syncBasicReleases(username, signal, callbacks),
+  );
+}
+
+/**
  * Run an incremental sync: fetch only new releases since last full sync,
  * then run bounded detail sync.
  */
 export async function runIncrementalSync(username: string) {
-  const store = useSyncStore.getState();
+  const { lastFullSyncAt } = useSyncStore.getState();
+  if (!lastFullSyncAt) return;
 
-  if (store.isSyncing) return;
-  if (!store.lastFullSyncAt) return;
-
-  const controller = store.startSync();
-  const signal = controller.signal;
-
-  const callbacks = {
-    setPhase: store.setPhase,
-    setProgress: store.setProgress,
-  };
-
-  try {
-    await syncFolders(username, signal, callbacks);
-    queryClient.invalidateQueries({ queryKey: ["folders"] });
-
-    if (signal.aborted) return;
-
-    await syncBasicReleasesIncremental(
-      username,
-      store.lastFullSyncAt,
-      signal,
-      callbacks,
-    );
-    queryClient.invalidateQueries({ queryKey: ["releases"] });
-
-    if (signal.aborted) return;
-
-    store.setLastFullSyncAt(new Date().toISOString());
-
-    // Detail sync continues while isSyncing remains true
-    store.setPhase("details");
-    await runDetailSyncLoop(signal);
-
-    store.finishSync();
-  } catch (err) {
-    if (signal.aborted) return;
-    if (err instanceof AuthExpiredError) {
-      await logout();
-      useAuthStore.getState().clearAuth();
-      store.finishSync();
-      return;
-    }
-    store.setError(err instanceof Error ? err.message : "Sync failed");
-  }
+  return runSyncPipeline(username, (signal, callbacks) =>
+    syncBasicReleasesIncremental(username, lastFullSyncAt, signal, callbacks),
+  );
 }
 
 /**
