@@ -66,6 +66,8 @@ export default function FolderReleasesScreen() {
           data={releases}
           keyExtractor={(item) => String(item.instanceId)}
           contentContainerStyle={{ paddingBottom: 90 }}
+          initialNumToRender={15}
+          maxToRenderPerBatch={20}
           getItemLayout={(_, index) => ({
             length: ITEM_HEIGHT,
             offset: ITEM_HEIGHT * index,

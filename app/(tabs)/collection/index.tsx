@@ -86,6 +86,7 @@ export default function CollectionScreen() {
         data={folders}
         keyExtractor={(item) => String(item.id)}
         contentContainerStyle={{ paddingTop: 4, paddingBottom: 90 }}
+        initialNumToRender={15}
         ListHeaderComponent={
           <>
             <SyncStatusCard />
