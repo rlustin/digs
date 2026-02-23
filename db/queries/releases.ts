@@ -51,6 +51,7 @@ export function getReleasesNeedingDetailSync(limit: number = 10) {
     .select()
     .from(releases)
     .where(sql`${releases.detailSyncedAt} IS NULL`)
+    .orderBy(sql`RANDOM()`)
     .limit(limit)
     .all();
 }
