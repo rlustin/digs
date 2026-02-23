@@ -80,10 +80,16 @@ function migrateV1() {
   `);
 
   // Triggers to keep FTS index in sync
+  // Extract plain-text names from JSON arrays so FTS5 indexes searchable text
   expo.execSync(`
     CREATE TRIGGER IF NOT EXISTS releases_ai AFTER INSERT ON releases BEGIN
       INSERT INTO releases_fts(rowid, title, artists, labels)
-      VALUES (new.instance_id, new.title, new.artists, new.labels);
+      VALUES (
+        new.instance_id,
+        new.title,
+        (SELECT GROUP_CONCAT(json_extract(value, '$.name'), ', ') FROM json_each(new.artists)),
+        (SELECT GROUP_CONCAT(json_extract(value, '$.name'), ', ') FROM json_each(new.labels))
+      );
     END;
   `);
 
@@ -99,7 +105,12 @@ function migrateV1() {
       INSERT INTO releases_fts(releases_fts, rowid, title, artists, labels)
       VALUES ('delete', old.instance_id, old.title, old.artists, old.labels);
       INSERT INTO releases_fts(rowid, title, artists, labels)
-      VALUES (new.instance_id, new.title, new.artists, new.labels);
+      VALUES (
+        new.instance_id,
+        new.title,
+        (SELECT GROUP_CONCAT(json_extract(value, '$.name'), ', ') FROM json_each(new.artists)),
+        (SELECT GROUP_CONCAT(json_extract(value, '$.name'), ', ') FROM json_each(new.labels))
+      );
     END;
   `);
 }
