@@ -235,7 +235,7 @@ export async function syncReleaseDetails(
 
       db.update(releases)
         .set(mapReleaseDetailToRow(detail))
-        .where(eq(releases.releaseId, release.releaseId))
+        .where(eq(releases.instanceId, release.instanceId))
         .run();
       processed++;
     } catch (err) {
