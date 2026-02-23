@@ -18,7 +18,8 @@
       "infoPlist": {
         "UIBackgroundModes": [
           "processing"
-        ]
+        ],
+        "ITSAppUsesNonExemptEncryption": false
       },
       "bundleIdentifier": "fr.lustin.digs"
     },
@@ -45,6 +46,12 @@
     ],
     "experiments": {
       "typedRoutes": true
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "6301f144-76a2-471e-87f4-d52410b50c38"
+      }
     }
   }
 }

@@ -15,6 +15,9 @@ android/
 *.mobileprovision
 *.p8
 
+# EAS Build artifacts
+*.tar.gz
+
 # Debug logs
 npm-debug.*
 yarn-debug.*
