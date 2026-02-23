@@ -169,11 +169,14 @@ export async function restoreSession(): Promise<string | null> {
         "User-Agent": DISCOGS_USER_AGENT,
       },
     });
-    if (!res.ok) throw new Error("invalid");
+    if (res.status === 401) {
+      clearClientCredentials();
+      await logout();
+      return null;
+    }
+    // Non-401 errors (5xx, etc.) — keep session alive for offline use
   } catch {
-    clearClientCredentials();
-    await logout();
-    return null;
+    // Network error (no connectivity) — keep session alive for offline use
   }
 
   return username;
