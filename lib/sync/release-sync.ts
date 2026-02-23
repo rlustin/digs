@@ -160,7 +160,7 @@ export async function syncBasicReleasesIncremental(
 
       const newReleases = [];
       for (const r of response.releases) {
-        if (r.date_added <= lastFullSyncAt) {
+        if (new Date(r.date_added).getTime() <= new Date(lastFullSyncAt).getTime()) {
           reachedOldReleases = true;
           break;
         }
