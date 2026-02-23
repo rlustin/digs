@@ -1,4 +1,4 @@
-import { eq, and, notInArray } from "drizzle-orm";
+import { eq, and, notInArray, inArray } from "drizzle-orm";
 import { db, expo } from "@/db/client";
 import { releases } from "@/db/schema";
 import { getAllFolders } from "@/db/queries/folders";
@@ -44,6 +44,45 @@ export function mapBasicRelease(r: CollectionRelease, folderId: number) {
     dateAdded: r.date_added,
     basicSyncedAt: new Date().toISOString(),
   };
+}
+
+const SQLITE_VARIABLE_LIMIT = 500;
+
+/**
+ * Delete releases in a folder that are not in the given set of instance IDs.
+ * Handles large ID sets by batching to stay within SQLite variable limits.
+ */
+function deleteReleasesNotIn(folderId: number, syncedInstanceIds: number[]) {
+  if (syncedInstanceIds.length <= SQLITE_VARIABLE_LIMIT) {
+    db.delete(releases)
+      .where(
+        and(
+          eq(releases.folderId, folderId),
+          notInArray(releases.instanceId, syncedInstanceIds),
+        ),
+      )
+      .run();
+    return;
+  }
+
+  // For large sets: fetch all local IDs, compute diff in JS, delete in batches
+  const localRows = db
+    .select({ instanceId: releases.instanceId })
+    .from(releases)
+    .where(eq(releases.folderId, folderId))
+    .all();
+
+  const syncedSet = new Set(syncedInstanceIds);
+  const toDelete = localRows
+    .map((r) => r.instanceId)
+    .filter((id) => !syncedSet.has(id));
+
+  for (let i = 0; i < toDelete.length; i += SQLITE_VARIABLE_LIMIT) {
+    const batch = toDelete.slice(i, i + SQLITE_VARIABLE_LIMIT);
+    db.delete(releases)
+      .where(inArray(releases.instanceId, batch))
+      .run();
+  }
 }
 
 function upsertReleasePage(
@@ -107,14 +146,7 @@ export async function syncBasicReleases(
 
     // Remove local releases that were deleted from this folder on Discogs
     if (syncedInstanceIds.length > 0) {
-      db.delete(releases)
-        .where(
-          and(
-            eq(releases.folderId, folder.id),
-            notInArray(releases.instanceId, syncedInstanceIds),
-          ),
-        )
-        .run();
+      deleteReleasesNotIn(folder.id, syncedInstanceIds);
     }
   }
 }
@@ -201,14 +233,7 @@ export async function syncBasicReleasesIncremental(
       }
 
       if (syncedInstanceIds.length > 0) {
-        db.delete(releases)
-          .where(
-            and(
-              eq(releases.folderId, folder.id),
-              notInArray(releases.instanceId, syncedInstanceIds),
-            ),
-          )
-          .run();
+        deleteReleasesNotIn(folder.id, syncedInstanceIds);
       }
     }
   }

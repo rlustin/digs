@@ -19,6 +19,9 @@ jest.mock("@/db/client", () => ({
     set: jest.fn().mockReturnThis(),
     where: jest.fn().mockReturnThis(),
     delete: jest.fn().mockReturnThis(),
+    select: jest.fn().mockReturnThis(),
+    from: jest.fn().mockReturnThis(),
+    all: jest.fn().mockReturnValue([]),
   },
   expo: {
     withTransactionSync: jest.fn((fn: () => void) => fn()),
@@ -221,6 +224,35 @@ describe("syncBasicReleases", () => {
     await syncBasicReleases("rlustin", undefined, mockCallbacks);
 
     expect(mockCallbacks.setProgress).toHaveBeenCalledWith(3, 29);
+  });
+
+  it("handles deletion reconciliation with more than 500 instance IDs", async () => {
+    const mockDb = db as any;
+    mockGetAllFolders.mockReturnValue([
+      { id: 9182214, name: "Jungle", count: 600 },
+    ]);
+
+    // Generate 600 fake releases with unique instance_ids
+    const fakeReleases = Array.from({ length: 600 }, (_, i) => ({
+      ...collectionFixture.releases[0],
+      instance_id: 1000 + i,
+    }));
+
+    mockFetchReleasesInFolder.mockResolvedValue({
+      pagination: { page: 1, pages: 1, per_page: 600, items: 600, urls: {} },
+      releases: fakeReleases,
+    } as any);
+
+    // Local DB has one extra release that should be deleted
+    mockDb.all.mockReturnValue([
+      ...fakeReleases.map((r: any) => ({ instanceId: r.instance_id })),
+      { instanceId: 99999 },
+    ]);
+
+    await syncBasicReleases("rlustin");
+
+    // Should have called delete (via batched path since > 500 IDs)
+    expect(mockDb.delete).toHaveBeenCalled();
   });
 });
 
