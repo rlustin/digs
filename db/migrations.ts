@@ -38,7 +38,7 @@ function migrateV1() {
     CREATE TABLE IF NOT EXISTS releases (
       instance_id INTEGER PRIMARY KEY,
       release_id INTEGER NOT NULL,
-      folder_id INTEGER NOT NULL REFERENCES folders(id),
+      folder_id INTEGER NOT NULL REFERENCES folders(id) ON DELETE CASCADE,
       title TEXT NOT NULL,
       year INTEGER,
       artists TEXT,
@@ -66,6 +66,10 @@ function migrateV1() {
 
   expo.execSync(`
     CREATE INDEX IF NOT EXISTS idx_releases_folder_id ON releases(folder_id);
+  `);
+
+  expo.execSync(`
+    CREATE INDEX IF NOT EXISTS idx_releases_detail_synced_at ON releases(detail_synced_at);
   `);
 
   // FTS5 virtual table for full-text search
