@@ -1,7 +1,7 @@
 import { useEffect, useRef } from "react";
 import { useAuthStore } from "@/stores/auth-store";
 import { useSyncStore } from "@/stores/sync-store";
-import { runFullSync } from "@/lib/sync/engine";
+import { runFullSync, runIncrementalSync } from "@/lib/sync/engine";
 import { registerBackgroundSync } from "@/lib/sync/background-task";
 
 /**
@@ -23,7 +23,8 @@ export function useInitialSync() {
       // First sync ever
       runFullSync(username);
     } else {
-      // Already synced before — just register background task
+      // Already synced before — run incremental sync + register background task
+      runIncrementalSync(username);
       registerBackgroundSync();
     }
   }, [username, lastFullSyncAt]);

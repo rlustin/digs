@@ -63,6 +63,32 @@ describe("endpoints", () => {
         undefined
       );
     });
+
+    it("appends sort and sort_order params when provided", () => {
+      mockDiscogsRequest.mockResolvedValue(collectionFixture);
+
+      fetchReleasesInFolder("rlustin", 9182214, 1, 100, undefined, "added", "desc");
+
+      expect(mockDiscogsRequest).toHaveBeenCalledWith(
+        "/users/rlustin/collection/folders/9182214/releases?per_page=100&page=1&sort=added&sort_order=desc",
+        "GET",
+        3,
+        undefined
+      );
+    });
+
+    it("omits sort params when not provided", () => {
+      mockDiscogsRequest.mockResolvedValue(collectionFixture);
+
+      fetchReleasesInFolder("rlustin", 9182214, 1, 100, undefined);
+
+      expect(mockDiscogsRequest).toHaveBeenCalledWith(
+        "/users/rlustin/collection/folders/9182214/releases?per_page=100&page=1",
+        "GET",
+        3,
+        undefined
+      );
+    });
   });
 
   describe("fetchReleaseDetail", () => {

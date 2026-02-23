@@ -17,6 +17,7 @@ jest.mock("@/lib/discogs/client", () => ({
 
 jest.mock("@/lib/sync/engine", () => ({
   runFullSync: jest.fn(),
+  runIncrementalSync: jest.fn(),
 }));
 
 jest.mock("@/db/queries/releases", () => ({

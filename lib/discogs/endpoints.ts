@@ -19,14 +19,14 @@ export function fetchReleasesInFolder(
   folderId: number,
   page: number = 1,
   perPage: number = 100,
-  signal?: AbortSignal
+  signal?: AbortSignal,
+  sort?: string,
+  sortOrder?: string
 ) {
-  return discogsRequest<CollectionReleasesResponse>(
-    `/users/${username}/collection/folders/${folderId}/releases?per_page=${perPage}&page=${page}`,
-    "GET",
-    3,
-    signal
-  );
+  let url = `/users/${username}/collection/folders/${folderId}/releases?per_page=${perPage}&page=${page}`;
+  if (sort) url += `&sort=${sort}`;
+  if (sortOrder) url += `&sort_order=${sortOrder}`;
+  return discogsRequest<CollectionReleasesResponse>(url, "GET", 3, signal);
 }
 
 export function fetchReleaseDetail(releaseId: number, signal?: AbortSignal) {

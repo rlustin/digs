@@ -28,6 +28,15 @@ export function getReleaseByReleaseId(releaseId: number) {
     .get() ?? null;
 }
 
+export function getLocalReleaseCountByFolder(folderId: number): number {
+  const row = db
+    .select({ count: sql<number>`count(*)` })
+    .from(releases)
+    .where(eq(releases.folderId, folderId))
+    .get();
+  return row?.count ?? 0;
+}
+
 export function getReleasesNeedingDetailSync(limit: number = 10) {
   return db
     .select()

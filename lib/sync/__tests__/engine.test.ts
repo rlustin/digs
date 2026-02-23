@@ -1,6 +1,6 @@
-import { runFullSync, runDetailSyncLoop, runDetailSyncBatch } from "../engine";
+import { runFullSync, runIncrementalSync, runDetailSyncLoop, runDetailSyncBatch } from "../engine";
 import { syncFolders } from "../folder-sync";
-import { syncBasicReleases, syncReleaseDetails } from "../release-sync";
+import { syncBasicReleases, syncBasicReleasesIncremental, syncReleaseDetails } from "../release-sync";
 import { useSyncStore } from "@/stores/sync-store";
 import { queryClient } from "@/lib/query-client";
 
@@ -10,6 +10,7 @@ jest.mock("../folder-sync", () => ({
 
 jest.mock("../release-sync", () => ({
   syncBasicReleases: jest.fn().mockResolvedValue(undefined),
+  syncBasicReleasesIncremental: jest.fn().mockResolvedValue(undefined),
   syncReleaseDetails: jest.fn().mockResolvedValue(0),
 }));
 
@@ -36,6 +37,7 @@ jest.mock("@/lib/query-client", () => ({
 
 const mockSyncFolders = syncFolders as jest.MockedFunction<typeof syncFolders>;
 const mockSyncBasicReleases = syncBasicReleases as jest.MockedFunction<typeof syncBasicReleases>;
+const mockSyncBasicReleasesIncremental = syncBasicReleasesIncremental as jest.MockedFunction<typeof syncBasicReleasesIncremental>;
 const mockSyncReleaseDetails = syncReleaseDetails as jest.MockedFunction<typeof syncReleaseDetails>;
 const mockInvalidateQueries = queryClient.invalidateQueries as jest.MockedFunction<typeof queryClient.invalidateQueries>;
 
@@ -147,6 +149,19 @@ describe("runDetailSyncLoop", () => {
     expect(mockSyncReleaseDetails).toHaveBeenCalledTimes(3);
   });
 
+  it("stops after maxBatches even if more data is available", async () => {
+    mockSyncReleaseDetails.mockResolvedValue(10);
+
+    const promise = runDetailSyncLoop(undefined, 3);
+
+    await jest.advanceTimersByTimeAsync(12500);
+    await jest.advanceTimersByTimeAsync(12500);
+
+    await promise;
+
+    expect(mockSyncReleaseDetails).toHaveBeenCalledTimes(3);
+  });
+
   it("pauses 12s between batches", async () => {
     mockSyncReleaseDetails
       .mockResolvedValueOnce(10)
@@ -162,6 +177,33 @@ describe("runDetailSyncLoop", () => {
     await promise;
 
     expect(mockSyncReleaseDetails).toHaveBeenCalledTimes(2);
+  });
+
+  it("invalidates queries once at the end, not per batch", async () => {
+    mockSyncReleaseDetails
+      .mockResolvedValueOnce(10)
+      .mockResolvedValueOnce(5)
+      .mockResolvedValueOnce(0);
+
+    const promise = runDetailSyncLoop();
+
+    await jest.advanceTimersByTimeAsync(12500);
+    await jest.advanceTimersByTimeAsync(12500);
+
+    await promise;
+
+    const releaseCalls = mockInvalidateQueries.mock.calls.filter(
+      (c) => (c[0] as any).queryKey[0] === "releases"
+    );
+    expect(releaseCalls).toHaveLength(1);
+  });
+
+  it("does not invalidate queries when no releases were processed", async () => {
+    mockSyncReleaseDetails.mockResolvedValue(0);
+
+    await runDetailSyncLoop();
+
+    expect(mockInvalidateQueries).not.toHaveBeenCalled();
   });
 
   it("logs and breaks on error", async () => {
@@ -184,6 +226,84 @@ describe("runDetailSyncLoop", () => {
     await runDetailSyncLoop(controller.signal);
 
     expect(mockSyncReleaseDetails).not.toHaveBeenCalled();
+  });
+});
+
+describe("runIncrementalSync", () => {
+  const store = useSyncStore.getState();
+
+  beforeEach(() => {
+    jest.useFakeTimers();
+    jest.clearAllMocks();
+    (store as any).isSyncing = false;
+    (store as any).lastFullSyncAt = "2025-01-15T00:00:00.000Z";
+    (store.startSync as jest.Mock).mockReturnValue(new AbortController());
+    mockSyncFolders.mockResolvedValue(undefined);
+    mockSyncBasicReleasesIncremental.mockResolvedValue(undefined);
+    mockSyncReleaseDetails.mockResolvedValue(0);
+  });
+
+  afterEach(() => {
+    jest.useRealTimers();
+  });
+
+  it("no-ops when already syncing", async () => {
+    (store as any).isSyncing = true;
+
+    await runIncrementalSync("testuser");
+
+    expect(mockSyncFolders).not.toHaveBeenCalled();
+  });
+
+  it("no-ops when lastFullSyncAt is not set", async () => {
+    (store as any).lastFullSyncAt = null;
+
+    await runIncrementalSync("testuser");
+
+    expect(mockSyncFolders).not.toHaveBeenCalled();
+  });
+
+  it("calls syncBasicReleasesIncremental with lastFullSyncAt", async () => {
+    await runIncrementalSync("testuser");
+
+    expect(mockSyncBasicReleasesIncremental).toHaveBeenCalledWith(
+      "testuser",
+      "2025-01-15T00:00:00.000Z",
+      expect.any(AbortSignal),
+      expect.objectContaining({ setPhase: expect.any(Function) }),
+    );
+  });
+
+  it("runs pipeline: folders → incremental releases → detail loop", async () => {
+    const callOrder: string[] = [];
+    mockSyncFolders.mockImplementation(async () => { callOrder.push("folders"); });
+    mockSyncBasicReleasesIncremental.mockImplementation(async () => { callOrder.push("incremental-releases"); });
+    mockSyncReleaseDetails.mockImplementation(async () => {
+      callOrder.push("details");
+      return 0;
+    });
+
+    await runIncrementalSync("testuser");
+
+    expect(callOrder).toEqual(["folders", "incremental-releases", "details"]);
+  });
+
+  it("updates lastFullSyncAt on success", async () => {
+    jest.spyOn(Date.prototype, "toISOString").mockReturnValue("2025-02-01T00:00:00.000Z");
+
+    await runIncrementalSync("testuser");
+
+    expect(store.setLastFullSyncAt).toHaveBeenCalledWith("2025-02-01T00:00:00.000Z");
+    jest.restoreAllMocks();
+  });
+
+  it("sets error and stops syncing on failure", async () => {
+    mockSyncFolders.mockRejectedValue(new Error("network down"));
+
+    await runIncrementalSync("testuser");
+
+    expect(store.setError).toHaveBeenCalledWith("network down");
+    expect(store.setSyncing).toHaveBeenCalledWith(false);
   });
 });
 

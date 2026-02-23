@@ -28,6 +28,7 @@ jest.mock("@/db/queries/releases", () => ({
 
 jest.mock("@/lib/sync/engine", () => ({
   runFullSync: jest.fn(),
+  runIncrementalSync: jest.fn(),
 }));
 
 jest.mock("@/components/sync/sync-status-bar", () => ({

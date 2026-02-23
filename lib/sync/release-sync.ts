@@ -6,7 +6,10 @@ import {
   fetchReleasesInFolder,
   fetchReleaseDetail,
 } from "@/lib/discogs/endpoints";
-import { getReleasesNeedingDetailSync } from "@/db/queries/releases";
+import {
+  getReleasesNeedingDetailSync,
+  getLocalReleaseCountByFolder,
+} from "@/db/queries/releases";
 import type { CollectionRelease } from "@/lib/discogs/types";
 import type { SyncPhase } from "@/stores/sync-store";
 import { mapReleaseDetailToRow } from "./detail-mapper";
@@ -112,6 +115,101 @@ export async function syncBasicReleases(
           ),
         )
         .run();
+    }
+  }
+}
+
+/**
+ * Incremental sync: fetch only new releases added since lastFullSyncAt.
+ * Uses sort=added&sort_order=desc so newest releases come first.
+ * Stops paginating a folder once we hit a release older than the cutoff.
+ * Only runs full deletion reconciliation for folders where local count != API count.
+ */
+export async function syncBasicReleasesIncremental(
+  username: string,
+  lastFullSyncAt: string,
+  signal?: AbortSignal,
+  callbacks?: ReleaseSyncCallbacks,
+) {
+  callbacks?.setPhase("basic-releases");
+
+  const folders = getAllFolders().filter((f) => f.id !== 0);
+  const foldersToSync =
+    folders.length > 0 ? folders : [{ id: 1, name: "Uncategorized", count: 0 }];
+
+  for (const folder of foldersToSync) {
+    if (signal?.aborted) return;
+
+    let page = 1;
+    let totalPages = 1;
+    let reachedOldReleases = false;
+
+    // Fetch new releases (newest first, stop when we hit known ones)
+    while (page <= totalPages && !reachedOldReleases) {
+      if (signal?.aborted) return;
+      const response = await fetchReleasesInFolder(
+        username,
+        folder.id,
+        page,
+        100,
+        signal,
+        "added",
+        "desc",
+      );
+      totalPages = response.pagination.pages;
+
+      const newReleases = [];
+      for (const r of response.releases) {
+        if (r.date_added <= lastFullSyncAt) {
+          reachedOldReleases = true;
+          break;
+        }
+        newReleases.push(r);
+      }
+
+      if (newReleases.length > 0) {
+        upsertReleasePage(newReleases, folder.id);
+      }
+      page++;
+    }
+
+    // Deletion detection: only reconcile folders where counts diverge
+    if (signal?.aborted) return;
+    const localCount = getLocalReleaseCountByFolder(folder.id);
+    if (localCount !== folder.count) {
+      // Full reconciliation for this folder
+      let reconcilePage = 1;
+      let reconcileTotalPages = 1;
+      const syncedInstanceIds: number[] = [];
+
+      while (reconcilePage <= reconcileTotalPages) {
+        if (signal?.aborted) return;
+        const response = await fetchReleasesInFolder(
+          username,
+          folder.id,
+          reconcilePage,
+          100,
+          signal,
+        );
+        reconcileTotalPages = response.pagination.pages;
+
+        for (const r of response.releases) {
+          syncedInstanceIds.push(r.instance_id);
+        }
+        upsertReleasePage(response.releases, folder.id);
+        reconcilePage++;
+      }
+
+      if (syncedInstanceIds.length > 0) {
+        db.delete(releases)
+          .where(
+            and(
+              eq(releases.folderId, folder.id),
+              notInArray(releases.instanceId, syncedInstanceIds),
+            ),
+          )
+          .run();
+      }
     }
   }
 }

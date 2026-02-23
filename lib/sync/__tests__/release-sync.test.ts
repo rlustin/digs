@@ -2,9 +2,9 @@ import type { CollectionRelease } from "@/lib/discogs/types";
 import collectionFixture from "@/__fixtures__/collection-releases.json";
 import releaseDetailFixture from "@/__fixtures__/release-detail.json";
 
-import { mapBasicRelease, syncBasicReleases, syncReleaseDetails } from "../release-sync";
+import { mapBasicRelease, syncBasicReleases, syncBasicReleasesIncremental, syncReleaseDetails } from "../release-sync";
 import { getAllFolders } from "@/db/queries/folders";
-import { getReleasesNeedingDetailSync } from "@/db/queries/releases";
+import { getReleasesNeedingDetailSync, getLocalReleaseCountByFolder } from "@/db/queries/releases";
 import { fetchReleasesInFolder, fetchReleaseDetail } from "@/lib/discogs/endpoints";
 import { db } from "@/db/client";
 
@@ -35,6 +35,7 @@ jest.mock("@/db/queries/folders", () => ({
 
 jest.mock("@/db/queries/releases", () => ({
   getReleasesNeedingDetailSync: jest.fn(),
+  getLocalReleaseCountByFolder: jest.fn(),
 }));
 
 jest.mock("@/lib/discogs/endpoints", () => ({
@@ -48,6 +49,7 @@ const mockCallbacks = {
   setPhase: jest.fn(),
   setProgress: jest.fn(),
 };
+const mockGetLocalReleaseCountByFolder = getLocalReleaseCountByFolder as jest.MockedFunction<typeof getLocalReleaseCountByFolder>;
 const mockGetReleasesNeedingDetailSync = getReleasesNeedingDetailSync as jest.MockedFunction<typeof getReleasesNeedingDetailSync>;
 const mockFetchReleasesInFolder = fetchReleasesInFolder as jest.MockedFunction<typeof fetchReleasesInFolder>;
 const mockFetchReleaseDetail = fetchReleaseDetail as jest.MockedFunction<typeof fetchReleaseDetail>;
@@ -219,6 +221,99 @@ describe("syncBasicReleases", () => {
     await syncBasicReleases("rlustin", undefined, mockCallbacks);
 
     expect(mockCallbacks.setProgress).toHaveBeenCalledWith(3, 29);
+  });
+});
+
+describe("syncBasicReleasesIncremental", () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it("stops paginating when hitting a release older than cutoff", async () => {
+    mockGetAllFolders.mockReturnValue([
+      { id: 9182214, name: "Jungle", count: 3 },
+    ]);
+    // Sorted desc by date_added: Mix'Elle (2025-07-19), Tim Reaper (2023-03-23), Fracture (2023-03-05)
+    mockFetchReleasesInFolder.mockResolvedValueOnce({
+      pagination: { page: 1, pages: 2, per_page: 100, items: 3, urls: {} },
+      releases: [mixElle, timReaper, fracture],
+    } as any);
+    mockGetLocalReleaseCountByFolder.mockReturnValue(3);
+
+    // Cutoff: 2025-01-01 — only Mix'Elle (2025-07-19) is newer
+    await syncBasicReleasesIncremental("rlustin", "2025-01-01T00:00:00.000Z");
+
+    // Should NOT fetch page 2 since we hit old releases on page 1
+    expect(mockFetchReleasesInFolder).toHaveBeenCalledTimes(1);
+    // Should have been called with sort params
+    expect(mockFetchReleasesInFolder).toHaveBeenCalledWith(
+      "rlustin", 9182214, 1, 100, undefined, "added", "desc",
+    );
+  });
+
+  it("upserts only new releases from the boundary page", async () => {
+    mockGetAllFolders.mockReturnValue([
+      { id: 9182214, name: "Jungle", count: 3 },
+    ]);
+    mockFetchReleasesInFolder.mockResolvedValueOnce({
+      pagination: { page: 1, pages: 1, per_page: 100, items: 3, urls: {} },
+      releases: [mixElle, timReaper, fracture],
+    } as any);
+    mockGetLocalReleaseCountByFolder.mockReturnValue(3);
+
+    await syncBasicReleasesIncremental("rlustin", "2025-01-01T00:00:00.000Z");
+
+    // Only Mix'Elle should be upserted (the one newer than cutoff)
+    const mockExpo = require("@/db/client").expo;
+    const transactionFn = mockExpo.withTransactionSync.mock.calls[0]?.[0];
+    expect(mockExpo.withTransactionSync).toHaveBeenCalledTimes(1);
+  });
+
+  it("skips deletion check when local count matches API count", async () => {
+    mockGetAllFolders.mockReturnValue([
+      { id: 9182214, name: "Jungle", count: 3 },
+    ]);
+    mockFetchReleasesInFolder.mockResolvedValueOnce({
+      pagination: { page: 1, pages: 1, per_page: 100, items: 3, urls: {} },
+      releases: [mixElle],
+    } as any);
+    // Local count matches API count — no reconciliation needed
+    mockGetLocalReleaseCountByFolder.mockReturnValue(3);
+
+    await syncBasicReleasesIncremental("rlustin", "2020-01-01T00:00:00.000Z");
+
+    // Only the incremental fetch call — no reconciliation calls
+    expect(mockFetchReleasesInFolder).toHaveBeenCalledTimes(1);
+    expect((db as any).delete).not.toHaveBeenCalled();
+  });
+
+  it("runs full reconciliation when counts diverge", async () => {
+    mockGetAllFolders.mockReturnValue([
+      { id: 9182214, name: "Jungle", count: 3 },
+    ]);
+    // Incremental fetch
+    mockFetchReleasesInFolder
+      .mockResolvedValueOnce({
+        pagination: { page: 1, pages: 1, per_page: 100, items: 3, urls: {} },
+        releases: [mixElle],
+      } as any)
+      // Full reconciliation fetch
+      .mockResolvedValueOnce({
+        pagination: { page: 1, pages: 1, per_page: 100, items: 3, urls: {} },
+        releases: collectionFixture.releases,
+      } as any);
+    // Local count (2) doesn't match API count (3) — reconciliation needed
+    mockGetLocalReleaseCountByFolder.mockReturnValue(2);
+
+    await syncBasicReleasesIncremental("rlustin", "2020-01-01T00:00:00.000Z");
+
+    // 1 incremental + 1 reconciliation
+    expect(mockFetchReleasesInFolder).toHaveBeenCalledTimes(2);
+    // Reconciliation call should NOT have sort params
+    expect(mockFetchReleasesInFolder).toHaveBeenCalledWith(
+      "rlustin", 9182214, 1, 100, undefined,
+    );
+    expect((db as any).delete).toHaveBeenCalled();
   });
 });
 
