@@ -60,13 +60,25 @@ export default function SettingsScreen() {
         text: t("settings.logOut"),
         style: "destructive",
         onPress: async () => {
-          cancelSync();
-          clearLastFullSyncAt();
-          clearAllFolders();
-          clearAllReleases();
-          queryClient.invalidateQueries();
-          await logout();
-          clearClientCredentials();
+          try {
+            cancelSync();
+            clearLastFullSyncAt();
+            clearAllFolders();
+            clearAllReleases();
+            queryClient.invalidateQueries();
+          } catch (e) {
+            console.warn("Logout: DB cleanup failed", e);
+          }
+          try {
+            await logout();
+          } catch (e) {
+            console.warn("Logout: credential removal failed", e);
+          }
+          try {
+            clearClientCredentials();
+          } catch (e) {
+            console.warn("Logout: client credentials clear failed", e);
+          }
           clearAuth();
         },
       },
