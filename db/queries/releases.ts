@@ -1,4 +1,4 @@
-import { desc, eq, sql } from "drizzle-orm";
+import { desc, eq, sql, type InferSelectModel } from "drizzle-orm";
 import { db, expo } from "../client";
 import { releases } from "../schema";
 
@@ -67,21 +67,22 @@ export function getDetailSyncCounts() {
   return { total: row?.total ?? 0, synced: row?.synced ?? 0 };
 }
 
-export interface SearchResult {
-  instanceId: number;
-  releaseId: number;
-  folderId: number;
-  title: string;
-  year: number | null;
-  artists: { name: string; id: number }[] | null;
-  labels: { name: string; catno: string }[] | null;
-  formats: { name: string; qty: string; descriptions?: string[] }[] | null;
-  genres: string[] | null;
-  styles: string[] | null;
-  thumbUrl: string | null;
-  coverUrl: string | null;
-  dateAdded: string | null;
-}
+export type SearchResult = Pick<
+  InferSelectModel<typeof releases>,
+  | "instanceId"
+  | "releaseId"
+  | "folderId"
+  | "title"
+  | "year"
+  | "artists"
+  | "labels"
+  | "formats"
+  | "genres"
+  | "styles"
+  | "thumbUrl"
+  | "coverUrl"
+  | "dateAdded"
+>;
 
 export function searchReleases(query: string): SearchResult[] {
   if (!query.trim()) return [];
