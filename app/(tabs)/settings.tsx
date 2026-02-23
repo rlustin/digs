@@ -168,7 +168,7 @@ export default function SettingsScreen() {
                   {error}
                 </Text>
               </View>
-              <Pressable onPress={reset} hitSlop={8}>
+              <Pressable onPress={reset} hitSlop={8} accessibilityLabel={t("common.dismiss")} accessibilityRole="button">
                 <X size={14} color={Colors.gray400} />
               </Pressable>
             </View>

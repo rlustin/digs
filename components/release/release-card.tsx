@@ -31,6 +31,8 @@ export const ReleaseCard = memo(function ReleaseCard({
     <Pressable
       onPress={() => router.push(`/release/${releaseId}`)}
       className="flex-row px-4 py-3 active:bg-gray-50"
+      accessibilityRole="button"
+      accessibilityLabel={`${title} by ${artistNames}`}
     >
       <View
         style={{
