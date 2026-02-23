@@ -68,7 +68,7 @@ describe("RateLimiter", () => {
     expect(results).toContain(2);
   });
 
-  it("allows immediate acquire after queue drains", async () => {
+  it("allows immediate acquire after queue drains when tokens are restored", async () => {
     const limiter = new RateLimiter(2);
     await limiter.acquire(); // remaining = 1
     await limiter.acquire(); // remaining = 0
@@ -80,14 +80,38 @@ describe("RateLimiter", () => {
     await flushMicrotasks();
     expect(queued).toBe(false);
 
+    // Simulate a header update restoring tokens before drain
+    limiter.updateFromHeader(5);
+
     // Drain the queue
     jest.advanceTimersByTime(1100);
     await flushMicrotasks();
     await queuedPromise;
     expect(queued).toBe(true);
 
-    // After drain, next acquire should resolve immediately (remaining was set to 1)
+    // After drain, next acquire should resolve immediately (header restored tokens)
     await expect(limiter.acquire()).resolves.toBeUndefined();
+  });
+
+  it("releases multiple queued items when updateFromHeader sets higher count", async () => {
+    const limiter = new RateLimiter(1);
+    await limiter.acquire(); // remaining = 0
+
+    const results: number[] = [];
+    limiter.acquire().then(() => results.push(1)); // queued
+    limiter.acquire().then(() => results.push(2)); // queued
+    limiter.acquire().then(() => results.push(3)); // queued
+
+    await flushMicrotasks();
+    expect(results).toEqual([]);
+
+    // Header says 10 remaining — all 3 queued should release in one tick
+    limiter.updateFromHeader(10);
+
+    jest.advanceTimersByTime(1100);
+    await flushMicrotasks();
+
+    expect(results).toEqual([1, 2, 3]);
   });
 
   it("cancels pending requests on destroy", async () => {

@@ -54,12 +54,13 @@ export class RateLimiter {
         return;
       }
 
-      // Release one request per second when rate limited
-      const next = this.queue.shift();
-      if (next) {
-        this.remaining = 1;
-        next();
+      // Release up to `remaining` queued requests (at least 1 for forward progress)
+      const count = Math.min(Math.max(this.remaining, 1), this.queue.length);
+      for (let i = 0; i < count; i++) {
+        const next = this.queue.shift();
+        if (next) next();
       }
+      this.remaining = Math.max(this.remaining - count, 0);
       this.drainNext();
     }, 1000);
   }
