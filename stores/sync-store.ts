@@ -16,6 +16,7 @@ interface SyncState {
   setProgress: (current: number, total: number) => void;
   setSyncing: (syncing: boolean) => void;
   setError: (error: string | null) => void;
+  finishSync: () => void;
   setLastFullSyncAt: (date: string) => void;
   restoreLastFullSyncAt: () => Promise<void>;
   clearLastFullSyncAt: () => void;
@@ -35,6 +36,7 @@ export const useSyncStore = create<SyncState>((set, get) => ({
   setProgress: (current, total) => set({ progress: { current, total } }),
   setSyncing: (syncing) => set({ isSyncing: syncing }),
   setError: (error) => set({ phase: "error", error, isSyncing: false }),
+  finishSync: () => set({ isSyncing: false, phase: "idle", progress: null, abortController: null }),
   setLastFullSyncAt: (date) => {
     set({ lastFullSyncAt: date });
     SecureStore.setItemAsync(KEY_LAST_FULL_SYNC_AT, date).catch((e) =>

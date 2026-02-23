@@ -84,6 +84,21 @@ describe("useSyncStore", () => {
     expect(SecureStore.deleteItemAsync).toHaveBeenCalledWith("last_full_sync_at");
   });
 
+  it("finishSync atomically resets sync state", () => {
+    useSyncStore.setState({
+      isSyncing: true,
+      phase: "details",
+      progress: { current: 50, total: 200 },
+      abortController: new AbortController(),
+    });
+    useSyncStore.getState().finishSync();
+    const state = useSyncStore.getState();
+    expect(state.isSyncing).toBe(false);
+    expect(state.phase).toBe("idle");
+    expect(state.progress).toBeNull();
+    expect(state.abortController).toBeNull();
+  });
+
   it("reset clears syncing/phase/progress/error but preserves lastFullSyncAt", () => {
     useSyncStore.setState({
       isSyncing: true,

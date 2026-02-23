@@ -22,6 +22,7 @@ jest.mock("@/stores/sync-store", () => {
     setProgress: jest.fn(),
     setLastFullSyncAt: jest.fn(),
     setError: jest.fn(),
+    finishSync: jest.fn(),
     startSync: jest.fn(() => new AbortController()),
   };
   return {
@@ -82,20 +83,18 @@ describe("runFullSync", () => {
   });
 
   it("keeps isSyncing true during detail sync loop", async () => {
-    let syncingDuringDetails = false;
+    let finishedDuringDetails = false;
     mockSyncReleaseDetails.mockImplementation(async () => {
-      // At this point, setSyncing(false) should NOT have been called yet
-      syncingDuringDetails = !(store.setSyncing as jest.Mock).mock.calls.some(
-        (c: any[]) => c[0] === false
-      );
+      // At this point, finishSync should NOT have been called yet
+      finishedDuringDetails = (store.finishSync as jest.Mock).mock.calls.length > 0;
       return 0;
     });
 
     await runFullSync("testuser");
 
-    expect(syncingDuringDetails).toBe(true);
-    // setSyncing(false) is called after detail loop completes
-    expect(store.setSyncing).toHaveBeenCalledWith(false);
+    expect(finishedDuringDetails).toBe(false);
+    // finishSync is called after detail loop completes
+    expect(store.finishSync).toHaveBeenCalled();
   });
 
   it("sets phase to details before running detail sync loop", async () => {
@@ -120,13 +119,12 @@ describe("runFullSync", () => {
     jest.restoreAllMocks();
   });
 
-  it("sets error and stops syncing on failure", async () => {
+  it("sets error on failure", async () => {
     mockSyncFolders.mockRejectedValue(new Error("network down"));
 
     await runFullSync("testuser");
 
     expect(store.setError).toHaveBeenCalledWith("network down");
-    expect(store.setSyncing).toHaveBeenCalledWith(false);
   });
 
   it("passes signal and callbacks to sync functions", async () => {
@@ -320,13 +318,12 @@ describe("runIncrementalSync", () => {
     jest.restoreAllMocks();
   });
 
-  it("sets error and stops syncing on failure", async () => {
+  it("sets error on failure", async () => {
     mockSyncFolders.mockRejectedValue(new Error("network down"));
 
     await runIncrementalSync("testuser");
 
     expect(store.setError).toHaveBeenCalledWith("network down");
-    expect(store.setSyncing).toHaveBeenCalledWith(false);
   });
 });
 

@@ -44,17 +44,15 @@ export async function runFullSync(username: string) {
     store.setPhase("details");
     await runDetailSyncLoop(signal);
 
-    store.setSyncing(false);
-    store.setPhase("idle");
+    store.finishSync();
   } catch (err) {
     if (signal.aborted) return;
     if (err instanceof AuthExpiredError) {
       useAuthStore.getState().clearAuth();
-      store.setSyncing(false);
+      store.finishSync();
       return;
     }
     store.setError(err instanceof Error ? err.message : "Sync failed");
-    store.setSyncing(false);
   }
 }
 
@@ -98,17 +96,15 @@ export async function runIncrementalSync(username: string) {
     store.setPhase("details");
     await runDetailSyncLoop(signal);
 
-    store.setSyncing(false);
-    store.setPhase("idle");
+    store.finishSync();
   } catch (err) {
     if (signal.aborted) return;
     if (err instanceof AuthExpiredError) {
       useAuthStore.getState().clearAuth();
-      store.setSyncing(false);
+      store.finishSync();
       return;
     }
     store.setError(err instanceof Error ? err.message : "Sync failed");
-    store.setSyncing(false);
   }
 }
 
