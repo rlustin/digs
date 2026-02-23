@@ -38,11 +38,13 @@ export async function runFullSync(username: string) {
     if (signal.aborted) return;
 
     store.setLastFullSyncAt(new Date().toISOString());
+
+    // Detail sync continues while isSyncing remains true
+    store.setPhase("details");
+    await runDetailSyncLoop(signal);
+
     store.setSyncing(false);
     store.setPhase("idle");
-
-    // Detail sync continues silently in the background
-    await runDetailSyncLoop(signal);
   } catch (err) {
     if (signal.aborted) return;
     if (err instanceof Error && err.message === "authentication_expired") {
@@ -90,10 +92,13 @@ export async function runIncrementalSync(username: string) {
     if (signal.aborted) return;
 
     store.setLastFullSyncAt(new Date().toISOString());
+
+    // Detail sync continues while isSyncing remains true
+    store.setPhase("details");
+    await runDetailSyncLoop(signal);
+
     store.setSyncing(false);
     store.setPhase("idle");
-
-    await runDetailSyncLoop(signal);
   } catch (err) {
     if (signal.aborted) return;
     if (err instanceof Error && err.message === "authentication_expired") {

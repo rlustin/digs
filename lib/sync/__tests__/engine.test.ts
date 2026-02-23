@@ -81,6 +81,29 @@ describe("runFullSync", () => {
     expect(callOrder).toEqual(["folders", "basic-releases", "details"]);
   });
 
+  it("keeps isSyncing true during detail sync loop", async () => {
+    let syncingDuringDetails = false;
+    mockSyncReleaseDetails.mockImplementation(async () => {
+      // At this point, setSyncing(false) should NOT have been called yet
+      syncingDuringDetails = !(store.setSyncing as jest.Mock).mock.calls.some(
+        (c: any[]) => c[0] === false
+      );
+      return 0;
+    });
+
+    await runFullSync("testuser");
+
+    expect(syncingDuringDetails).toBe(true);
+    // setSyncing(false) is called after detail loop completes
+    expect(store.setSyncing).toHaveBeenCalledWith(false);
+  });
+
+  it("sets phase to details before running detail sync loop", async () => {
+    await runFullSync("testuser");
+
+    expect(store.setPhase).toHaveBeenCalledWith("details");
+  });
+
   it("invalidates query cache after folders and releases stages", async () => {
     await runFullSync("testuser");
 
