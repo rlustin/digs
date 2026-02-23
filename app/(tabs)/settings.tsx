@@ -7,7 +7,7 @@ import { useAuthStore } from "@/stores/auth-store";
 import { useSyncStore } from "@/stores/sync-store";
 import { logout } from "@/lib/discogs/oauth";
 import { clearClientCredentials } from "@/lib/discogs/client";
-import { runFullSync } from "@/lib/sync/engine";
+import { runFullSync, runIncrementalSync } from "@/lib/sync/engine";
 import { clearAllReleases, getDetailSyncCounts } from "@/db/queries/releases";
 import { clearAllFolders } from "@/db/queries/folders";
 import { queryClient } from "@/lib/query-client";
@@ -49,7 +49,10 @@ export default function SettingsScreen() {
   const detailPending = detailCounts.total > 0 && detailCounts.synced < detailCounts.total;
 
   const handleSyncNow = () => {
-    if (username && !isSyncing) {
+    if (!username || isSyncing) return;
+    if (lastFullSyncAt) {
+      runIncrementalSync(username);
+    } else {
       runFullSync(username);
     }
   };

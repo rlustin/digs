@@ -5,7 +5,7 @@ import SettingsScreen from "../(tabs)/settings";
 import { useAuthStore } from "@/stores/auth-store";
 import { useSyncStore } from "@/stores/sync-store";
 
-import { runFullSync } from "@/lib/sync/engine";
+import { runFullSync, runIncrementalSync } from "@/lib/sync/engine";
 
 jest.mock("@/lib/discogs/oauth", () => ({
   logout: jest.fn().mockResolvedValue(undefined),
@@ -25,6 +25,7 @@ jest.mock("@/db/queries/releases", () => ({
 }));
 
 const mockRunFullSync = runFullSync as jest.MockedFunction<typeof runFullSync>;
+const mockRunIncrementalSync = runIncrementalSync as jest.MockedFunction<typeof runIncrementalSync>;
 
 describe("SettingsScreen", () => {
   beforeEach(() => {
@@ -63,10 +64,19 @@ describe("SettingsScreen", () => {
     expect(elements.length).toBeGreaterThanOrEqual(1);
   });
 
-  it("Sync Now button triggers runFullSync", () => {
+  it("Sync Now triggers runFullSync when no previous sync", () => {
     render(<SettingsScreen />);
     fireEvent.press(screen.getByText("Sync Now"));
     expect(mockRunFullSync).toHaveBeenCalledWith("testuser");
+    expect(mockRunIncrementalSync).not.toHaveBeenCalled();
+  });
+
+  it("Sync Now triggers runIncrementalSync when already synced", () => {
+    useSyncStore.setState({ lastFullSyncAt: "2025-01-15T00:00:00.000Z" });
+    render(<SettingsScreen />);
+    fireEvent.press(screen.getByText("Sync Now"));
+    expect(mockRunIncrementalSync).toHaveBeenCalledWith("testuser");
+    expect(mockRunFullSync).not.toHaveBeenCalled();
   });
 
   it("Sync Now button shows 'Syncing...' and is disabled when syncing", () => {
