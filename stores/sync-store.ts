@@ -37,7 +37,9 @@ export const useSyncStore = create<SyncState>((set, get) => ({
   setError: (error) => set({ phase: "error", error, isSyncing: false }),
   setLastFullSyncAt: (date) => {
     set({ lastFullSyncAt: date });
-    SecureStore.setItemAsync(KEY_LAST_FULL_SYNC_AT, date);
+    SecureStore.setItemAsync(KEY_LAST_FULL_SYNC_AT, date).catch((e) =>
+      console.warn("Failed to persist lastFullSyncAt:", e)
+    );
   },
   restoreLastFullSyncAt: async () => {
     const date = await SecureStore.getItemAsync(KEY_LAST_FULL_SYNC_AT);
@@ -45,7 +47,9 @@ export const useSyncStore = create<SyncState>((set, get) => ({
   },
   clearLastFullSyncAt: () => {
     set({ lastFullSyncAt: null });
-    SecureStore.deleteItemAsync(KEY_LAST_FULL_SYNC_AT);
+    SecureStore.deleteItemAsync(KEY_LAST_FULL_SYNC_AT).catch((e) =>
+      console.warn("Failed to delete lastFullSyncAt:", e)
+    );
   },
   startSync: () => {
     const { abortController: previous } = get();
