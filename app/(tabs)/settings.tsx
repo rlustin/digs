@@ -41,9 +41,10 @@ export default function SettingsScreen() {
 
   useEffect(() => {
     refreshCounts();
+    if (!isSyncing) return;
     const id = setInterval(refreshCounts, 5000);
     return () => clearInterval(id);
-  }, [refreshCounts]);
+  }, [refreshCounts, isSyncing]);
 
   const detailPending = detailCounts.total > 0 && detailCounts.synced < detailCounts.total;
 
