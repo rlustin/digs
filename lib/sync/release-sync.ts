@@ -242,20 +242,26 @@ export async function syncBasicReleasesIncremental(
   }
 }
 
+export interface DetailSyncResult {
+  processed: number;
+  failed: number;
+}
+
 /**
  * Fetch full details for a batch of releases that haven't been detail-synced yet.
- * Returns the number of releases processed (0 means all done).
+ * Returns counts of processed and failed releases (processed 0 means all done).
  */
 export async function syncReleaseDetails(
   batchSize: number = 10,
   signal?: AbortSignal
-): Promise<number> {
+): Promise<DetailSyncResult> {
   const pending = getReleasesNeedingDetailSync(batchSize);
-  if (pending.length === 0) return 0;
+  if (pending.length === 0) return { processed: 0, failed: 0 };
 
   let processed = 0;
+  let failed = 0;
   for (let i = 0; i < pending.length; i++) {
-    if (signal?.aborted) return processed;
+    if (signal?.aborted) return { processed, failed };
     const release = pending[i];
 
     try {
@@ -267,14 +273,14 @@ export async function syncReleaseDetails(
         .run();
       processed++;
     } catch (err) {
-      if (signal?.aborted) return processed;
-      // Re-throw auth errors so the caller can handle them
+      if (signal?.aborted) return { processed, failed };
       if (err instanceof AuthExpiredError) {
         throw err;
       }
+      failed++;
       console.warn(`Detail sync failed for release ${release.releaseId}:`, err);
     }
   }
 
-  return processed;
+  return { processed, failed };
 }

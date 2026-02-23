@@ -11,11 +11,13 @@ interface SyncState {
   progress: { current: number; total: number } | null;
   lastFullSyncAt: string | null;
   error: string | null;
+  detailSyncFailed: number;
   abortController: AbortController | null;
   setPhase: (phase: SyncPhase) => void;
   setProgress: (current: number, total: number) => void;
   setSyncing: (syncing: boolean) => void;
   setError: (error: string | null) => void;
+  setDetailSyncFailed: (count: number) => void;
   finishSync: () => void;
   setLastFullSyncAt: (date: string) => void;
   restoreLastFullSyncAt: () => Promise<void>;
@@ -31,12 +33,14 @@ export const useSyncStore = create<SyncState>((set, get) => ({
   progress: null,
   lastFullSyncAt: null,
   error: null,
+  detailSyncFailed: 0,
   abortController: null,
   setPhase: (phase) => set({ phase, error: null }),
   setProgress: (current, total) => set({ progress: { current, total } }),
   setSyncing: (syncing) => set({ isSyncing: syncing }),
   setError: (error) => set({ phase: "error", error, isSyncing: false }),
-  finishSync: () => set({ isSyncing: false, phase: "idle", progress: null, abortController: null }),
+  setDetailSyncFailed: (count) => set({ detailSyncFailed: count }),
+  finishSync: () => set({ isSyncing: false, phase: "idle", progress: null, detailSyncFailed: 0, abortController: null }),
   setLastFullSyncAt: (date) => {
     set({ lastFullSyncAt: date });
     SecureStore.setItemAsync(KEY_LAST_FULL_SYNC_AT, date).catch((e) =>
@@ -57,14 +61,14 @@ export const useSyncStore = create<SyncState>((set, get) => ({
     const { abortController: previous } = get();
     if (previous) previous.abort();
     const controller = new AbortController();
-    set({ isSyncing: true, abortController: controller });
+    set({ isSyncing: true, detailSyncFailed: 0, abortController: controller });
     return controller;
   },
   cancelSync: () => {
     const { abortController } = get();
     if (abortController) abortController.abort();
-    set({ isSyncing: false, phase: "idle", progress: null, error: null, abortController: null });
+    set({ isSyncing: false, phase: "idle", progress: null, error: null, detailSyncFailed: 0, abortController: null });
   },
   reset: () =>
-    set({ isSyncing: false, phase: "idle", progress: null, error: null, abortController: null }),
+    set({ isSyncing: false, phase: "idle", progress: null, error: null, detailSyncFailed: 0, abortController: null }),
 }));

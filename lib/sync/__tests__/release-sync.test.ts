@@ -360,10 +360,10 @@ describe("syncReleaseDetails", () => {
     mockDb.where.mockReturnThis();
   });
 
-  it("returns 0 when no releases need detail sync", async () => {
+  it("returns zero counts when no releases need detail sync", async () => {
     mockGetReleasesNeedingDetailSync.mockReturnValue([]);
     const result = await syncReleaseDetails();
-    expect(result).toBe(0);
+    expect(result).toEqual({ processed: 0, failed: 0 });
   });
 
   it("fetches and updates Fracture — 0860 details", async () => {
@@ -375,7 +375,7 @@ describe("syncReleaseDetails", () => {
 
     const result = await syncReleaseDetails(10);
 
-    expect(result).toBe(1);
+    expect(result).toEqual({ processed: 1, failed: 0 });
     expect(mockFetchReleaseDetail).toHaveBeenCalledWith(25213822, undefined);
     expect(mockDb.update).toHaveBeenCalled();
   });
@@ -390,11 +390,11 @@ describe("syncReleaseDetails", () => {
 
     const result = await syncReleaseDetails(10);
 
-    expect(result).toBe(2);
+    expect(result).toEqual({ processed: 2, failed: 0 });
     expect(mockFetchReleaseDetail).toHaveBeenCalledTimes(2);
   });
 
-  it("continues processing after a single release fetch fails", async () => {
+  it("continues processing after a single release fetch fails and tracks failures", async () => {
     const warnSpy = jest.spyOn(console, "warn").mockImplementation(() => {});
     mockGetReleasesNeedingDetailSync.mockReturnValue([
       { instanceId: 1304522474, releaseId: 20068396 },
@@ -407,7 +407,7 @@ describe("syncReleaseDetails", () => {
 
     const result = await syncReleaseDetails(10);
 
-    expect(result).toBe(1);
+    expect(result).toEqual({ processed: 1, failed: 1 });
     expect(mockFetchReleaseDetail).toHaveBeenCalledTimes(2);
     expect(mockDb.update).toHaveBeenCalledTimes(1);
     warnSpy.mockRestore();

@@ -91,13 +91,17 @@ export async function runDetailSyncLoop(
   signal?: AbortSignal,
   maxBatches: number = 5,
 ) {
+  const store = useSyncStore.getState();
   let totalProcessed = 0;
+  let totalFailed = 0;
   for (let i = 0; i < maxBatches; i++) {
     if (signal?.aborted) break;
     try {
-      const processed = await syncReleaseDetails(10, signal);
+      const { processed, failed } = await syncReleaseDetails(10, signal);
       totalProcessed += processed;
-      if (processed === 0) break;
+      totalFailed += failed;
+      if (failed > 0) store.setDetailSyncFailed(totalFailed);
+      if (processed === 0 && failed === 0) break;
 
       if (i < maxBatches - 1) {
         // Pause between batches to respect rate limits

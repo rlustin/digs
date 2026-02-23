@@ -14,7 +14,7 @@ jest.mock("../folder-sync", () => ({
 jest.mock("../release-sync", () => ({
   syncBasicReleases: jest.fn().mockResolvedValue(undefined),
   syncBasicReleasesIncremental: jest.fn().mockResolvedValue(undefined),
-  syncReleaseDetails: jest.fn().mockResolvedValue(0),
+  syncReleaseDetails: jest.fn().mockResolvedValue({ processed: 0, failed: 0 }),
 }));
 
 jest.mock("@/lib/discogs/oauth", () => ({
@@ -36,6 +36,7 @@ jest.mock("@/stores/sync-store", () => {
     setProgress: jest.fn(),
     setLastFullSyncAt: jest.fn(),
     setError: jest.fn(),
+    setDetailSyncFailed: jest.fn(),
     finishSync: jest.fn(),
     startSync: jest.fn(() => new AbortController()),
   };
@@ -66,7 +67,7 @@ describe("runFullSync", () => {
     (store.startSync as jest.Mock).mockReturnValue(new AbortController());
     mockSyncFolders.mockResolvedValue(undefined);
     mockSyncBasicReleases.mockResolvedValue(undefined);
-    mockSyncReleaseDetails.mockResolvedValue(0);
+    mockSyncReleaseDetails.mockResolvedValue({ processed: 0, failed: 0 } as any);
   });
 
   afterEach(() => {
@@ -88,7 +89,7 @@ describe("runFullSync", () => {
     mockSyncBasicReleases.mockImplementation(async () => { callOrder.push("basic-releases"); });
     mockSyncReleaseDetails.mockImplementation(async () => {
       callOrder.push("details");
-      return 0;
+      return { processed: 0, failed: 0 };
     });
 
     await runFullSync("testuser");
@@ -99,9 +100,8 @@ describe("runFullSync", () => {
   it("keeps isSyncing true during detail sync loop", async () => {
     let finishedDuringDetails = false;
     mockSyncReleaseDetails.mockImplementation(async () => {
-      // At this point, finishSync should NOT have been called yet
       finishedDuringDetails = (store.finishSync as jest.Mock).mock.calls.length > 0;
-      return 0;
+      return { processed: 0, failed: 0 };
     });
 
     await runFullSync("testuser");
@@ -179,9 +179,9 @@ describe("runDetailSyncLoop", () => {
 
   it("loops until syncReleaseDetails returns 0", async () => {
     mockSyncReleaseDetails
-      .mockResolvedValueOnce(10)
-      .mockResolvedValueOnce(5)
-      .mockResolvedValueOnce(0);
+      .mockResolvedValueOnce({ processed: 10, failed: 0 } as any)
+      .mockResolvedValueOnce({ processed: 5, failed: 0 } as any)
+      .mockResolvedValueOnce({ processed: 0, failed: 0 } as any);
 
     const promise = runDetailSyncLoop();
 
@@ -195,7 +195,7 @@ describe("runDetailSyncLoop", () => {
   });
 
   it("stops after maxBatches even if more data is available", async () => {
-    mockSyncReleaseDetails.mockResolvedValue(10);
+    mockSyncReleaseDetails.mockResolvedValue({ processed: 10, failed: 0 } as any);
 
     const promise = runDetailSyncLoop(undefined, 3);
 
@@ -209,8 +209,8 @@ describe("runDetailSyncLoop", () => {
 
   it("pauses 12s between batches", async () => {
     mockSyncReleaseDetails
-      .mockResolvedValueOnce(10)
-      .mockResolvedValueOnce(0);
+      .mockResolvedValueOnce({ processed: 10, failed: 0 } as any)
+      .mockResolvedValueOnce({ processed: 0, failed: 0 } as any);
 
     const promise = runDetailSyncLoop();
 
@@ -226,9 +226,9 @@ describe("runDetailSyncLoop", () => {
 
   it("invalidates queries once at the end, not per batch", async () => {
     mockSyncReleaseDetails
-      .mockResolvedValueOnce(10)
-      .mockResolvedValueOnce(5)
-      .mockResolvedValueOnce(0);
+      .mockResolvedValueOnce({ processed: 10, failed: 0 } as any)
+      .mockResolvedValueOnce({ processed: 5, failed: 0 } as any)
+      .mockResolvedValueOnce({ processed: 0, failed: 0 } as any);
 
     const promise = runDetailSyncLoop();
 
@@ -244,7 +244,7 @@ describe("runDetailSyncLoop", () => {
   });
 
   it("does not invalidate queries when no releases were processed", async () => {
-    mockSyncReleaseDetails.mockResolvedValue(0);
+    mockSyncReleaseDetails.mockResolvedValue({ processed: 0, failed: 0 } as any);
 
     await runDetailSyncLoop();
 
@@ -285,7 +285,7 @@ describe("runIncrementalSync", () => {
     (store.startSync as jest.Mock).mockReturnValue(new AbortController());
     mockSyncFolders.mockResolvedValue(undefined);
     mockSyncBasicReleasesIncremental.mockResolvedValue(undefined);
-    mockSyncReleaseDetails.mockResolvedValue(0);
+    mockSyncReleaseDetails.mockResolvedValue({ processed: 0, failed: 0 } as any);
   });
 
   afterEach(() => {
@@ -325,7 +325,7 @@ describe("runIncrementalSync", () => {
     mockSyncBasicReleasesIncremental.mockImplementation(async () => { callOrder.push("incremental-releases"); });
     mockSyncReleaseDetails.mockImplementation(async () => {
       callOrder.push("details");
-      return 0;
+      return { processed: 0, failed: 0 };
     });
 
     await runIncrementalSync("testuser");
@@ -357,7 +357,7 @@ describe("runDetailSyncBatch", () => {
   });
 
   it("passes batch size through to syncReleaseDetails", async () => {
-    mockSyncReleaseDetails.mockResolvedValue(5);
+    mockSyncReleaseDetails.mockResolvedValue({ processed: 5, failed: 0 } as any);
 
     await runDetailSyncBatch(25);
 

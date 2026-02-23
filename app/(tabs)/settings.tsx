@@ -31,6 +31,7 @@ export default function SettingsScreen() {
   const phase = useSyncStore((s) => s.phase);
   const progress = useSyncStore((s) => s.progress);
   const error = useSyncStore((s) => s.error);
+  const detailSyncFailed = useSyncStore((s) => s.detailSyncFailed);
   const reset = useSyncStore((s) => s.reset);
 
   const [detailCounts, setDetailCounts] = useState({ synced: 0, total: 0 });
@@ -143,7 +144,7 @@ export default function SettingsScreen() {
               {detailCounts.total === 0
                 ? t("settings.noReleases")
                 : detailPending
-                  ? `${detailCounts.synced}/${detailCounts.total}`
+                  ? `${detailCounts.synced}/${detailCounts.total}${detailSyncFailed > 0 ? ` (${detailSyncFailed} failed)` : ""}`
                   : t("settings.allSynced")}
             </Text>
           </View>
