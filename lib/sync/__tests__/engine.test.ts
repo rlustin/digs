@@ -2,6 +2,9 @@ import { runFullSync, runIncrementalSync, runDetailSyncLoop, runDetailSyncBatch 
 import { syncFolders } from "../folder-sync";
 import { syncBasicReleases, syncBasicReleasesIncremental, syncReleaseDetails } from "../release-sync";
 import { useSyncStore } from "@/stores/sync-store";
+import { useAuthStore } from "@/stores/auth-store";
+import { AuthExpiredError } from "@/lib/discogs/errors";
+import { logout } from "@/lib/discogs/oauth";
 import { queryClient } from "@/lib/query-client";
 
 jest.mock("../folder-sync", () => ({
@@ -13,6 +16,17 @@ jest.mock("../release-sync", () => ({
   syncBasicReleasesIncremental: jest.fn().mockResolvedValue(undefined),
   syncReleaseDetails: jest.fn().mockResolvedValue(0),
 }));
+
+jest.mock("@/lib/discogs/oauth", () => ({
+  logout: jest.fn().mockResolvedValue(undefined),
+}));
+
+jest.mock("@/stores/auth-store", () => {
+  const state = { clearAuth: jest.fn() };
+  return {
+    useAuthStore: { getState: () => state },
+  };
+});
 
 jest.mock("@/stores/sync-store", () => {
   const state = {
@@ -125,6 +139,16 @@ describe("runFullSync", () => {
     await runFullSync("testuser");
 
     expect(store.setError).toHaveBeenCalledWith("network down");
+  });
+
+  it("calls logout and clearAuth on auth expiry", async () => {
+    mockSyncFolders.mockRejectedValue(new AuthExpiredError());
+
+    await runFullSync("testuser");
+
+    expect(logout).toHaveBeenCalled();
+    expect(useAuthStore.getState().clearAuth).toHaveBeenCalled();
+    expect(store.finishSync).toHaveBeenCalled();
   });
 
   it("passes signal and callbacks to sync functions", async () => {

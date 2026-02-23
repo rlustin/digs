@@ -7,6 +7,7 @@ import {
 import { useSyncStore } from "@/stores/sync-store";
 import { useAuthStore } from "@/stores/auth-store";
 import { AuthExpiredError } from "@/lib/discogs/errors";
+import { logout } from "@/lib/discogs/oauth";
 import { queryClient } from "@/lib/query-client";
 
 /**
@@ -48,6 +49,7 @@ export async function runFullSync(username: string) {
   } catch (err) {
     if (signal.aborted) return;
     if (err instanceof AuthExpiredError) {
+      await logout();
       useAuthStore.getState().clearAuth();
       store.finishSync();
       return;
@@ -100,6 +102,7 @@ export async function runIncrementalSync(username: string) {
   } catch (err) {
     if (signal.aborted) return;
     if (err instanceof AuthExpiredError) {
+      await logout();
       useAuthStore.getState().clearAuth();
       store.finishSync();
       return;
