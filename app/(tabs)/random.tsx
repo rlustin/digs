@@ -84,6 +84,13 @@ export default function RandomScreen() {
     [translateX, cardOpacity, cardScale],
   );
 
+  const onSwipeOffRef = useRef(onSwipeOff);
+  onSwipeOffRef.current = onSwipeOff;
+
+  const handleSwipeOff = useCallback((direction: number) => {
+    onSwipeOffRef.current(direction);
+  }, []);
+
   const panResponder = useRef(
     PanResponder.create({
       onMoveShouldSetPanResponder: (_, gs) =>
@@ -100,7 +107,7 @@ export default function RandomScreen() {
             dir * sw,
             { duration: 200, easing: Easing.in(Easing.ease) },
             (finished) => {
-              if (finished) runOnJS(onSwipeOff)(dir);
+              if (finished) runOnJS(handleSwipeOff)(dir);
             },
           );
         } else {
