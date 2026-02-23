@@ -81,6 +81,7 @@
   "common": {
     "back": "Back",
     "cancel": "Cancel",
-    "error": "Something went wrong"
+    "error": "Something went wrong",
+    "errorLoading": "Could not load data"
   }
 }

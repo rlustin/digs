@@ -40,7 +40,7 @@ export default function ReleaseDetailScreen() {
   const coverSize = screenWidth * COVER_WIDTH_RATIO;
   const backdropHeight = insets.top + 44 + COVER_TOP_SPACING + coverSize + BACKDROP_EXTRA;
 
-  const { data: release, refetch } = useQuery({
+  const { data: release, isError, refetch } = useQuery({
     queryKey: ["release", id],
     queryFn: () => getReleaseByReleaseId(id),
   });
@@ -66,7 +66,7 @@ export default function ReleaseDetailScreen() {
     enabled: !!release && !release.detailSyncedAt,
   });
 
-  if (Number.isNaN(id)) {
+  if (Number.isNaN(id) || isError) {
     return (
       <View className="flex-1 bg-white items-center justify-center">
         <Text className="text-gray-400 text-base font-sans">{t("common.error")}</Text>

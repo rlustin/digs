@@ -7,7 +7,7 @@ import { getAllFolders } from "@/db/queries/folders";
 import { useSyncStore } from "@/stores/sync-store";
 import { ReleaseCard } from "@/components/release/release-card";
 import { EmptyState } from "@/components/ui/empty-state";
-import { Music } from "lucide-react-native";
+import { CircleAlert, Music } from "lucide-react-native";
 import { ListSkeleton } from "@/components/ui/skeleton";
 import { Colors } from "@/constants/Colors";
 import { t } from "@/lib/i18n";
@@ -29,6 +29,7 @@ export default function FolderReleasesScreen() {
   const {
     data: releases = [],
     isLoading,
+    isError,
     refetch,
   } = useQuery({
     queryKey: ["releases", "folder", id],
@@ -48,6 +49,12 @@ export default function FolderReleasesScreen() {
       <Stack.Screen options={{ headerShown: true, title: folderName }} />
       {isLoading ? (
         <ListSkeleton type="release" />
+      ) : isError ? (
+        <EmptyState
+          icon={CircleAlert}
+          title={t("common.error")}
+          message={t("common.errorLoading")}
+        />
       ) : releases.length === 0 ? (
         <EmptyState
           icon={Music}
