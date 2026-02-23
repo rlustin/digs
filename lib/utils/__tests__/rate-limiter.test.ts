@@ -25,8 +25,9 @@ describe("RateLimiter", () => {
     const limiter = new RateLimiter(3);
     await limiter.acquire(); // remaining = 2
     await limiter.acquire(); // remaining = 1
+    await limiter.acquire(); // remaining = 0
 
-    // Third acquire should queue since remaining <= 1
+    // Fourth acquire should queue since remaining < 1
     let resolved = false;
     limiter.acquire().then(() => {
       resolved = true;
@@ -55,17 +56,13 @@ describe("RateLimiter", () => {
     const limiter = new RateLimiter(1);
 
     const results: number[] = [];
-    limiter.acquire().then(() => results.push(1));
-    limiter.acquire().then(() => results.push(2));
+    limiter.acquire().then(() => results.push(1)); // remaining = 0, resolves immediately
+    limiter.acquire().then(() => results.push(2)); // queued
 
-    await flushMicrotasks();
-
-    // First queued request resolves after 1s
-    jest.advanceTimersByTime(1100);
     await flushMicrotasks();
     expect(results).toContain(1);
 
-    // Second queued request resolves after another 1s
+    // Queued request resolves after 1s
     jest.advanceTimersByTime(1100);
     await flushMicrotasks();
     expect(results).toContain(2);
@@ -74,8 +71,9 @@ describe("RateLimiter", () => {
   it("allows immediate acquire after queue drains", async () => {
     const limiter = new RateLimiter(2);
     await limiter.acquire(); // remaining = 1
+    await limiter.acquire(); // remaining = 0
 
-    // This queues because remaining <= 1
+    // This queues because remaining < 1
     let queued = false;
     const queuedPromise = limiter.acquire().then(() => { queued = true; });
 
@@ -90,5 +88,25 @@ describe("RateLimiter", () => {
 
     // After drain, next acquire should resolve immediately (remaining was set to 1)
     await expect(limiter.acquire()).resolves.toBeUndefined();
+  });
+
+  it("cancels pending requests on destroy", async () => {
+    const limiter = new RateLimiter(1);
+    await limiter.acquire(); // remaining = 0
+
+    let resolved = false;
+    limiter.acquire().then(() => {
+      resolved = true;
+    });
+
+    await flushMicrotasks();
+    expect(resolved).toBe(false);
+
+    limiter.destroy();
+
+    // Advance past drain interval — should not resolve
+    jest.advanceTimersByTime(5000);
+    await flushMicrotasks();
+    expect(resolved).toBe(false);
   });
 });

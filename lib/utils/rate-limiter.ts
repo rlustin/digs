@@ -6,6 +6,7 @@ export class RateLimiter {
   private remaining: number;
   private queue: (() => void)[] = [];
   private draining = false;
+  private drainTimer: ReturnType<typeof setTimeout> | null = null;
 
   constructor(initialTokens: number = 60) {
     this.remaining = initialTokens;
@@ -18,7 +19,7 @@ export class RateLimiter {
 
   /** Wait until a request slot is available. */
   async acquire(): Promise<void> {
-    if (this.remaining > 1) {
+    if (this.remaining >= 1) {
       this.remaining--;
       return;
     }
@@ -30,6 +31,16 @@ export class RateLimiter {
     });
   }
 
+  /** Cancel all pending requests and stop the drain timer. */
+  destroy() {
+    if (this.drainTimer) {
+      clearTimeout(this.drainTimer);
+      this.drainTimer = null;
+    }
+    this.queue = [];
+    this.draining = false;
+  }
+
   private startDraining() {
     if (this.draining) return;
     this.draining = true;
@@ -37,7 +48,7 @@ export class RateLimiter {
   }
 
   private drainNext() {
-    setTimeout(() => {
+    this.drainTimer = setTimeout(() => {
       if (this.queue.length === 0) {
         this.draining = false;
         return;
@@ -46,7 +57,7 @@ export class RateLimiter {
       // Release one request per second when rate limited
       const next = this.queue.shift();
       if (next) {
-        this.remaining = 2;
+        this.remaining = 1;
         next();
       }
       this.drainNext();
