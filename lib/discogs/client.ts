@@ -94,6 +94,9 @@ export async function discogsRequest<T>(
       10
     );
     await new Promise((r) => setTimeout(r, retryAfter * 1000));
+    if (signal?.aborted) {
+      throw new DOMException("The operation was aborted.", "AbortError");
+    }
     return discogsRequest<T>(path, method, retries - 1, signal);
   }
 

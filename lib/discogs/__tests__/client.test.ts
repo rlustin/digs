@@ -234,6 +234,32 @@ describe("discogsRequest", () => {
     );
   });
 
+  it("aborts during 429 retry sleep without retrying", async () => {
+    setClientCredentials({
+      consumerKey: "ck",
+      consumerSecret: "cs",
+      token: "t",
+      tokenSecret: "ts",
+    });
+
+    mockFetch.mockResolvedValueOnce(
+      jsonResponse(null, 429, { "Retry-After": "2" })
+    );
+
+    const controller = new AbortController();
+    const promise = discogsRequest("/test", "GET", 3, controller.signal);
+
+    // Abort before the retry sleep completes, then advance past it
+    controller.abort();
+
+    const expectation = expect(promise).rejects.toThrow("The operation was aborted.");
+    await jest.advanceTimersByTimeAsync(2500);
+    await expectation;
+
+    // Should not have retried
+    expect(mockFetch).toHaveBeenCalledTimes(1);
+  });
+
   it("passes signal to fetch", async () => {
     setClientCredentials({
       consumerKey: "ck",
