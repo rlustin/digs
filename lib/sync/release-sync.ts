@@ -170,6 +170,8 @@ export async function syncBasicReleasesIncremental(
   const foldersToSync =
     folders.length > 0 ? folders : [{ id: 1, name: "Uncategorized", count: 0 }];
 
+  const cutoffTime = new Date(lastFullSyncAt).getTime();
+
   for (const folder of foldersToSync) {
     if (signal?.aborted) return;
 
@@ -193,7 +195,7 @@ export async function syncBasicReleasesIncremental(
 
       const newReleases = [];
       for (const r of response.releases) {
-        if (new Date(r.date_added).getTime() <= new Date(lastFullSyncAt).getTime()) {
+        if (new Date(r.date_added).getTime() <= cutoffTime) {
           reachedOldReleases = true;
           break;
         }
