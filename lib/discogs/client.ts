@@ -65,52 +65,56 @@ export async function discogsRequest<T>(
 
   const url = path.startsWith("http") ? path : `${DISCOGS_BASE_URL}${path}`;
 
-  const authHeader = signRequest(method, url, {
-    consumerKey: credentials!.consumerKey,
-    consumerSecret: credentials!.consumerSecret,
-    token: credentials!.token,
-    tokenSecret: credentials!.tokenSecret,
-  });
+  let retriesLeft = retries;
+  while (true) {
+    const authHeader = signRequest(method, url, {
+      consumerKey: credentials!.consumerKey,
+      consumerSecret: credentials!.consumerSecret,
+      token: credentials!.token,
+      tokenSecret: credentials!.tokenSecret,
+    });
 
-  const response = await fetch(url, {
-    method,
-    signal,
-    headers: {
-      Authorization: authHeader,
-      "User-Agent": DISCOGS_USER_AGENT,
-      Accept: "application/vnd.discogs.v2.discogs+json",
-    },
-  });
+    const response = await fetch(url, {
+      method,
+      signal,
+      headers: {
+        Authorization: authHeader,
+        "User-Agent": DISCOGS_USER_AGENT,
+        Accept: "application/vnd.discogs.v2.discogs+json",
+      },
+    });
 
-  // Update rate limiter from response headers
-  const remaining = response.headers.get("X-Discogs-Ratelimit-Remaining");
-  if (remaining) {
-    rateLimiter.updateFromHeader(parseInt(remaining, 10));
-  }
-
-  // Handle rate limiting with retry
-  if (response.status === 429 && retries > 0) {
-    const retryAfter = parseInt(
-      response.headers.get("Retry-After") ?? "2",
-      10
-    );
-    await new Promise((r) => setTimeout(r, retryAfter * 1000));
-    if (signal?.aborted) {
-      throw new DOMException("The operation was aborted.", "AbortError");
+    // Update rate limiter from response headers
+    const remaining = response.headers.get("X-Discogs-Ratelimit-Remaining");
+    if (remaining) {
+      rateLimiter.updateFromHeader(parseInt(remaining, 10));
     }
-    return discogsRequest<T>(path, method, retries - 1, signal);
-  }
 
-  if (response.status === 401) {
-    clearClientCredentials();
-    throw new AuthExpiredError();
-  }
+    // Handle rate limiting with retry
+    if (response.status === 429 && retriesLeft > 0) {
+      const retryAfter = parseInt(
+        response.headers.get("Retry-After") ?? "2",
+        10
+      );
+      await new Promise((r) => setTimeout(r, retryAfter * 1000));
+      if (signal?.aborted) {
+        throw new DOMException("The operation was aborted.", "AbortError");
+      }
+      retriesLeft--;
+      continue;
+    }
 
-  if (!response.ok) {
-    throw new Error(
-      `Discogs API error: ${response.status} ${response.statusText}`
-    );
-  }
+    if (response.status === 401) {
+      clearClientCredentials();
+      throw new AuthExpiredError();
+    }
 
-  return response.json() as Promise<T>;
+    if (!response.ok) {
+      throw new Error(
+        `Discogs API error: ${response.status} ${response.statusText}`
+      );
+    }
+
+    return response.json() as Promise<T>;
+  }
 }
