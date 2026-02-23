@@ -85,6 +85,8 @@ export function searchReleases(query: string): SearchResult[] {
     .map((term) => `"${term}"*`)
     .join(" ");
 
+  if (!ftsQuery) return [];
+
   const rows = expo.getAllSync<{
     instance_id: number;
     release_id: number;
