@@ -2,6 +2,15 @@ import { desc, eq, sql } from "drizzle-orm";
 import { db, expo } from "../client";
 import { releases } from "../schema";
 
+function safeJsonParse<T>(value: string | null): T | null {
+  if (!value) return null;
+  try {
+    return JSON.parse(value) as T;
+  } catch {
+    return null;
+  }
+}
+
 export function getReleasesByFolder(
   folderId: number,
   options?: { limit?: number; offset?: number },
@@ -114,11 +123,11 @@ export function searchReleases(query: string): SearchResult[] {
     folderId: row.folder_id,
     title: row.title,
     year: row.year,
-    artists: row.artists ? JSON.parse(row.artists) : null,
-    labels: row.labels ? JSON.parse(row.labels) : null,
-    formats: row.formats ? JSON.parse(row.formats) : null,
-    genres: row.genres ? JSON.parse(row.genres) : null,
-    styles: row.styles ? JSON.parse(row.styles) : null,
+    artists: safeJsonParse(row.artists),
+    labels: safeJsonParse(row.labels),
+    formats: safeJsonParse(row.formats),
+    genres: safeJsonParse(row.genres),
+    styles: safeJsonParse(row.styles),
     thumbUrl: row.thumb_url,
     coverUrl: row.cover_url,
     dateAdded: row.date_added,
