@@ -1,6 +1,6 @@
 import { expo } from "./client";
 
-const CURRENT_VERSION = 1;
+const CURRENT_VERSION = 2;
 
 /**
  * Run all schema migrations. Call once at app startup before any queries.
@@ -16,8 +16,9 @@ export function runMigrations() {
     migrateV1();
   }
 
-  // Future migrations go here:
-  // if (version < 2) { migrateV2(); }
+  if (version < 2) {
+    migrateV2();
+  }
 
   if (version < CURRENT_VERSION) {
     expo.execSync(`PRAGMA user_version = ${CURRENT_VERSION}`);
@@ -117,4 +118,49 @@ function migrateV1() {
       );
     END;
   `);
+}
+
+/** V2: Fix FTS delete/update triggers to extract names from JSON instead of passing raw JSON. */
+function migrateV2() {
+  // Drop broken triggers
+  expo.execSync(`DROP TRIGGER IF EXISTS releases_ad`);
+  expo.execSync(`DROP TRIGGER IF EXISTS releases_au`);
+
+  // Recreate delete trigger with JSON extraction
+  expo.execSync(`
+    CREATE TRIGGER releases_ad AFTER DELETE ON releases BEGIN
+      INSERT INTO releases_fts(releases_fts, rowid, title, artists, labels)
+      VALUES (
+        'delete',
+        old.instance_id,
+        old.title,
+        (SELECT GROUP_CONCAT(json_extract(value, '$.name'), ', ') FROM json_each(old.artists)),
+        (SELECT GROUP_CONCAT(json_extract(value, '$.name'), ', ') FROM json_each(old.labels))
+      );
+    END;
+  `);
+
+  // Recreate update trigger with JSON extraction in the delete portion
+  expo.execSync(`
+    CREATE TRIGGER releases_au AFTER UPDATE ON releases BEGIN
+      INSERT INTO releases_fts(releases_fts, rowid, title, artists, labels)
+      VALUES (
+        'delete',
+        old.instance_id,
+        old.title,
+        (SELECT GROUP_CONCAT(json_extract(value, '$.name'), ', ') FROM json_each(old.artists)),
+        (SELECT GROUP_CONCAT(json_extract(value, '$.name'), ', ') FROM json_each(old.labels))
+      );
+      INSERT INTO releases_fts(rowid, title, artists, labels)
+      VALUES (
+        new.instance_id,
+        new.title,
+        (SELECT GROUP_CONCAT(json_extract(value, '$.name'), ', ') FROM json_each(new.artists)),
+        (SELECT GROUP_CONCAT(json_extract(value, '$.name'), ', ') FROM json_each(new.labels))
+      );
+    END;
+  `);
+
+  // Rebuild FTS index to fix any existing corruption
+  expo.execSync(`INSERT INTO releases_fts(releases_fts) VALUES('rebuild')`);
 }

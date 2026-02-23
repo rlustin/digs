@@ -10,7 +10,7 @@ const config: Config = {
       displayName: "logic",
       preset: "ts-jest",
       testEnvironment: "node",
-      roots: ["<rootDir>/lib", "<rootDir>/stores"],
+      roots: ["<rootDir>/lib", "<rootDir>/stores", "<rootDir>/db"],
       moduleNameMapper,
     },
     {
