@@ -4,6 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 
 import { getReleasesByFolder } from "@/db/queries/releases";
 import { getAllFolders } from "@/db/queries/folders";
+import { useSyncStore } from "@/stores/sync-store";
 import { ReleaseCard } from "@/components/release/release-card";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Music } from "lucide-react-native";
@@ -16,6 +17,7 @@ const ITEM_HEIGHT = 104;
 export default function FolderReleasesScreen() {
   const { folderId } = useLocalSearchParams<{ folderId: string }>();
   const id = Number(folderId);
+  const isSyncing = useSyncStore((s) => s.isSyncing);
 
   const { data: folders = [] } = useQuery({
     queryKey: ["folders"],
@@ -56,7 +58,7 @@ export default function FolderReleasesScreen() {
           })}
           refreshControl={
             <RefreshControl
-              refreshing={false}
+              refreshing={isSyncing}
               onRefresh={() => refetch()}
               tintColor={Colors.accent}
             />
