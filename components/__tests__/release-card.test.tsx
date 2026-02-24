@@ -1,9 +1,10 @@
 import React from "react";
 import { render, screen, fireEvent } from "@testing-library/react-native";
+import { useRouter } from "expo-router";
 import { ReleaseCard } from "../release/release-card";
 import collectionFixture from "@/__fixtures__/collection-releases.json";
 
-const mockRouter = require("expo-router").useRouter();
+const mockRouter = (useRouter as jest.Mock)();
 
 // Real releases from the fixture
 const timReaper = collectionFixture.releases[0].basic_information;

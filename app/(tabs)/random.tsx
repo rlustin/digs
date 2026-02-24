@@ -18,7 +18,7 @@ import Animated, {
   useSharedValue,
   useAnimatedStyle,
   withTiming,
-  withSequence,
+
   withSpring,
   Easing,
   runOnJS,

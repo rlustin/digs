@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import CollectionScreen from "../(tabs)/collection/index";
 import FolderReleasesScreen from "../(tabs)/collection/[folderId]";
 import ReleaseDetailScreen from "../release/[releaseId]";
+import { useRouter, useLocalSearchParams } from "expo-router";
 import { FloatingTabBar } from "@/components/ui/tab-bar";
 import { useAuthStore } from "@/stores/auth-store";
 import { useSyncStore } from "@/stores/sync-store";
@@ -100,8 +101,8 @@ const realFolders = foldersFixture.folders.map((f) => ({
 
 // ── Tests ──────────────────────────────────────────────────
 describe("Collection navigation flow", () => {
-  const mockRouter = require("expo-router").useRouter();
-  const { useLocalSearchParams } = require("expo-router");
+  const mockRouter = (useRouter as jest.Mock)();
+
 
   beforeEach(() => {
     jest.clearAllMocks();

@@ -1,4 +1,5 @@
 import { runMigrations } from "../migrations";
+import { expo } from "../client";
 
 jest.mock("../client", () => ({
   expo: {
@@ -6,8 +7,6 @@ jest.mock("../client", () => ({
     execSync: jest.fn(),
   },
 }));
-
-const { expo } = require("../client");
 const mockGetFirstSync = expo.getFirstSync as jest.MockedFunction<typeof expo.getFirstSync>;
 const mockExecSync = expo.execSync as jest.MockedFunction<typeof expo.execSync>;
 

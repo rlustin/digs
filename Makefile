@@ -18,7 +18,7 @@ test: ## Run all tests
 	npx jest
 
 lint: ## Lint and type-check the project
-	npx expo lint .
+	npx expo lint . -- --max-warnings 0
 	npx tsc --noEmit
 
 lintfix: ## Auto-fix lint issues

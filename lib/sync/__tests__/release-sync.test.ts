@@ -7,7 +7,7 @@ import { mapBasicRelease, syncBasicReleases, syncBasicReleasesIncremental, syncR
 import { getAllFolders } from "@/db/queries/folders";
 import { getReleasesNeedingDetailSync, getLocalReleaseCountByFolder } from "@/db/queries/releases";
 import { fetchReleasesInFolder, fetchReleaseDetail } from "@/lib/discogs/endpoints";
-import { db } from "@/db/client";
+import { db, expo } from "@/db/client";
 
 // ── Mocks ──────────────────────────────────────────────────
 jest.mock("@/db/client", () => ({
@@ -297,9 +297,7 @@ describe("syncBasicReleasesIncremental", () => {
     await syncBasicReleasesIncremental("rlustin", "2025-01-01T00:00:00.000Z");
 
     // Only Mix'Elle should be upserted (the one newer than cutoff)
-    const mockExpo = require("@/db/client").expo;
-    const transactionFn = mockExpo.withTransactionSync.mock.calls[0]?.[0];
-    expect(mockExpo.withTransactionSync).toHaveBeenCalledTimes(1);
+    expect((expo as any).withTransactionSync).toHaveBeenCalledTimes(1);
   });
 
   it("skips deletion check when local count matches API count", async () => {

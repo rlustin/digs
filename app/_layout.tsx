@@ -70,7 +70,7 @@ export default function RootLayout() {
       }),
       useSyncStore.getState().restoreLastFullSyncAt(),
     ]).then(() => setAuthChecked(true));
-  }, [dbReady]);
+  }, [dbReady, setAuthenticated]);
 
   useEffect(() => {
     if (error) throw error;
@@ -107,7 +107,7 @@ function AuthGate() {
     } else if (isAuthenticated && inAuthGroup) {
       router.replace("/");
     }
-  }, [isAuthenticated, segments]);
+  }, [isAuthenticated, segments, router]);
 
   return (
     <Stack screenOptions={{ headerShown: false }}>
