@@ -7,7 +7,8 @@ import { registerBackgroundSync } from "@/lib/sync/background-task";
 /**
  * Hook to trigger sync on first mount after authentication.
  * - First launch: runs full sync (folders + basic + detail)
- * - Subsequent: registers background task for detail sync
+ * - Subsequent: runs incremental sync
+ * Always registers the background task for ongoing detail sync.
  */
 export function useInitialSync() {
   const username = useAuthStore((s) => s.username);
@@ -20,13 +21,11 @@ export function useInitialSync() {
     started.current = true;
 
     if (!lastFullSyncAt) {
-      // First sync ever
       runFullSync(username);
     } else {
-      // Already synced before — run incremental sync + register background task
       runIncrementalSync(username);
-      registerBackgroundSync();
     }
+    registerBackgroundSync();
   }, [username, lastFullSyncAt]);
 
   return { isSyncing };

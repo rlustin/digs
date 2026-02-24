@@ -84,17 +84,15 @@ export async function runIncrementalSync(username: string) {
 }
 
 /**
- * Run detail sync in batches of 10, with a 12s pause between batches
- * to stay within rate limits. Stops after maxBatches foreground batches.
+ * Run detail sync in batches of 10 until all releases are synced.
+ * Relies on the rate limiter for pacing. Stops on abort or when
+ * there is nothing left to sync.
  */
-export async function runDetailSyncLoop(
-  signal?: AbortSignal,
-  maxBatches: number = 5,
-) {
+export async function runDetailSyncLoop(signal?: AbortSignal) {
   const store = useSyncStore.getState();
   let totalProcessed = 0;
   let totalFailed = 0;
-  for (let i = 0; i < maxBatches; i++) {
+  while (true) {
     if (signal?.aborted) break;
     try {
       const { processed, failed } = await syncReleaseDetails(10, signal);
@@ -102,11 +100,6 @@ export async function runDetailSyncLoop(
       totalFailed += failed;
       if (failed > 0) store.setDetailSyncFailed(totalFailed);
       if (processed === 0 && failed === 0) break;
-
-      if (i < maxBatches - 1) {
-        // Pause between batches to respect rate limits
-        await new Promise((r) => setTimeout(r, 12000));
-      }
     } catch (err) {
       if (signal?.aborted) break;
       console.warn("Detail sync loop stopped:", err);
@@ -119,12 +112,22 @@ export async function runDetailSyncLoop(
 }
 
 /**
- * Run a single batch of detail sync (for background task usage).
+ * Run multiple batches of detail sync (for background task usage).
+ * Processes up to maxReleases before stopping, relying on the rate
+ * limiter for pacing.
  */
-export async function runDetailSyncBatch(batchSize: number = 10) {
+export async function runDetailSyncBatch(maxReleases: number = 500) {
+  const batchSize = 10;
+  let totalProcessed = 0;
   try {
-    await syncReleaseDetails(batchSize);
-    queryClient.invalidateQueries({ queryKey: ["releases"] });
+    while (totalProcessed < maxReleases) {
+      const { processed, failed } = await syncReleaseDetails(batchSize);
+      totalProcessed += processed;
+      if (processed === 0 && failed === 0) break;
+    }
+    if (totalProcessed > 0) {
+      queryClient.invalidateQueries({ queryKey: ["releases"] });
+    }
   } catch (err) {
     console.warn("Background detail sync batch failed:", err);
   }

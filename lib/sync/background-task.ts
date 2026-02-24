@@ -7,7 +7,7 @@ const BACKGROUND_SYNC_TASK = "background-detail-sync";
 // Define the task at module scope — must be imported at app root
 TaskManager.defineTask(BACKGROUND_SYNC_TASK, async () => {
   try {
-    await runDetailSyncBatch(10);
+    await runDetailSyncBatch(500);
     return BackgroundTask.BackgroundTaskResult.Success;
   } catch {
     return BackgroundTask.BackgroundTaskResult.Failed;

@@ -169,12 +169,7 @@ describe("runFullSync", () => {
 
 describe("runDetailSyncLoop", () => {
   beforeEach(() => {
-    jest.useFakeTimers();
     jest.clearAllMocks();
-  });
-
-  afterEach(() => {
-    jest.useRealTimers();
   });
 
   it("loops until syncReleaseDetails returns 0", async () => {
@@ -183,45 +178,9 @@ describe("runDetailSyncLoop", () => {
       .mockResolvedValueOnce({ processed: 5, failed: 0 } as any)
       .mockResolvedValueOnce({ processed: 0, failed: 0 } as any);
 
-    const promise = runDetailSyncLoop();
-
-    // Advance through the 12s pauses between batches
-    await jest.advanceTimersByTimeAsync(12500);
-    await jest.advanceTimersByTimeAsync(12500);
-
-    await promise;
+    await runDetailSyncLoop();
 
     expect(mockSyncReleaseDetails).toHaveBeenCalledTimes(3);
-  });
-
-  it("stops after maxBatches even if more data is available", async () => {
-    mockSyncReleaseDetails.mockResolvedValue({ processed: 10, failed: 0 } as any);
-
-    const promise = runDetailSyncLoop(undefined, 3);
-
-    await jest.advanceTimersByTimeAsync(12500);
-    await jest.advanceTimersByTimeAsync(12500);
-
-    await promise;
-
-    expect(mockSyncReleaseDetails).toHaveBeenCalledTimes(3);
-  });
-
-  it("pauses 12s between batches", async () => {
-    mockSyncReleaseDetails
-      .mockResolvedValueOnce({ processed: 10, failed: 0 } as any)
-      .mockResolvedValueOnce({ processed: 0, failed: 0 } as any);
-
-    const promise = runDetailSyncLoop();
-
-    // First batch completes, then 12s pause
-    expect(mockSyncReleaseDetails).toHaveBeenCalledTimes(1);
-
-    await jest.advanceTimersByTimeAsync(12500);
-
-    await promise;
-
-    expect(mockSyncReleaseDetails).toHaveBeenCalledTimes(2);
   });
 
   it("invalidates queries once at the end, not per batch", async () => {
@@ -230,12 +189,7 @@ describe("runDetailSyncLoop", () => {
       .mockResolvedValueOnce({ processed: 5, failed: 0 } as any)
       .mockResolvedValueOnce({ processed: 0, failed: 0 } as any);
 
-    const promise = runDetailSyncLoop();
-
-    await jest.advanceTimersByTimeAsync(12500);
-    await jest.advanceTimersByTimeAsync(12500);
-
-    await promise;
+    await runDetailSyncLoop();
 
     const releaseCalls = mockInvalidateQueries.mock.calls.filter(
       (c) => (c[0] as any).queryKey[0] === "releases"
@@ -356,12 +310,18 @@ describe("runDetailSyncBatch", () => {
     jest.clearAllMocks();
   });
 
-  it("passes batch size through to syncReleaseDetails", async () => {
-    mockSyncReleaseDetails.mockResolvedValue({ processed: 5, failed: 0 } as any);
+  it("loops until maxReleases processed", async () => {
+    mockSyncReleaseDetails
+      .mockResolvedValueOnce({ processed: 10, failed: 0 } as any)
+      .mockResolvedValueOnce({ processed: 10, failed: 0 } as any)
+      .mockResolvedValueOnce({ processed: 5, failed: 0 } as any)
+      .mockResolvedValueOnce({ processed: 0, failed: 0 } as any);
 
     await runDetailSyncBatch(25);
 
-    expect(mockSyncReleaseDetails).toHaveBeenCalledWith(25);
+    // Stops after 25 total processed (10+10+5), calls syncReleaseDetails with batchSize=10
+    expect(mockSyncReleaseDetails).toHaveBeenCalledTimes(4);
+    expect(mockSyncReleaseDetails).toHaveBeenCalledWith(10);
   });
 
   it("swallows errors with console.warn", async () => {

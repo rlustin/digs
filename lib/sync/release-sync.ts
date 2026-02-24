@@ -260,25 +260,32 @@ export async function syncReleaseDetails(
 
   let processed = 0;
   let failed = 0;
-  for (let i = 0; i < pending.length; i++) {
+  const CONCURRENCY = 5;
+
+  for (let i = 0; i < pending.length; i += CONCURRENCY) {
     if (signal?.aborted) return { processed, failed };
-    const release = pending[i];
+    const chunk = pending.slice(i, i + CONCURRENCY);
 
-    try {
-      const detail = await fetchReleaseDetail(release.releaseId, signal);
+    const results = await Promise.allSettled(
+      chunk.map(async (release) => {
+        const detail = await fetchReleaseDetail(release.releaseId, signal);
+        return { instanceId: release.instanceId, detail };
+      })
+    );
 
-      db.update(releases)
-        .set(mapReleaseDetailToRow(detail))
-        .where(eq(releases.instanceId, release.instanceId))
-        .run();
-      processed++;
-    } catch (err) {
-      if (signal?.aborted) return { processed, failed };
-      if (err instanceof AuthExpiredError) {
-        throw err;
+    for (const result of results) {
+      if (result.status === "fulfilled") {
+        db.update(releases)
+          .set(mapReleaseDetailToRow(result.value.detail))
+          .where(eq(releases.instanceId, result.value.instanceId))
+          .run();
+        processed++;
+      } else {
+        const err = result.reason;
+        if (err instanceof AuthExpiredError) throw err;
+        failed++;
+        console.warn("Detail sync failed for a release:", err);
       }
-      failed++;
-      console.warn(`Detail sync failed for release ${release.releaseId}:`, err);
     }
   }
 

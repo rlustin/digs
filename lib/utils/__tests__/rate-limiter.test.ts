@@ -24,8 +24,11 @@ describe("RateLimiter", () => {
   it("decrements remaining tokens on acquire", async () => {
     const limiter = new RateLimiter(3);
     await limiter.acquire(); // remaining = 2
+    limiter.release();
     await limiter.acquire(); // remaining = 1
+    limiter.release();
     await limiter.acquire(); // remaining = 0
+    limiter.release();
 
     // Fourth acquire should queue since remaining < 1
     let resolved = false;
@@ -36,6 +39,7 @@ describe("RateLimiter", () => {
     await flushMicrotasks();
     expect(resolved).toBe(false);
 
+    // inFlight=0, remaining=0 → probe releases 1
     jest.advanceTimersByTime(1100);
     await flushMicrotasks();
 
@@ -56,13 +60,13 @@ describe("RateLimiter", () => {
     const limiter = new RateLimiter(1);
 
     const results: number[] = [];
-    limiter.acquire().then(() => results.push(1)); // remaining = 0, resolves immediately
+    limiter.acquire().then(() => { results.push(1); limiter.release(); }); // remaining = 0, resolves immediately
     limiter.acquire().then(() => results.push(2)); // queued
 
     await flushMicrotasks();
     expect(results).toContain(1);
 
-    // Queued request resolves after 1s
+    // inFlight=0 after release, remaining=0 → probe releases 1
     jest.advanceTimersByTime(1100);
     await flushMicrotasks();
     expect(results).toContain(2);
