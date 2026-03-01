@@ -32,6 +32,10 @@ yarn-error.*
 # Web build
 web-build/
 
+# Downloaded album covers and generated registry
+assets/covers/
+constants/covers.ts
+
 # Claude Code
 .claude/settings.local.json
 

@@ -1,37 +1,16 @@
 import { View, Text, Pressable, ActivityIndicator, StyleSheet } from "react-native";
-import { useState, useEffect } from "react";
-import { LinearGradient } from "expo-linear-gradient";
-import { Disc3 } from "lucide-react-native";
-import Animated, {
-  useSharedValue,
-  useAnimatedStyle,
-  withRepeat,
-  withTiming,
-  Easing,
-} from "react-native-reanimated";
+import { useState } from "react";
+import { StatusBar } from "expo-status-bar";
 import { login } from "@/lib/discogs/oauth";
 import { useAuthStore } from "@/stores/auth-store";
 import { Colors } from "@/constants/Colors";
+import { CoverMosaic } from "@/components/login/cover-mosaic";
 import { t } from "@/lib/i18n";
 
 export default function LoginScreen() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const setAuthenticated = useAuthStore((s) => s.setAuthenticated);
-
-  const rotation = useSharedValue(0);
-
-  useEffect(() => {
-    rotation.value = withRepeat(
-      withTiming(360, { duration: 8000, easing: Easing.linear }),
-      -1,
-      false,
-    );
-  }, [rotation]);
-
-  const spinStyle = useAnimatedStyle(() => ({
-    transform: [{ rotate: `${rotation.value}deg` }],
-  }));
 
   const handleLogin = async () => {
     setLoading(true);
@@ -47,12 +26,11 @@ export default function LoginScreen() {
   };
 
   return (
-    <LinearGradient colors={[Colors.white, Colors.gray100]} style={{ flex: 1 }}>
-      <View style={styles.content}>
-        <Animated.View style={spinStyle}>
-          <Disc3 size={160} color="rgba(249,115,22,0.12)" strokeWidth={1} />
-        </Animated.View>
+    <View style={{ flex: 1 }}>
+      <StatusBar style="light" />
+      <CoverMosaic />
 
+      <View style={styles.content}>
         <Text style={styles.title}>{t("login.title")}</Text>
         <Text style={styles.tagline}>{t("login.tagline")}</Text>
       </View>
@@ -72,7 +50,7 @@ export default function LoginScreen() {
 
         {error && <Text style={styles.error}>{error}</Text>}
       </View>
-    </LinearGradient>
+    </View>
   );
 }
 
@@ -85,14 +63,14 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 52,
     fontFamily: "GeistMono-ExtraBold",
-    color: Colors.gray900,
+    color: Colors.white,
     marginTop: 28,
     letterSpacing: -1.5,
   },
   tagline: {
     fontSize: 17,
     fontFamily: "Inter-Regular",
-    color: Colors.gray400,
+    color: "rgba(255,255,255,0.7)",
     marginTop: 8,
   },
   bottom: {
