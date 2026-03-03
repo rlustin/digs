@@ -1,4 +1,4 @@
-import { ScrollView, Dimensions } from "react-native";
+import { ScrollView, useWindowDimensions } from "react-native";
 import { Image } from "expo-image";
 
 interface ReleaseImage {
@@ -12,10 +12,9 @@ interface ImageGalleryProps {
   images: ReleaseImage[];
 }
 
-const SCREEN_WIDTH = Dimensions.get("window").width;
-const IMAGE_SIZE = SCREEN_WIDTH * 0.85;
-
 export function ImageGallery({ images }: ImageGalleryProps) {
+  const { width } = useWindowDimensions();
+  const imageSize = width * 0.85;
   if (!images.length) return null;
 
   return (
@@ -31,8 +30,8 @@ export function ImageGallery({ images }: ImageGalleryProps) {
           key={`${img.uri}-${i}`}
           source={{ uri: img.uri }}
           style={{
-            width: IMAGE_SIZE,
-            height: IMAGE_SIZE,
+            width: imageSize,
+            height: imageSize,
             borderRadius: 8,
           }}
           contentFit="cover"
