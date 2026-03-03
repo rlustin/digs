@@ -14,6 +14,7 @@ jest.mock("@/lib/utils/rate-limiter", () => ({
   RateLimiter: jest.fn().mockImplementation(() => ({
     acquire: jest.fn().mockResolvedValue(undefined),
     updateFromHeader: jest.fn(),
+    release: jest.fn(),
   })),
 }));
 
@@ -147,8 +148,8 @@ describe("discogsRequest", () => {
 
     const promise = discogsRequest("/test", "GET", 3);
 
-    // Advance past the 1s retry delay
-    await jest.advanceTimersByTimeAsync(1500);
+    // Advance past the retry delay: Math.max(1, 5) * 2^0 = 5s
+    await jest.advanceTimersByTimeAsync(5500);
 
     const result = await promise;
     expect(result).toEqual({ retried: true });
@@ -172,8 +173,8 @@ describe("discogsRequest", () => {
     // Set up the rejection expectation before advancing timers
     const expectation = expect(promise).rejects.toThrow("Discogs API error: 429");
 
-    // Advance past the retry delay
-    await jest.advanceTimersByTimeAsync(1500);
+    // Advance past the retry delay: Math.max(1, 5) * 2^0 = 5s
+    await jest.advanceTimersByTimeAsync(5500);
 
     await expectation;
   });
@@ -253,7 +254,8 @@ describe("discogsRequest", () => {
     controller.abort();
 
     const expectation = expect(promise).rejects.toThrow("The operation was aborted.");
-    await jest.advanceTimersByTimeAsync(2500);
+    // Advance past the retry delay: Math.max(2, 5) * 2^0 = 5s
+    await jest.advanceTimersByTimeAsync(5500);
     await expectation;
 
     // Should not have retried
