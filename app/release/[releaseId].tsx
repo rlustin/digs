@@ -1,7 +1,8 @@
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Image } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
 import { useLocalSearchParams, useRouter } from "expo-router";
+import { useEffect, useRef } from "react";
 import {
   ActivityIndicator,
   Pressable,
@@ -40,7 +41,9 @@ export default function ReleaseDetailScreen() {
   const coverSize = screenWidth * COVER_WIDTH_RATIO;
   const backdropHeight = insets.top + 44 + COVER_TOP_SPACING + coverSize + BACKDROP_EXTRA;
 
-  const { data: release, isError, refetch } = useQuery({
+  const queryClient = useQueryClient();
+
+  const { data: release, isError } = useQuery({
     queryKey: ["release", id],
     queryFn: () => getReleaseByReleaseId(id),
   });
@@ -52,19 +55,27 @@ export default function ReleaseDetailScreen() {
   });
 
   // On-demand detail fetch if not yet synced
-  const { isLoading: fetchingDetail } = useQuery({
-    queryKey: ["release-detail-fetch", id],
-    queryFn: async () => {
+  const detailMutation = useMutation({
+    mutationFn: async () => {
       const detail = await fetchReleaseDetail(id);
       db.update(releases)
         .set(mapReleaseDetailToRow(detail))
         .where(eq(releases.releaseId, id))
         .run();
-      refetch();
-      return true;
+      return detail;
     },
-    enabled: !!release && !release.detailSyncedAt,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["release", id] });
+    },
   });
+
+  const detailFetchedRef = useRef(false);
+  useEffect(() => {
+    if (release && !release.detailSyncedAt && !detailFetchedRef.current) {
+      detailFetchedRef.current = true;
+      detailMutation.mutate();
+    }
+  }, [release, detailMutation]);
 
   if (Number.isNaN(id) || isError) {
     return (
@@ -211,7 +222,7 @@ export default function ReleaseDetailScreen() {
       </View>
 
       {/* Loading indicator for on-demand detail fetch */}
-      {fetchingDetail && (
+      {detailMutation.isPending && (
         <View className="flex-row items-center justify-center mt-4">
           <ActivityIndicator color={Colors.accent} size="small" />
           <Text className="text-gray-400 text-sm ml-2 font-sans">
