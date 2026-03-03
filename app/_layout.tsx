@@ -7,6 +7,7 @@ import { useFonts } from "expo-font";
 import { Stack, useRouter, useSegments } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { useEffect, useState } from "react";
+import { Text, View } from "react-native";
 import { StatusBar } from "expo-status-bar";
 
 import { queryClient } from "@/lib/query-client";
@@ -48,6 +49,7 @@ export default function RootLayout() {
     "GeistMono-ExtraBold": require("../assets/fonts/GeistMono-ExtraBold.ttf"),
   });
   const [dbReady, setDbReady] = useState(false);
+  const [migrationError, setMigrationError] = useState<string | null>(null);
   const [authChecked, setAuthChecked] = useState(false);
   const setAuthenticated = useAuthStore((s) => s.setAuthenticated);
 
@@ -58,6 +60,8 @@ export default function RootLayout() {
       setDbReady(true);
     } catch (e) {
       console.error("Migration failed:", e);
+      setMigrationError(e instanceof Error ? e.message : String(e));
+      SplashScreen.hideAsync();
     }
   }, []);
 
@@ -84,6 +88,27 @@ export default function RootLayout() {
       SplashScreen.hideAsync();
     }
   }, [loaded, dbReady, authChecked]);
+
+  if (migrationError) {
+    return (
+      <View
+        style={{
+          flex: 1,
+          alignItems: "center",
+          justifyContent: "center",
+          padding: 24,
+          backgroundColor: "#fff",
+        }}
+      >
+        <Text style={{ fontSize: 18, fontWeight: "bold", marginBottom: 8 }}>
+          Database Error
+        </Text>
+        <Text style={{ fontSize: 14, color: "#666", textAlign: "center" }}>
+          {migrationError}
+        </Text>
+      </View>
+    );
+  }
 
   if (!loaded || !dbReady || !authChecked) return null;
 
