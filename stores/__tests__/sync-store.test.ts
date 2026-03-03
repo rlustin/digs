@@ -1,4 +1,5 @@
 import * as SecureStore from "expo-secure-store";
+import { getDetailSyncCounts } from "@/db/queries/releases";
 import { useSyncStore } from "../sync-store";
 
 jest.mock("expo-secure-store", () => ({
@@ -6,6 +7,12 @@ jest.mock("expo-secure-store", () => ({
   setItemAsync: jest.fn().mockResolvedValue(undefined),
   deleteItemAsync: jest.fn().mockResolvedValue(undefined),
 }));
+
+jest.mock("@/db/queries/releases", () => ({
+  getDetailSyncCounts: jest.fn().mockReturnValue({ synced: 0, total: 0 }),
+}));
+
+const mockGetDetailSyncCounts = getDetailSyncCounts as jest.MockedFunction<typeof getDetailSyncCounts>;
 
 const mockSecureStore = jest.mocked(SecureStore);
 
@@ -148,5 +155,16 @@ describe("useSyncStore", () => {
     expect(state.isSyncing).toBe(false);
     expect(state.phase).toBe("idle");
     expect(state.abortController).toBeNull();
+  });
+
+  it("setDetailCounts updates synced and total", () => {
+    useSyncStore.getState().setDetailCounts(42, 100);
+    expect(useSyncStore.getState().detailCounts).toEqual({ synced: 42, total: 100 });
+  });
+
+  it("loadDetailCounts reads from DB", () => {
+    mockGetDetailSyncCounts.mockReturnValue({ synced: 75, total: 200 });
+    useSyncStore.getState().loadDetailCounts();
+    expect(useSyncStore.getState().detailCounts).toEqual({ synced: 75, total: 200 });
   });
 });

@@ -2,6 +2,7 @@ import { runFullSync, runIncrementalSync, runDetailSyncLoop, runDetailSyncBatch 
 import { syncFolders } from "../folder-sync";
 import { syncBasicReleases, syncBasicReleasesIncremental, syncReleaseDetails } from "../release-sync";
 import { runImageCacheSync } from "../image-cache";
+import { getDetailSyncCounts } from "@/db/queries/releases";
 import { useSyncStore } from "@/stores/sync-store";
 import { useAuthStore } from "@/stores/auth-store";
 import { AuthExpiredError } from "@/lib/discogs/errors";
@@ -20,6 +21,10 @@ jest.mock("../release-sync", () => ({
 
 jest.mock("../image-cache", () => ({
   runImageCacheSync: jest.fn().mockResolvedValue(undefined),
+}));
+
+jest.mock("@/db/queries/releases", () => ({
+  getDetailSyncCounts: jest.fn().mockReturnValue({ synced: 0, total: 0 }),
 }));
 
 jest.mock("@/lib/discogs/oauth", () => ({
@@ -42,6 +47,7 @@ jest.mock("@/stores/sync-store", () => {
     setLastFullSyncAt: jest.fn(),
     setError: jest.fn(),
     setDetailSyncFailed: jest.fn(),
+    loadDetailCounts: jest.fn(),
     finishSync: jest.fn(),
     startSync: jest.fn(() => new AbortController()),
   };
@@ -62,6 +68,7 @@ const mockSyncBasicReleasesIncremental = syncBasicReleasesIncremental as jest.Mo
 const mockSyncReleaseDetails = syncReleaseDetails as jest.MockedFunction<typeof syncReleaseDetails>;
 const mockRunImageCacheSync = runImageCacheSync as jest.MockedFunction<typeof runImageCacheSync>;
 const mockInvalidateQueries = queryClient.invalidateQueries as jest.MockedFunction<typeof queryClient.invalidateQueries>;
+const mockGetDetailSyncCounts = getDetailSyncCounts as jest.MockedFunction<typeof getDetailSyncCounts>;
 
 describe("runFullSync", () => {
   const store = useSyncStore.getState();
@@ -74,6 +81,7 @@ describe("runFullSync", () => {
     mockSyncFolders.mockResolvedValue(undefined);
     mockSyncBasicReleases.mockResolvedValue(undefined);
     mockSyncReleaseDetails.mockResolvedValue({ processed: 0, failed: 0 } as any);
+    mockGetDetailSyncCounts.mockReturnValue({ synced: 0, total: 0 });
   });
 
   afterEach(() => {
@@ -184,19 +192,38 @@ describe("runFullSync", () => {
     expect(mockSyncFolders).toHaveBeenCalledWith(
       "testuser",
       expect.any(AbortSignal),
-      expect.objectContaining({ setPhase: expect.any(Function), setProgress: expect.any(Function) }),
+      expect.objectContaining({ setPhase: expect.any(Function) }),
     );
+    // syncFolders should NOT receive setProgress (single API call, no granular progress)
+    const folderCallbacks = mockSyncFolders.mock.calls[0][2];
+    expect(folderCallbacks).not.toHaveProperty("setProgress");
+
     expect(mockSyncBasicReleases).toHaveBeenCalledWith(
       "testuser",
       expect.any(AbortSignal),
       expect.objectContaining({ setPhase: expect.any(Function), setProgress: expect.any(Function) }),
     );
   });
+
+  it("initializes progress to (0, 100) and ends at (100, 100)", async () => {
+    await runFullSync("testuser");
+
+    const progressCalls = (store.setProgress as jest.Mock).mock.calls;
+    expect(progressCalls[0]).toEqual([0, 100]);
+    expect(progressCalls[progressCalls.length - 1]).toEqual([100, 100]);
+  });
+
+  it("loads detail counts from DB before detail sync loop", async () => {
+    await runFullSync("testuser");
+
+    expect(store.loadDetailCounts).toHaveBeenCalled();
+  });
 });
 
 describe("runDetailSyncLoop", () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockGetDetailSyncCounts.mockReturnValue({ synced: 0, total: 100 });
   });
 
   it("loops until syncReleaseDetails returns 0", async () => {
@@ -253,6 +280,46 @@ describe("runDetailSyncLoop", () => {
 
     expect(mockSyncReleaseDetails).not.toHaveBeenCalled();
   });
+
+  it("calls onProgress callback with (processed, totalToSync)", async () => {
+    mockGetDetailSyncCounts.mockReturnValue({ synced: 50, total: 150 });
+    const onProgress = jest.fn();
+
+    mockSyncReleaseDetails
+      .mockResolvedValueOnce({ processed: 10, failed: 0 } as any)
+      .mockResolvedValueOnce({ processed: 10, failed: 0 } as any)
+      .mockResolvedValueOnce({ processed: 0, failed: 0 } as any);
+
+    await runDetailSyncLoop(undefined, { onProgress });
+
+    expect(onProgress).toHaveBeenCalledWith(10, 100);
+    expect(onProgress).toHaveBeenCalledWith(20, 100);
+  });
+
+  it("calls onFailed callback when failures occur", async () => {
+    const onFailed = jest.fn();
+
+    mockSyncReleaseDetails
+      .mockResolvedValueOnce({ processed: 8, failed: 2 } as any)
+      .mockResolvedValueOnce({ processed: 0, failed: 0 } as any);
+
+    await runDetailSyncLoop(undefined, { onFailed });
+
+    expect(onFailed).toHaveBeenCalledWith(2);
+  });
+
+  it("calls onBatchComplete after each batch", async () => {
+    const onBatchComplete = jest.fn();
+
+    mockSyncReleaseDetails
+      .mockResolvedValueOnce({ processed: 10, failed: 0 } as any)
+      .mockResolvedValueOnce({ processed: 5, failed: 0 } as any)
+      .mockResolvedValueOnce({ processed: 0, failed: 0 } as any);
+
+    await runDetailSyncLoop(undefined, { onBatchComplete });
+
+    expect(onBatchComplete).toHaveBeenCalledTimes(3);
+  });
 });
 
 describe("runIncrementalSync", () => {
@@ -267,6 +334,7 @@ describe("runIncrementalSync", () => {
     mockSyncFolders.mockResolvedValue(undefined);
     mockSyncBasicReleasesIncremental.mockResolvedValue(undefined);
     mockSyncReleaseDetails.mockResolvedValue({ processed: 0, failed: 0 } as any);
+    mockGetDetailSyncCounts.mockReturnValue({ synced: 0, total: 0 });
   });
 
   afterEach(() => {

@@ -20,10 +20,6 @@ jest.mock("@/lib/sync/engine", () => ({
   runIncrementalSync: jest.fn(),
 }));
 
-jest.mock("@/db/queries/releases", () => ({
-  getDetailSyncCounts: jest.fn().mockReturnValue({ synced: 0, total: 0 }),
-}));
-
 const mockRunFullSync = runFullSync as jest.MockedFunction<typeof runFullSync>;
 const mockRunIncrementalSync = runIncrementalSync as jest.MockedFunction<typeof runIncrementalSync>;
 
@@ -37,6 +33,7 @@ describe("SettingsScreen", () => {
       progress: null,
       lastFullSyncAt: null,
       error: null,
+      detailCounts: { synced: 0, total: 0 },
     });
   });
 

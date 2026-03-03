@@ -10,7 +10,31 @@ import { useAuthStore } from "@/stores/auth-store";
 import { AuthExpiredError } from "@/lib/discogs/errors";
 import { logout } from "@/lib/discogs/oauth";
 import { queryClient } from "@/lib/query-client";
+import { getDetailSyncCounts } from "@/db/queries/releases";
 import type { ReleaseSyncCallbacks } from "./release-sync";
+
+/** Weight each phase occupies in the 0–100% overall progress. */
+export const PHASE_WEIGHTS = {
+  folders: 2,
+  "basic-releases": 18,
+  details: 60,
+  "caching-images": 20,
+} as const;
+
+/**
+ * Create a setProgress callback that maps per-phase (current, total)
+ * into the overall 0–100 range.
+ */
+export function makeProgressCallback(
+  setProgress: (current: number, total: number) => void,
+  offset: number,
+  weight: number,
+): (current: number, total: number) => void {
+  return (current: number, total: number) => {
+    const fraction = total > 0 ? current / total : 1;
+    setProgress(Math.round(offset + fraction * weight), 100);
+  };
+}
 
 /**
  * Shared sync pipeline: guards, folder sync, release sync step, detail sync, cleanup.
@@ -25,36 +49,62 @@ async function runSyncPipeline(
   const controller = store.startSync();
   const signal = controller.signal;
 
-  const callbacks: ReleaseSyncCallbacks = {
-    setPhase: store.setPhase,
-    setProgress: store.setProgress,
-  };
+  store.setProgress(0, 100);
 
   try {
-    await syncFolders(username, signal, callbacks);
+    await syncFolders(username, signal, { setPhase: store.setPhase });
+    store.setProgress(PHASE_WEIGHTS.folders, 100);
     queryClient.invalidateQueries({ queryKey: ["folders"] });
 
     if (signal.aborted) return;
 
-    await syncReleasesStep(signal, callbacks);
+    const basicReleasesCallbacks: ReleaseSyncCallbacks = {
+      setPhase: store.setPhase,
+      setProgress: makeProgressCallback(
+        store.setProgress,
+        PHASE_WEIGHTS.folders,
+        PHASE_WEIGHTS["basic-releases"],
+      ),
+    };
+    await syncReleasesStep(signal, basicReleasesCallbacks);
     queryClient.invalidateQueries({ queryKey: ["releases"] });
 
     if (signal.aborted) return;
 
     store.setLastFullSyncAt(new Date().toISOString());
 
+    store.loadDetailCounts();
+
     store.setPhase("details");
-    await runDetailSyncLoop(signal);
+    const detailsOffset = PHASE_WEIGHTS.folders + PHASE_WEIGHTS["basic-releases"];
+    const detailsProgress = makeProgressCallback(
+      store.setProgress,
+      detailsOffset,
+      PHASE_WEIGHTS.details,
+    );
+    await runDetailSyncLoop(signal, {
+      onProgress: detailsProgress,
+      onFailed: store.setDetailSyncFailed,
+      onBatchComplete: store.loadDetailCounts,
+    });
 
     if (signal.aborted) return;
 
     store.setPhase("caching-images");
+    const imageCacheOffset = detailsOffset + PHASE_WEIGHTS.details;
     try {
-      await runImageCacheSync(signal, { setProgress: store.setProgress });
+      await runImageCacheSync(signal, {
+        setProgress: makeProgressCallback(
+          store.setProgress,
+          imageCacheOffset,
+          PHASE_WEIGHTS["caching-images"],
+        ),
+      });
     } catch (err) {
       console.warn("Image caching failed:", err);
     }
 
+    store.setProgress(100, 100);
     store.finishSync();
   } catch (err) {
     if (signal.aborted) return;
@@ -93,13 +143,24 @@ export async function runIncrementalSync(username: string) {
   );
 }
 
+export interface DetailSyncLoopCallbacks {
+  onProgress?: (current: number, total: number) => void;
+  onFailed?: (count: number) => void;
+  onBatchComplete?: () => void;
+}
+
 /**
  * Run detail sync in batches of 10 until all releases are synced.
  * Relies on the rate limiter for pacing. Stops on abort or when
  * there is nothing left to sync.
  */
-export async function runDetailSyncLoop(signal?: AbortSignal) {
-  const store = useSyncStore.getState();
+export async function runDetailSyncLoop(
+  signal?: AbortSignal,
+  callbacks?: DetailSyncLoopCallbacks,
+) {
+  const { total, synced } = getDetailSyncCounts();
+  const totalToSync = total - synced;
+
   let totalProcessed = 0;
   let totalFailed = 0;
   while (true) {
@@ -108,7 +169,11 @@ export async function runDetailSyncLoop(signal?: AbortSignal) {
       const { processed, failed } = await syncReleaseDetails(10, signal);
       totalProcessed += processed;
       totalFailed += failed;
-      if (failed > 0) store.setDetailSyncFailed(totalFailed);
+      if (failed > 0) callbacks?.onFailed?.(totalFailed);
+      if (totalToSync > 0) {
+        callbacks?.onProgress?.(totalProcessed, totalToSync);
+      }
+      callbacks?.onBatchComplete?.();
       if (processed === 0 && failed === 0) break;
     } catch (err) {
       if (signal?.aborted) break;

@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import * as SecureStore from "expo-secure-store";
+import { getDetailSyncCounts } from "@/db/queries/releases";
 
 const KEY_LAST_FULL_SYNC_AT = "last_full_sync_at";
 
@@ -20,12 +21,15 @@ interface SyncState {
   lastFullSyncAt: string | null;
   error: string | null;
   detailSyncFailed: number;
+  detailCounts: { synced: number; total: number };
   abortController: AbortController | null;
   setPhase: (phase: SyncPhase) => void;
   setProgress: (current: number, total: number) => void;
   setSyncing: (syncing: boolean) => void;
   setError: (error: string | null) => void;
   setDetailSyncFailed: (count: number) => void;
+  setDetailCounts: (synced: number, total: number) => void;
+  loadDetailCounts: () => void;
   finishSync: () => void;
   setLastFullSyncAt: (date: string) => void;
   restoreLastFullSyncAt: () => Promise<void>;
@@ -42,12 +46,15 @@ export const useSyncStore = create<SyncState>((set, get) => ({
   lastFullSyncAt: null,
   error: null,
   detailSyncFailed: 0,
+  detailCounts: { synced: 0, total: 0 },
   abortController: null,
   setPhase: (phase) => set({ phase, error: null }),
   setProgress: (current, total) => set({ progress: { current, total } }),
   setSyncing: (syncing) => set({ isSyncing: syncing }),
   setError: (error) => set({ phase: "error", error, isSyncing: false }),
   setDetailSyncFailed: (count) => set({ detailSyncFailed: count }),
+  setDetailCounts: (synced, total) => set({ detailCounts: { synced, total } }),
+  loadDetailCounts: () => set({ detailCounts: getDetailSyncCounts() }),
   finishSync: () => set({ isSyncing: false, phase: "idle", progress: null, detailSyncFailed: 0, abortController: null }),
   setLastFullSyncAt: (date) => {
     set({ lastFullSyncAt: date });

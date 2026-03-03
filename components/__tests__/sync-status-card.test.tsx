@@ -34,7 +34,7 @@ describe("SyncStatusCard", () => {
   it("renders progress percentage", () => {
     useSyncStore.setState({
       phase: "basic-releases",
-      progress: { current: 50, total: 200 },
+      progress: { current: 25, total: 100 },
     });
     render(<SyncStatusCard />);
     expect(screen.getByText("25%")).toBeTruthy();

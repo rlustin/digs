@@ -1,4 +1,3 @@
-import { useState, useEffect, useCallback } from "react";
 import { View, Text, Pressable, Alert, ScrollView } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { CircleAlert, RefreshCw, X } from "lucide-react-native";
@@ -9,7 +8,7 @@ import { useSyncStore, syncPhaseKeys } from "@/stores/sync-store";
 import { logout } from "@/lib/discogs/oauth";
 import { clearClientCredentials } from "@/lib/discogs/client";
 import { runFullSync, runIncrementalSync } from "@/lib/sync/engine";
-import { clearAllReleases, getDetailSyncCounts } from "@/db/queries/releases";
+import { clearAllReleases } from "@/db/queries/releases";
 import { clearAllFolders } from "@/db/queries/folders";
 import { queryClient } from "@/lib/query-client";
 import { Colors } from "@/constants/Colors";
@@ -27,19 +26,7 @@ export default function SettingsScreen() {
   const error = useSyncStore((s) => s.error);
   const detailSyncFailed = useSyncStore((s) => s.detailSyncFailed);
   const reset = useSyncStore((s) => s.reset);
-
-  const [detailCounts, setDetailCounts] = useState({ synced: 0, total: 0 });
-
-  const refreshCounts = useCallback(() => {
-    setDetailCounts(getDetailSyncCounts());
-  }, []);
-
-  useEffect(() => {
-    refreshCounts();
-    if (!isSyncing) return;
-    const id = setInterval(refreshCounts, 5000);
-    return () => clearInterval(id);
-  }, [refreshCounts, isSyncing]);
+  const detailCounts = useSyncStore((s) => s.detailCounts);
 
   const detailPending = detailCounts.total > 0 && detailCounts.synced < detailCounts.total;
 
@@ -124,7 +111,7 @@ export default function SettingsScreen() {
         </View>
 
         {/* Collection status */}
-        <View className={`flex-row justify-between px-4 py-3 ${syncActive || detailPending ? "border-b border-gray-100" : ""}`}>
+        <View className={`flex-row justify-between px-4 py-3 ${syncActive ? "border-b border-gray-100" : ""}`}>
           <Text className="text-gray-500 text-sm font-sans">{t("settings.collection")}</Text>
           <Text className="text-gray-900 text-sm font-sans">
             {isSyncing ? t("settings.syncing") : t("settings.idle")}
@@ -133,7 +120,7 @@ export default function SettingsScreen() {
 
         {/* Release details */}
         {(detailCounts.total > 0 || !syncActive) && (
-          <View className={`flex-row justify-between px-4 py-3 ${syncActive || detailPending ? "border-b border-gray-100" : ""}`}>
+          <View className={`flex-row justify-between px-4 py-3 ${syncActive ? "border-b border-gray-100" : ""}`}>
             <Text className="text-gray-500 text-sm font-sans">{t("settings.releaseDetails")}</Text>
             <Text className="text-gray-900 text-sm font-sans">
               {detailCounts.total === 0
@@ -147,7 +134,7 @@ export default function SettingsScreen() {
 
         {/* Active sync status (inline) */}
         {syncActive && !isError && (
-          <View className={`px-4 py-3 ${detailPending ? "border-b border-gray-100" : ""}`}>
+          <View className="px-4 py-3">
             <View className="flex-row items-center justify-between">
               <View className="flex-row items-center flex-1">
                 <RefreshCw size={12} color={Colors.accent} />
@@ -183,31 +170,6 @@ export default function SettingsScreen() {
               <Pressable onPress={reset} hitSlop={8} accessibilityLabel={t("common.dismiss")} accessibilityRole="button">
                 <X size={14} color={Colors.gray400} />
               </Pressable>
-            </View>
-          </View>
-        )}
-
-        {/* Detail sync progress */}
-        {detailPending && (
-          <View className="px-4 py-3">
-            <View className="flex-row items-center justify-between mb-2">
-              <View className="flex-row items-center">
-                <RefreshCw size={12} color={Colors.accent} />
-                <Text className="text-gray-900 text-sm font-sans-medium ml-2">
-                  {t("settings.syncingReleaseDetails")}
-                </Text>
-              </View>
-              <Text className="text-gray-500 text-xs font-mono">
-                {Math.round((detailCounts.synced / detailCounts.total) * 100)}%
-              </Text>
-            </View>
-            <View className="h-1 rounded-full bg-gray-200 overflow-hidden">
-              <View
-                className="h-full rounded-full bg-accent"
-                style={{
-                  width: `${Math.round((detailCounts.synced / detailCounts.total) * 100)}%`,
-                }}
-              />
             </View>
           </View>
         )}
