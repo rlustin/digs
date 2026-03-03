@@ -341,13 +341,12 @@ describe("runDetailSyncBatch", () => {
     mockSyncReleaseDetails
       .mockResolvedValueOnce({ processed: 10, failed: 0 } as any)
       .mockResolvedValueOnce({ processed: 10, failed: 0 } as any)
-      .mockResolvedValueOnce({ processed: 5, failed: 0 } as any)
-      .mockResolvedValueOnce({ processed: 0, failed: 0 } as any);
+      .mockResolvedValueOnce({ processed: 5, failed: 0 } as any);
 
     await runDetailSyncBatch(25);
 
-    // Stops after 25 total processed (10+10+5), calls syncReleaseDetails with batchSize=10
-    expect(mockSyncReleaseDetails).toHaveBeenCalledTimes(4);
+    // Stops after 25 total processed (10+10+5) because 25 < 25 is false
+    expect(mockSyncReleaseDetails).toHaveBeenCalledTimes(3);
     expect(mockSyncReleaseDetails).toHaveBeenCalledWith(10);
   });
 
