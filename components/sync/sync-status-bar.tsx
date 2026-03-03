@@ -1,15 +1,8 @@
 import { View, Text, Pressable } from "react-native";
 import { CircleAlert, RefreshCw, X } from "lucide-react-native";
-import { useSyncStore } from "@/stores/sync-store";
+import { useSyncStore, syncPhaseKeys } from "@/stores/sync-store";
 import { Colors } from "@/constants/Colors";
 import { t } from "@/lib/i18n";
-
-const syncPhaseKeys: Record<string, string> = {
-  folders: "sync.folders",
-  "basic-releases": "sync.basicReleases",
-  details: "sync.details",
-  error: "sync.error",
-};
 
 export function SyncStatusCard() {
   const phase = useSyncStore((s) => s.phase);

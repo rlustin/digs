@@ -3,7 +3,15 @@ import * as SecureStore from "expo-secure-store";
 
 const KEY_LAST_FULL_SYNC_AT = "last_full_sync_at";
 
-export type SyncPhase = "idle" | "folders" | "basic-releases" | "details" | "error";
+export type SyncPhase = "idle" | "folders" | "basic-releases" | "details" | "caching-images" | "error";
+
+export const syncPhaseKeys: Record<string, string> = {
+  folders: "sync.folders",
+  "basic-releases": "sync.basicReleases",
+  details: "sync.details",
+  "caching-images": "sync.cachingImages",
+  error: "sync.error",
+};
 
 interface SyncState {
   isSyncing: boolean;

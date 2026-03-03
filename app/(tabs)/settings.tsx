@@ -2,9 +2,10 @@ import { useState, useEffect, useCallback } from "react";
 import { View, Text, Pressable, Alert, ScrollView } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { CircleAlert, RefreshCw, X } from "lucide-react-native";
+import { Image } from "expo-image";
 
 import { useAuthStore } from "@/stores/auth-store";
-import { useSyncStore } from "@/stores/sync-store";
+import { useSyncStore, syncPhaseKeys } from "@/stores/sync-store";
 import { logout } from "@/lib/discogs/oauth";
 import { clearClientCredentials } from "@/lib/discogs/client";
 import { runFullSync, runIncrementalSync } from "@/lib/sync/engine";
@@ -13,13 +14,6 @@ import { clearAllFolders } from "@/db/queries/folders";
 import { queryClient } from "@/lib/query-client";
 import { Colors } from "@/constants/Colors";
 import { t } from "@/lib/i18n";
-
-const syncPhaseKeys: Record<string, string> = {
-  folders: "sync.folders",
-  "basic-releases": "sync.basicReleases",
-  details: "sync.details",
-  error: "sync.error",
-};
 
 export default function SettingsScreen() {
   const username = useAuthStore((s) => s.username);
@@ -71,6 +65,7 @@ export default function SettingsScreen() {
             clearAllFolders();
             clearAllReleases();
             queryClient.invalidateQueries();
+            await Image.clearDiskCache();
           } catch (e) {
             console.warn("Logout: DB cleanup failed", e);
           }

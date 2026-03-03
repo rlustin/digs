@@ -46,6 +46,12 @@ describe("SyncStatusCard", () => {
     expect(screen.getByText("Network failure")).toBeTruthy();
   });
 
+  it("renders sync label when caching images", () => {
+    useSyncStore.setState({ phase: "caching-images" });
+    render(<SyncStatusCard />);
+    expect(screen.getByText("Caching images for offline use")).toBeTruthy();
+  });
+
   it("calls reset when dismiss button pressed in error state", () => {
     useSyncStore.setState({ phase: "error", error: "Failed" });
     render(<SyncStatusCard />);

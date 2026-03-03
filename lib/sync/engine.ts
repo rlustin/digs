@@ -4,6 +4,7 @@ import {
   syncBasicReleasesIncremental,
   syncReleaseDetails,
 } from "./release-sync";
+import { runImageCacheSync } from "./image-cache";
 import { useSyncStore } from "@/stores/sync-store";
 import { useAuthStore } from "@/stores/auth-store";
 import { AuthExpiredError } from "@/lib/discogs/errors";
@@ -44,6 +45,15 @@ async function runSyncPipeline(
 
     store.setPhase("details");
     await runDetailSyncLoop(signal);
+
+    if (signal.aborted) return;
+
+    store.setPhase("caching-images");
+    try {
+      await runImageCacheSync(signal, { setProgress: store.setProgress });
+    } catch (err) {
+      console.warn("Image caching failed:", err);
+    }
 
     store.finishSync();
   } catch (err) {

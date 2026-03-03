@@ -1,6 +1,7 @@
 import { runFullSync, runIncrementalSync, runDetailSyncLoop, runDetailSyncBatch } from "../engine";
 import { syncFolders } from "../folder-sync";
 import { syncBasicReleases, syncBasicReleasesIncremental, syncReleaseDetails } from "../release-sync";
+import { runImageCacheSync } from "../image-cache";
 import { useSyncStore } from "@/stores/sync-store";
 import { useAuthStore } from "@/stores/auth-store";
 import { AuthExpiredError } from "@/lib/discogs/errors";
@@ -15,6 +16,10 @@ jest.mock("../release-sync", () => ({
   syncBasicReleases: jest.fn().mockResolvedValue(undefined),
   syncBasicReleasesIncremental: jest.fn().mockResolvedValue(undefined),
   syncReleaseDetails: jest.fn().mockResolvedValue({ processed: 0, failed: 0 }),
+}));
+
+jest.mock("../image-cache", () => ({
+  runImageCacheSync: jest.fn().mockResolvedValue(undefined),
 }));
 
 jest.mock("@/lib/discogs/oauth", () => ({
@@ -55,6 +60,7 @@ const mockSyncFolders = syncFolders as jest.MockedFunction<typeof syncFolders>;
 const mockSyncBasicReleases = syncBasicReleases as jest.MockedFunction<typeof syncBasicReleases>;
 const mockSyncBasicReleasesIncremental = syncBasicReleasesIncremental as jest.MockedFunction<typeof syncBasicReleasesIncremental>;
 const mockSyncReleaseDetails = syncReleaseDetails as jest.MockedFunction<typeof syncReleaseDetails>;
+const mockRunImageCacheSync = runImageCacheSync as jest.MockedFunction<typeof runImageCacheSync>;
 const mockInvalidateQueries = queryClient.invalidateQueries as jest.MockedFunction<typeof queryClient.invalidateQueries>;
 
 describe("runFullSync", () => {
@@ -83,7 +89,7 @@ describe("runFullSync", () => {
     expect(store.startSync).not.toHaveBeenCalled();
   });
 
-  it("runs pipeline in order: folders → basic releases → detail loop", async () => {
+  it("runs pipeline in order: folders → basic releases → detail loop → image cache", async () => {
     const callOrder: string[] = [];
     mockSyncFolders.mockImplementation(async () => { callOrder.push("folders"); });
     mockSyncBasicReleases.mockImplementation(async () => { callOrder.push("basic-releases"); });
@@ -91,10 +97,11 @@ describe("runFullSync", () => {
       callOrder.push("details");
       return { processed: 0, failed: 0 };
     });
+    mockRunImageCacheSync.mockImplementation(async () => { callOrder.push("caching-images"); });
 
     await runFullSync("testuser");
 
-    expect(callOrder).toEqual(["folders", "basic-releases", "details"]);
+    expect(callOrder).toEqual(["folders", "basic-releases", "details", "caching-images"]);
   });
 
   it("keeps isSyncing true during detail sync loop", async () => {
@@ -115,6 +122,26 @@ describe("runFullSync", () => {
     await runFullSync("testuser");
 
     expect(store.setPhase).toHaveBeenCalledWith("details");
+  });
+
+  it("sets phase to caching-images before running image cache sync", async () => {
+    await runFullSync("testuser");
+
+    expect(store.setPhase).toHaveBeenCalledWith("caching-images");
+    expect(mockRunImageCacheSync).toHaveBeenCalledWith(
+      expect.any(AbortSignal),
+      expect.objectContaining({ setProgress: expect.any(Function) }),
+    );
+  });
+
+  it("finishes sync even if image caching fails", async () => {
+    const warnSpy = jest.spyOn(console, "warn").mockImplementation(() => {});
+    mockRunImageCacheSync.mockRejectedValueOnce(new Error("cache failed"));
+
+    await runFullSync("testuser");
+
+    expect(store.finishSync).toHaveBeenCalled();
+    warnSpy.mockRestore();
   });
 
   it("invalidates query cache after folders and releases stages", async () => {

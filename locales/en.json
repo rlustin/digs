@@ -53,6 +53,7 @@
     "folders": "Syncing folders",
     "basicReleases": "Syncing collection",
     "details": "Syncing release details",
+    "cachingImages": "Caching images for offline use",
     "error": "Sync failed",
     "syncing": "Syncing"
   },
