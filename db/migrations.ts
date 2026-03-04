@@ -12,20 +12,23 @@ export function runMigrations() {
   );
   const version = row?.user_version ?? 0;
 
-  if (version < 1) {
-    migrateV1();
-  }
+  const migrations: { target: number; run: () => void }[] = [
+    { target: 1, run: migrateV1 },
+    { target: 2, run: migrateV2 },
+    { target: 3, run: migrateV3 },
+  ];
 
-  if (version < 2) {
-    migrateV2();
-  }
-
-  if (version < 3) {
-    migrateV3();
-  }
-
-  if (version < CURRENT_VERSION) {
-    expo.execSync(`PRAGMA user_version = ${CURRENT_VERSION}`);
+  for (const { target, run } of migrations) {
+    if (version < target) {
+      try {
+        run();
+        expo.execSync(`PRAGMA user_version = ${target}`);
+      } catch (e) {
+        throw new Error(
+          `Migration to v${target} failed: ${e instanceof Error ? e.message : String(e)}`
+        );
+      }
+    }
   }
 }
 

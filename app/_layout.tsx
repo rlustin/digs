@@ -73,10 +73,16 @@ export default function RootLayout() {
         if (username) setAuthenticated(username);
       }),
       useSyncStore.getState().restoreLastFullSyncAt(),
-    ]).then(() => {
-      useSyncStore.getState().loadDetailCounts();
-      setAuthChecked(true);
-    });
+    ])
+      .then(() => {
+        useSyncStore.getState().loadDetailCounts();
+      })
+      .catch((e) => {
+        console.error("Session restore failed:", e);
+      })
+      .finally(() => {
+        setAuthChecked(true);
+      });
   }, [dbReady, setAuthenticated]);
 
   useEffect(() => {

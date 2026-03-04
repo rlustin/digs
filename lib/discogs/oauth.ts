@@ -127,12 +127,25 @@ export async function login(): Promise<{ username: string }> {
     throw new Error(`Identity fetch failed: ${identityRes.status}`);
   }
 
-  const identity = (await identityRes.json()) as { username: string };
+  let identity: { username: string };
+  try {
+    identity = (await identityRes.json()) as { username: string };
+  } catch {
+    throw new Error("Failed to parse identity response");
+  }
+
+  if (!identity.username) {
+    throw new Error("Missing username in identity response");
+  }
 
   // Step 5: Persist
-  await SecureStore.setItemAsync(KEY_TOKEN, token);
-  await SecureStore.setItemAsync(KEY_TOKEN_SECRET, tokenSecret);
-  await SecureStore.setItemAsync(KEY_USERNAME, identity.username);
+  try {
+    await SecureStore.setItemAsync(KEY_TOKEN, token);
+    await SecureStore.setItemAsync(KEY_TOKEN_SECRET, tokenSecret);
+    await SecureStore.setItemAsync(KEY_USERNAME, identity.username);
+  } catch {
+    throw new Error("Failed to save credentials");
+  }
 
   return { username: identity.username };
 }
