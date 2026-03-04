@@ -2,7 +2,9 @@
   "expo": {
     "name": "Digs",
     "slug": "digs",
+    "description": "Your Discogs vinyl collection, offline. Search, browse, and rediscover your records.",
     "version": "1.0.0",
+    "primaryColor": "#F97316",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "digs",
@@ -24,7 +26,8 @@
           "NSAllowsLocalNetworking": false
         }
       },
-      "bundleIdentifier": "fr.lustin.digs"
+      "bundleIdentifier": "fr.lustin.digs",
+      "appStoreCategory": "public.app-category.music"
     },
     "android": {
       "adaptiveIcon": {
