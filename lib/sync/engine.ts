@@ -13,29 +13,6 @@ import { queryClient } from "@/lib/query-client";
 import { getDetailSyncCounts } from "@/db/queries/releases";
 import type { ReleaseSyncCallbacks } from "./release-sync";
 
-/** Weight each phase occupies in the 0–100% overall progress. */
-export const PHASE_WEIGHTS = {
-  folders: 2,
-  "basic-releases": 18,
-  details: 60,
-  "caching-images": 20,
-} as const;
-
-/**
- * Create a setProgress callback that maps per-phase (current, total)
- * into the overall 0–100 range.
- */
-export function makeProgressCallback(
-  setProgress: (current: number, total: number) => void,
-  offset: number,
-  weight: number,
-): (current: number, total: number) => void {
-  return (current: number, total: number) => {
-    const fraction = total > 0 ? current / total : 1;
-    setProgress(Math.round(offset + fraction * weight), 100);
-  };
-}
-
 /**
  * Shared sync pipeline: guards, folder sync, release sync step, detail sync, cleanup.
  */
@@ -53,20 +30,14 @@ async function runSyncPipeline(
 
   try {
     await syncFolders(username, signal, { setPhase: store.setPhase });
-    store.setProgress(PHASE_WEIGHTS.folders, 100);
     queryClient.invalidateQueries({ queryKey: ["folders"] });
 
     if (signal.aborted) return;
 
-    const basicReleasesCallbacks: ReleaseSyncCallbacks = {
+    await syncReleasesStep(signal, {
       setPhase: store.setPhase,
-      setProgress: makeProgressCallback(
-        store.setProgress,
-        PHASE_WEIGHTS.folders,
-        PHASE_WEIGHTS["basic-releases"],
-      ),
-    };
-    await syncReleasesStep(signal, basicReleasesCallbacks);
+      setProgress: store.setProgress,
+    });
     queryClient.invalidateQueries({ queryKey: ["releases"] });
 
     if (signal.aborted) return;
@@ -76,14 +47,9 @@ async function runSyncPipeline(
     store.loadDetailCounts();
 
     store.setPhase("details");
-    const detailsOffset = PHASE_WEIGHTS.folders + PHASE_WEIGHTS["basic-releases"];
-    const detailsProgress = makeProgressCallback(
-      store.setProgress,
-      detailsOffset,
-      PHASE_WEIGHTS.details,
-    );
+    store.setProgress(0, 100);
     await runDetailSyncLoop(signal, {
-      onProgress: detailsProgress,
+      onProgress: store.setProgress,
       onFailed: store.setDetailSyncFailed,
       onBatchComplete: store.loadDetailCounts,
     });
@@ -91,20 +57,15 @@ async function runSyncPipeline(
     if (signal.aborted) return;
 
     store.setPhase("caching-images");
-    const imageCacheOffset = detailsOffset + PHASE_WEIGHTS.details;
+    store.setProgress(0, 100);
     try {
       await runImageCacheSync(signal, {
-        setProgress: makeProgressCallback(
-          store.setProgress,
-          imageCacheOffset,
-          PHASE_WEIGHTS["caching-images"],
-        ),
+        setProgress: store.setProgress,
       });
     } catch (err) {
       console.warn("Image caching failed:", err);
     }
 
-    store.setProgress(100, 100);
     store.finishSync();
   } catch (err) {
     if (signal.aborted) return;

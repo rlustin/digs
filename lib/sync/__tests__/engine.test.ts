@@ -205,12 +205,15 @@ describe("runFullSync", () => {
     );
   });
 
-  it("initializes progress to (0, 100) and ends at (100, 100)", async () => {
+  it("resets progress to (0, 100) at start of each phase", async () => {
     await runFullSync("testuser");
 
     const progressCalls = (store.setProgress as jest.Mock).mock.calls;
-    expect(progressCalls[0]).toEqual([0, 100]);
-    expect(progressCalls[progressCalls.length - 1]).toEqual([100, 100]);
+    // Initial reset, then reset before details, then reset before caching-images
+    const resets = progressCalls.filter(
+      ([c, t]: [number, number]) => c === 0 && t === 100
+    );
+    expect(resets).toHaveLength(3);
   });
 
   it("loads detail counts from DB before detail sync loop", async () => {
