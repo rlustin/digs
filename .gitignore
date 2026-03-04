@@ -17,6 +17,7 @@ android/
 
 # EAS Build artifacts
 *.tar.gz
+*.ipa
 
 # Debug logs
 npm-debug.*
