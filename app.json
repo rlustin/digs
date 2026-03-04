@@ -4,16 +4,14 @@
     "slug": "digs",
     "description": "Your Discogs vinyl collection, offline. Search, browse, and rediscover your records.",
     "version": "1.0.0",
-    "primaryColor": "#F97316",
+    "primaryColor": "#F17249",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "digs",
     "userInterfaceStyle": "light",
     "newArchEnabled": true,
     "splash": {
-      "image": "./assets/images/splash-icon.png",
-      "resizeMode": "contain",
-      "backgroundColor": "#FFFFFF"
+      "backgroundColor": "#404040"
     },
     "ios": {
       "supportsTablet": true,

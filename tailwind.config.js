@@ -5,7 +5,7 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        accent: "#F97316",
+        accent: "#F17249",
       },
       fontFamily: {
         sans: ["Inter-Regular"],

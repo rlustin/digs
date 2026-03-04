@@ -26,7 +26,7 @@ export function FloatingTabBar({
             if (!options.tabBarIcon) return null;
 
             const isFocused = state.index === index;
-            const color = isFocused ? "#F97316" : "#AAAAAA";
+            const color = isFocused ? "#F17249" : "#AAAAAA";
 
             const onPress = () => {
               const event = navigation.emit({

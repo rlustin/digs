@@ -21,11 +21,11 @@ export function CommunityRating({ rating, have, want }: CommunityRatingProps) {
             const isFull = n <= stars;
             const isHalf = !isFull && n - 0.5 <= stars;
             return isFull ? (
-              <Star key={n} size={14} color="#F97316" fill="#F97316" style={{ marginRight: 2 }} />
+              <Star key={n} size={14} color="#F17249" fill="#F17249" style={{ marginRight: 2 }} />
             ) : isHalf ? (
-              <StarHalf key={n} size={14} color="#F97316" fill="#F97316" style={{ marginRight: 2 }} />
+              <StarHalf key={n} size={14} color="#F17249" fill="#F17249" style={{ marginRight: 2 }} />
             ) : (
-              <Star key={n} size={14} color="#F97316" style={{ marginRight: 2 }} />
+              <Star key={n} size={14} color="#F17249" style={{ marginRight: 2 }} />
             );
           })}
           <Text className="text-gray-400 text-xs ml-1 font-mono">
