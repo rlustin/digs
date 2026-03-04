@@ -19,7 +19,10 @@
         "UIBackgroundModes": [
           "processing"
         ],
-        "ITSAppUsesNonExemptEncryption": false
+        "ITSAppUsesNonExemptEncryption": false,
+        "NSAppTransportSecurity": {
+          "NSAllowsLocalNetworking": false
+        }
       },
       "bundleIdentifier": "fr.lustin.digs"
     },
@@ -42,7 +45,8 @@
       "expo-secure-store",
       "expo-web-browser",
       "expo-background-task",
-      "expo-localization"
+      "expo-localization",
+      "./plugins/withStripDevSchemes"
     ],
     "experiments": {
       "typedRoutes": true
