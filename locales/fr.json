@@ -1,0 +1,88 @@
+{
+  "login": {
+    "title": "Digs",
+    "tagline": "Vos vinyles, toujours avec vous",
+    "signIn": "Se connecter avec Discogs",
+    "loginFailed": "Connexion échouée"
+  },
+  "tabs": {
+    "collection": "Collection",
+    "search": "Recherche",
+    "random": "Au hasard",
+    "settings": "Réglages"
+  },
+  "collection": {
+    "noFolders": "Aucun dossier",
+    "noFoldersMessage": "Votre collection apparaîtra ici après synchronisation",
+    "syncing": "Synchronisation en cours...",
+    "syncingMessage": "Cela peut prendre un moment selon la taille de votre collection"
+  },
+  "folder": {
+    "noReleases": "Aucune sortie",
+    "folderEmpty": "Ce dossier est vide"
+  },
+  "search": {
+    "placeholder": "Artistes, albums, labels...",
+    "noResults": "Aucun résultat",
+    "nothingFoundFor": "Aucun résultat pour « %{query} »"
+  },
+  "random": {
+    "all": "Tout",
+    "feelingLucky": "Un peu de hasard ?",
+    "feelingLuckyMessage": "Appuyez sur le bouton pour découvrir\nquelque chose dans votre collection",
+    "pickRandom": "Piocher au hasard"
+  },
+  "settings": {
+    "discogsAccount": "Compte Discogs",
+    "syncSection": "Synchronisation",
+    "lastFullSync": "Dernière synchronisation",
+    "never": "Jamais",
+    "collection": "Collection",
+    "syncing": "Synchronisation...",
+    "idle": "En attente",
+    "releaseDetails": "Détails des sorties",
+    "noReleases": "Aucune sortie",
+    "allSynced": "Tout est synchronisé",
+    "syncNow": "Synchroniser",
+    "accountSection": "Compte",
+    "logOut": "Se déconnecter",
+    "logOutConfirm": "Voulez-vous vraiment vous déconnecter ?"
+  },
+  "sync": {
+    "folders": "Synchronisation des dossiers",
+    "basicReleases": "Synchronisation de la collection",
+    "details": "Synchronisation des détails",
+    "cachingImages": "Mise en cache des images pour l'accès hors ligne",
+    "error": "Échec de la synchronisation",
+    "syncing": "Synchronisation"
+  },
+  "release": {
+    "tracklist": "Liste des pistes",
+    "have": "ont",
+    "want": "veulent",
+    "loadingDetails": "Chargement des détails...",
+    "unknownArtist": "Artiste inconnu"
+  },
+  "stats": {
+    "release": {
+      "one": "sortie",
+      "other": "sorties"
+    },
+    "artist": {
+      "one": "artiste",
+      "other": "artistes"
+    }
+  },
+  "notFound": {
+    "title": "Oups !",
+    "message": "Cet écran n'existe pas.",
+    "goHome": "Retour à l'accueil"
+  },
+  "common": {
+    "back": "Retour",
+    "cancel": "Annuler",
+    "dismiss": "Fermer",
+    "error": "Une erreur est survenue",
+    "errorLoading": "Impossible de charger les données"
+  }
+}
