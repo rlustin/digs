@@ -1,6 +1,6 @@
 .DEFAULT_GOAL := help
 
-.PHONY: help setup start test lint lintfix download-covers
+.PHONY: help setup start test lint lintfix download-covers build-preview
 
 help: ## Show this help
 	@grep -E '^[a-zA-Z_-]+:.*##' $(MAKEFILE_LIST) | awk -F ':.*## ' '{printf "  \033[36m%-10s\033[0m %s\n", $$1, $$2}'
@@ -26,3 +26,8 @@ lint: ## Lint and type-check the project
 
 lintfix: ## Auto-fix lint issues
 	npx expo lint . -- --fix
+
+build-preview: ## Build iOS preview locally (secrets from 1Password)
+	EXPO_PUBLIC_DISCOGS_KEY=$$(op read 'op://Private/Digs Discogs API/consumer_key' --account=my.1password.eu) \
+	EXPO_PUBLIC_DISCOGS_SECRET=$$(op read 'op://Private/Digs Discogs API/consumer_secret' --account=my.1password.eu) \
+	npx eas build --platform ios --profile preview --local
