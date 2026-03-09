@@ -1,0 +1,21 @@
+appId: fr.lustin.digs
+env:
+  TAB_SEARCH: ${TAB_SEARCH}
+  SEARCH_PLACEHOLDER: ${SEARCH_PLACEHOLDER}
+---
+- launchApp:
+    clearState: false
+- runFlow: dismiss-dev-menu.yaml
+- waitForAnimationToEnd
+- extendedWaitUntil:
+    visible: "Collection"
+    timeout: 10000
+- extendedWaitUntil:
+    notVisible: "Downloading.*"
+    timeout: 30000
+- tapOn: ${TAB_SEARCH}
+- waitForAnimationToEnd
+- tapOn: ${SEARCH_PLACEHOLDER}
+- inputText: "dj rum"
+- waitForAnimationToEnd
+- takeScreenshot: 04-search

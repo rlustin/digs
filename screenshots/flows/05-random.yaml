@@ -1,0 +1,20 @@
+appId: fr.lustin.digs
+env:
+  TAB_RANDOM: ${TAB_RANDOM}
+  PICK_RANDOM: ${PICK_RANDOM}
+---
+- launchApp:
+    clearState: false
+- runFlow: dismiss-dev-menu.yaml
+- waitForAnimationToEnd
+- extendedWaitUntil:
+    visible: "Collection"
+    timeout: 10000
+- extendedWaitUntil:
+    notVisible: "Downloading.*"
+    timeout: 30000
+- tapOn: ${TAB_RANDOM}
+- waitForAnimationToEnd
+- tapOn: ${PICK_RANDOM}
+- waitForAnimationToEnd
+- takeScreenshot: 05-random

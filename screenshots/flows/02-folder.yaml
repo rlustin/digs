@@ -1,0 +1,17 @@
+appId: fr.lustin.digs
+---
+- launchApp:
+    clearState: false
+- runFlow: dismiss-dev-menu.yaml
+- waitForAnimationToEnd
+- extendedWaitUntil:
+    visible: "Collection"
+    timeout: 10000
+- extendedWaitUntil:
+    notVisible: "Downloading.*"
+    timeout: 30000
+# Tap on the 4th folder row (Breakbeat & Breaks area, ~40% down the screen)
+- tapOn:
+    point: "50%, 42%"
+- waitForAnimationToEnd
+- takeScreenshot: 02-folder

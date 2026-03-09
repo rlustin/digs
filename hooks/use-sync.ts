@@ -18,6 +18,7 @@ export function useInitialSync() {
 
   useEffect(() => {
     if (!username || started.current) return;
+    if (process.env.EXPO_PUBLIC_SCREENSHOT_MODE === "true") return;
     started.current = true;
 
     if (!lastFullSyncAt) {

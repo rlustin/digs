@@ -37,6 +37,10 @@ web-build/
 assets/covers/
 constants/covers.ts
 
+# Screenshots (generated)
+screenshots/output/
+screenshots/fixtures/
+
 # Claude Code
 .claude/settings.local.json
 

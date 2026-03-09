@@ -1,0 +1,15 @@
+appId: fr.lustin.digs
+---
+- runFlow:
+    when:
+      visible: "Continue"
+    commands:
+      - tapOn: "Continue"
+      - waitForAnimationToEnd
+- runFlow:
+    when:
+      visible: "Go home"
+    commands:
+      - tapOn:
+          point: "95%, 8%"
+      - waitForAnimationToEnd

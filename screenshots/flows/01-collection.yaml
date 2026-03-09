@@ -1,0 +1,13 @@
+appId: fr.lustin.digs
+---
+- launchApp:
+    clearState: false
+- runFlow: dismiss-dev-menu.yaml
+- waitForAnimationToEnd
+- extendedWaitUntil:
+    visible: "Collection"
+    timeout: 10000
+- extendedWaitUntil:
+    notVisible: "Downloading.*"
+    timeout: 30000
+- takeScreenshot: 01-collection

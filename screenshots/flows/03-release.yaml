@@ -1,0 +1,21 @@
+appId: fr.lustin.digs
+---
+- launchApp:
+    clearState: false
+- runFlow: dismiss-dev-menu.yaml
+- waitForAnimationToEnd
+- extendedWaitUntil:
+    visible: "Collection"
+    timeout: 10000
+- extendedWaitUntil:
+    notVisible: "Downloading.*"
+    timeout: 30000
+# Tap on the 4th folder row
+- tapOn:
+    point: "50%, 42%"
+- waitForAnimationToEnd
+# Tap on the first release in the folder list
+- tapOn:
+    point: "50%, 20%"
+- waitForAnimationToEnd
+- takeScreenshot: 03-release

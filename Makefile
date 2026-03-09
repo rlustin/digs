@@ -1,6 +1,6 @@
 .DEFAULT_GOAL := help
 
-.PHONY: help setup start test lint lintfix download-covers build-preview
+.PHONY: help setup start test lint lintfix download-covers fetch-collection screenshots build-preview
 
 help: ## Show this help
 	@grep -E '^[a-zA-Z_-]+:.*##' $(MAKEFILE_LIST) | awk -F ':.*## ' '{printf "  \033[36m%-10s\033[0m %s\n", $$1, $$2}'
@@ -26,6 +26,14 @@ lint: ## Lint and type-check the project
 
 lintfix: ## Auto-fix lint issues
 	npx expo lint . -- --fix
+
+fetch-collection: ## Fetch Discogs collection for screenshot fixtures
+	DISCOGS_TOKEN=$$(op read 'op://Private/Digs Discogs API/personal_access_token' --account=my.1password.eu) \
+	node screenshots/fetch-collection.mjs
+
+screenshots: ## Generate App Store screenshots
+	node screenshots/seed-db.mjs
+	bash screenshots/take-screenshots.sh
 
 build-preview: ## Build iOS preview locally (secrets from 1Password)
 	EXPO_PUBLIC_DISCOGS_KEY=$$(op read 'op://Private/Digs Discogs API/consumer_key' --account=my.1password.eu) \
