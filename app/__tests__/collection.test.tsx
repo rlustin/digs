@@ -78,8 +78,7 @@ describe("CollectionScreen", () => {
     renderWithQuery(<CollectionScreen />);
 
     // FlatList only renders visible items — assert on folders near the top
-    expect(await screen.findByText("All")).toBeTruthy();
-    expect(screen.getByText("Ambient")).toBeTruthy();
+    expect(await screen.findByText("Ambient")).toBeTruthy();
     expect(screen.getByText("Breakbeat & Breaks")).toBeTruthy();
     expect(screen.getByText("Drum & Bass")).toBeTruthy();
     expect(screen.getByText("Dubstep")).toBeTruthy();
@@ -92,7 +91,7 @@ describe("CollectionScreen", () => {
 
     renderWithQuery(<CollectionScreen />);
 
-    await screen.findByText("All");
+    await screen.findByText("Ambient");
     // Ambient has 15 releases
     expect(screen.getByText(/15 releases/)).toBeTruthy();
     // Breakbeat & Breaks has 19 releases

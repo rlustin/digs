@@ -29,6 +29,14 @@ export default function CollectionScreen() {
   } = useQuery({
     queryKey: ["folders"],
     queryFn: getAllFolders,
+    select: (data) =>
+      data
+        .filter((f) => f.id !== 0)
+        .sort((a, b) => {
+          if (a.id === 1) return 1;
+          if (b.id === 1) return -1;
+          return 0;
+        }),
   });
 
   const { data: thumbnails = {} } = useQuery({
