@@ -49,8 +49,16 @@ export function signRequest(
   if (params.callback) oauthParams.oauth_callback = params.callback;
   if (params.verifier) oauthParams.oauth_verifier = params.verifier;
 
-  // Merge extra (query/body) params for signature base
-  const allParams = { ...oauthParams, ...extraParams };
+  // Extract query params from URL and use only the base URL for signing
+  const parsed = new URL(url);
+  const baseUrl = `${parsed.origin}${parsed.pathname}`;
+  const queryParams: Record<string, string> = {};
+  parsed.searchParams.forEach((value, key) => {
+    queryParams[key] = value;
+  });
+
+  // Merge oauth, query, and extra params for signature base
+  const allParams = { ...oauthParams, ...queryParams, ...extraParams };
 
   // Sort and encode
   const paramString = Object.keys(allParams)
@@ -61,7 +69,7 @@ export function signRequest(
   // Signature base string
   const baseString = [
     method.toUpperCase(),
-    percentEncode(url),
+    percentEncode(baseUrl),
     percentEncode(paramString),
   ].join("&");
 
