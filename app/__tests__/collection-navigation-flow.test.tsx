@@ -153,7 +153,7 @@ describe("Collection navigation flow", () => {
     expect(mockRouter.navigate).toHaveBeenCalledWith("/(tabs)/collection/9182196");
   });
 
-  it("resets collection stack when tapping focused Collection tab", () => {
+  it("pops to top when tapping focused Collection tab with deep stack", () => {
     const nestedStateKey = "collection-stack-123";
 
     let defaultPrevented = false;
@@ -207,15 +207,80 @@ describe("Collection navigation flow", () => {
 
     fireEvent.press(screen.getByText("Collection"));
 
-    // Prevents native stack's popToTop from firing in the next rAF
     expect(mockEvent.preventDefault).toHaveBeenCalled();
-
-    // Dispatches reset targeting the nested collection stack
     expect(mockNavigation.dispatch).toHaveBeenCalledWith(
-      expect.objectContaining({ target: nestedStateKey }),
+      expect.objectContaining({
+        type: "POP_TO_TOP",
+        target: nestedStateKey,
+      }),
+    );
+    expect(mockNavigation.navigate).not.toHaveBeenCalled();
+  });
+
+  it("replaces with index when tapping focused Collection tab with single non-index route", () => {
+    const nestedStateKey = "collection-stack-456";
+
+    let defaultPrevented = false;
+    const mockEvent = {
+      get defaultPrevented() { return defaultPrevented; },
+      preventDefault: jest.fn(() => { defaultPrevented = true; }),
+    };
+
+    const mockNavigation = {
+      emit: jest.fn(() => mockEvent),
+      navigate: jest.fn(),
+      dispatch: jest.fn(),
+    };
+
+    // Simulates the state after router.navigate("/(tabs)/collection/9182196")
+    // from the release detail screen: the collection stack has a single
+    // [folderId] route with no index underneath.
+    const tabState = {
+      index: 0,
+      routes: [
+        {
+          key: "collection-route-key",
+          name: "collection",
+          state: {
+            key: nestedStateKey,
+            index: 0,
+            routes: [
+              { key: "folder", name: "[folderId]", params: { folderId: "9182196" } },
+            ],
+          },
+        },
+      ],
+    };
+
+    const descriptors = {
+      "collection-route-key": {
+        options: {
+          tabBarIcon: ({ color }: { color: string }) =>
+            React.createElement("Text", {}, "icon"),
+          title: "Collection",
+        },
+      },
+    };
+
+    render(
+      <FloatingTabBar
+        state={tabState as any}
+        descriptors={descriptors as any}
+        navigation={mockNavigation as any}
+        insets={{ top: 0, bottom: 0, left: 0, right: 0 }}
+      />,
     );
 
-    // Does not switch tabs — we're already on collection
+    fireEvent.press(screen.getByText("Collection"));
+
+    expect(mockEvent.preventDefault).toHaveBeenCalled();
+    expect(mockNavigation.dispatch).toHaveBeenCalledWith(
+      expect.objectContaining({
+        type: "REPLACE",
+        payload: { name: "index" },
+        target: nestedStateKey,
+      }),
+    );
     expect(mockNavigation.navigate).not.toHaveBeenCalled();
   });
 });

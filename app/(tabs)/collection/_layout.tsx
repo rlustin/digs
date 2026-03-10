@@ -11,7 +11,7 @@ export default function CollectionLayout() {
         headerTitleStyle: { fontFamily: "GeistMono-Regular" },
       }}
     >
-      <Stack.Screen name="index" options={{ title: "Collection", headerShown: false }} />
+      <Stack.Screen name="index" options={{ title: "Collection", headerShown: false, animationTypeForReplace: "pop" }} />
     </Stack>
   );
 }

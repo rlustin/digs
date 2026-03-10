@@ -1,7 +1,7 @@
 import { View, Text, Pressable, StyleSheet } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { BlurView } from "expo-blur";
-import { CommonActions } from "@react-navigation/native";
+import { CommonActions, StackActions } from "@react-navigation/native";
 import type { BottomTabBarProps } from "@react-navigation/bottom-tabs";
 
 export function FloatingTabBar({
@@ -41,13 +41,25 @@ export function FloatingTabBar({
                 event.preventDefault();
                 const nestedState = state.routes[index].state;
                 if (nestedState?.key) {
-                  navigation.dispatch({
-                    ...CommonActions.reset({
-                      index: 0,
-                      routes: [{ name: "index" }],
-                    }),
-                    target: nestedState.key,
-                  });
+                  const isDeep = nestedState.index !== undefined && nestedState.index > 0;
+                  const currentRoute = nestedState.routes?.[nestedState.index ?? 0];
+                  const isOnNonInitialRoute = currentRoute && currentRoute.name !== "index";
+
+                  if (isDeep) {
+                    navigation.dispatch({
+                      ...StackActions.popToTop(),
+                      target: nestedState.key,
+                    });
+                  } else if (isOnNonInitialRoute) {
+                    // The stack has a single non-index route (e.g. navigated
+                    // here from outside the tabs). Replace it with index;
+                    // animationTypeForReplace: "pop" on the index screen
+                    // ensures a backward animation.
+                    navigation.dispatch({
+                      ...StackActions.replace("index"),
+                      target: nestedState.key,
+                    });
+                  }
                 }
               } else if (!event.defaultPrevented) {
                 navigation.navigate(route.name, route.params);
