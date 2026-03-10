@@ -1,6 +1,6 @@
 import { expo } from "./client";
 
-const CURRENT_VERSION = 3;
+const CURRENT_VERSION = 1;
 
 /**
  * Run all schema migrations. Call once at app startup before any queries.
@@ -14,8 +14,6 @@ export function runMigrations() {
 
   const migrations: { target: number; run: () => void }[] = [
     { target: 1, run: migrateV1 },
-    { target: 2, run: migrateV2 },
-    { target: 3, run: migrateV3 },
   ];
 
   for (const { target, run } of migrations) {
@@ -93,14 +91,15 @@ function migrateV1() {
 
   // Triggers to keep FTS index in sync
   // Extract plain-text names from JSON arrays so FTS5 indexes searchable text
+  // COALESCE guards against NULL artists/labels
   expo.execSync(`
     CREATE TRIGGER IF NOT EXISTS releases_ai AFTER INSERT ON releases BEGIN
       INSERT INTO releases_fts(rowid, title, artists, labels)
       VALUES (
         new.instance_id,
         new.title,
-        (SELECT GROUP_CONCAT(json_extract(value, '$.name'), ', ') FROM json_each(new.artists)),
-        (SELECT GROUP_CONCAT(json_extract(value, '$.name'), ', ') FROM json_each(new.labels))
+        COALESCE((SELECT GROUP_CONCAT(json_extract(value, '$.name'), ', ') FROM json_each(new.artists)), ''),
+        COALESCE((SELECT GROUP_CONCAT(json_extract(value, '$.name'), ', ') FROM json_each(new.labels)), '')
       );
     END;
   `);
@@ -108,104 +107,19 @@ function migrateV1() {
   expo.execSync(`
     CREATE TRIGGER IF NOT EXISTS releases_ad AFTER DELETE ON releases BEGIN
       INSERT INTO releases_fts(releases_fts, rowid, title, artists, labels)
-      VALUES ('delete', old.instance_id, old.title, old.artists, old.labels);
+      VALUES (
+        'delete',
+        old.instance_id,
+        old.title,
+        COALESCE((SELECT GROUP_CONCAT(json_extract(value, '$.name'), ', ') FROM json_each(old.artists)), ''),
+        COALESCE((SELECT GROUP_CONCAT(json_extract(value, '$.name'), ', ') FROM json_each(old.labels)), '')
+      );
     END;
   `);
 
   expo.execSync(`
     CREATE TRIGGER IF NOT EXISTS releases_au AFTER UPDATE ON releases BEGIN
       INSERT INTO releases_fts(releases_fts, rowid, title, artists, labels)
-      VALUES ('delete', old.instance_id, old.title, old.artists, old.labels);
-      INSERT INTO releases_fts(rowid, title, artists, labels)
-      VALUES (
-        new.instance_id,
-        new.title,
-        (SELECT GROUP_CONCAT(json_extract(value, '$.name'), ', ') FROM json_each(new.artists)),
-        (SELECT GROUP_CONCAT(json_extract(value, '$.name'), ', ') FROM json_each(new.labels))
-      );
-    END;
-  `);
-}
-
-/** V2: Fix FTS delete/update triggers to extract names from JSON instead of passing raw JSON. */
-function migrateV2() {
-  // Drop broken triggers
-  expo.execSync(`DROP TRIGGER IF EXISTS releases_ad`);
-  expo.execSync(`DROP TRIGGER IF EXISTS releases_au`);
-
-  // Recreate delete trigger with JSON extraction
-  expo.execSync(`
-    CREATE TRIGGER releases_ad AFTER DELETE ON releases BEGIN
-      INSERT INTO releases_fts(releases_fts, rowid, title, artists, labels)
-      VALUES (
-        'delete',
-        old.instance_id,
-        old.title,
-        (SELECT GROUP_CONCAT(json_extract(value, '$.name'), ', ') FROM json_each(old.artists)),
-        (SELECT GROUP_CONCAT(json_extract(value, '$.name'), ', ') FROM json_each(old.labels))
-      );
-    END;
-  `);
-
-  // Recreate update trigger with JSON extraction in the delete portion
-  expo.execSync(`
-    CREATE TRIGGER releases_au AFTER UPDATE ON releases BEGIN
-      INSERT INTO releases_fts(releases_fts, rowid, title, artists, labels)
-      VALUES (
-        'delete',
-        old.instance_id,
-        old.title,
-        (SELECT GROUP_CONCAT(json_extract(value, '$.name'), ', ') FROM json_each(old.artists)),
-        (SELECT GROUP_CONCAT(json_extract(value, '$.name'), ', ') FROM json_each(old.labels))
-      );
-      INSERT INTO releases_fts(rowid, title, artists, labels)
-      VALUES (
-        new.instance_id,
-        new.title,
-        (SELECT GROUP_CONCAT(json_extract(value, '$.name'), ', ') FROM json_each(new.artists)),
-        (SELECT GROUP_CONCAT(json_extract(value, '$.name'), ', ') FROM json_each(new.labels))
-      );
-    END;
-  `);
-
-  // Rebuild FTS index to fix any existing corruption
-  expo.execSync(`INSERT INTO releases_fts(releases_fts) VALUES('rebuild')`);
-}
-
-/** V3: Guard FTS triggers against NULL artists/labels with COALESCE. */
-function migrateV3() {
-  expo.execSync(`DROP TRIGGER IF EXISTS releases_ai`);
-  expo.execSync(`DROP TRIGGER IF EXISTS releases_ad`);
-  expo.execSync(`DROP TRIGGER IF EXISTS releases_au`);
-
-  expo.execSync(`
-    CREATE TRIGGER releases_ai AFTER INSERT ON releases BEGIN
-      INSERT INTO releases_fts(rowid, title, artists, labels)
-      VALUES (
-        new.instance_id,
-        new.title,
-        COALESCE((SELECT GROUP_CONCAT(json_extract(value, '$.name'), ', ') FROM json_each(new.artists)), ''),
-        COALESCE((SELECT GROUP_CONCAT(json_extract(value, '$.name'), ', ') FROM json_each(new.labels)), '')
-      );
-    END;
-  `);
-
-  expo.execSync(`
-    CREATE TRIGGER releases_ad AFTER DELETE ON releases BEGIN
-      INSERT INTO releases_fts(releases_fts, rowid, title, artists, labels)
-      VALUES (
-        'delete',
-        old.instance_id,
-        old.title,
-        COALESCE((SELECT GROUP_CONCAT(json_extract(value, '$.name'), ', ') FROM json_each(old.artists)), ''),
-        COALESCE((SELECT GROUP_CONCAT(json_extract(value, '$.name'), ', ') FROM json_each(old.labels)), '')
-      );
-    END;
-  `);
-
-  expo.execSync(`
-    CREATE TRIGGER releases_au AFTER UPDATE ON releases BEGIN
-      INSERT INTO releases_fts(releases_fts, rowid, title, artists, labels)
       VALUES (
         'delete',
         old.instance_id,
@@ -222,6 +136,4 @@ function migrateV3() {
       );
     END;
   `);
-
-  expo.execSync(`INSERT INTO releases_fts(releases_fts) VALUES('rebuild')`);
 }
