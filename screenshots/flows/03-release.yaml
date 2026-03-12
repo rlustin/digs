@@ -10,9 +10,9 @@ appId: fr.lustin.digs
 - extendedWaitUntil:
     notVisible: "Downloading.*"
     timeout: 30000
-# Tap on the 4th folder row
+# Tap on the 2th folder row
 - tapOn:
-    point: "50%, 42%"
+    point: "50%, 21%"
 - waitForAnimationToEnd
 # Tap on the first release in the folder list
 - tapOn:
