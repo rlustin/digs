@@ -1,6 +1,6 @@
 .DEFAULT_GOAL := help
 
-.PHONY: help setup start test lint lintfix download-covers fetch-collection screenshots build-preview build-production
+.PHONY: help setup start test lint lintfix download-covers fetch-collection screenshots build-preview build-production submit-production
 
 help: ## Show this help
 	@grep -E '^[a-zA-Z_-]+:.*##' $(MAKEFILE_LIST) | awk -F ':.*## ' '{printf "  \033[36m%-10s\033[0m %s\n", $$1, $$2}'
@@ -44,3 +44,6 @@ build-production: ## Build iOS production locally (secrets from 1Password)
 	EXPO_PUBLIC_DISCOGS_KEY=$$(op read 'op://Private/Digs Discogs API/consumer_key' --account=my.1password.eu) \
 	EXPO_PUBLIC_DISCOGS_SECRET=$$(op read 'op://Private/Digs Discogs API/consumer_secret' --account=my.1password.eu) \
 	npx eas build --platform ios --profile production --local
+
+submit-production: ## Submit production build to App Store Connect (use path=build.ipa)
+	npx eas submit --platform ios --path $(path)
