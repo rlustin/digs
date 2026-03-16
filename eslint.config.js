@@ -6,5 +6,23 @@ module.exports = defineConfig([
   expoConfig,
   {
     ignores: ["dist/*", ".expo/*"],
-  }
+  },
+  {
+    files: ["**/*.{ts,tsx}"],
+    rules: {
+      "no-console": "error",
+    },
+  },
+  {
+    files: ["lib/logger.ts"],
+    rules: {
+      "no-console": "off",
+    },
+  },
+  {
+    files: ["**/__tests__/**"],
+    rules: {
+      "no-console": "off",
+    },
+  },
 ]);

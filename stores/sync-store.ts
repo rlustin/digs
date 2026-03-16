@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import * as SecureStore from "expo-secure-store";
 import { getDetailSyncCounts } from "@/db/queries/releases";
+import { logger } from "@/lib/logger";
 
 const KEY_LAST_FULL_SYNC_AT = "last_full_sync_at";
 
@@ -59,7 +60,7 @@ export const useSyncStore = create<SyncState>((set, get) => ({
   setLastFullSyncAt: (date) => {
     set({ lastFullSyncAt: date });
     SecureStore.setItemAsync(KEY_LAST_FULL_SYNC_AT, date).catch((e) =>
-      console.warn("Failed to persist lastFullSyncAt:", e)
+      logger.warn("Failed to persist lastFullSyncAt:", e)
     );
   },
   restoreLastFullSyncAt: async () => {
@@ -69,7 +70,7 @@ export const useSyncStore = create<SyncState>((set, get) => ({
   clearLastFullSyncAt: () => {
     set({ lastFullSyncAt: null });
     SecureStore.deleteItemAsync(KEY_LAST_FULL_SYNC_AT).catch((e) =>
-      console.warn("Failed to delete lastFullSyncAt:", e)
+      logger.warn("Failed to delete lastFullSyncAt:", e)
     );
   },
   startSync: () => {

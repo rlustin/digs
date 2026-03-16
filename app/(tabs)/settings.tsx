@@ -13,6 +13,7 @@ import { clearAllFolders } from "@/db/queries/folders";
 import { queryClient } from "@/lib/query-client";
 import { Colors } from "@/constants/Colors";
 import { t } from "@/lib/i18n";
+import { logger } from "@/lib/logger";
 
 export default function SettingsScreen() {
   const username = useAuthStore((s) => s.username);
@@ -54,17 +55,17 @@ export default function SettingsScreen() {
             queryClient.invalidateQueries();
             await Image.clearDiskCache();
           } catch (e) {
-            console.warn("Logout: DB cleanup failed", e);
+            logger.warn("Logout: DB cleanup failed", e);
           }
           try {
             await logout();
           } catch (e) {
-            console.warn("Logout: credential removal failed", e);
+            logger.warn("Logout: credential removal failed", e);
           }
           try {
             clearClientCredentials();
           } catch (e) {
-            console.warn("Logout: client credentials clear failed", e);
+            logger.warn("Logout: client credentials clear failed", e);
           }
           clearAuth();
         },

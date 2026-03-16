@@ -17,6 +17,7 @@ import { useAuthStore } from "@/stores/auth-store";
 import { useSyncStore } from "@/stores/sync-store";
 import { Colors } from "@/constants/Colors";
 import { t } from "@/lib/i18n";
+import { logger } from "@/lib/logger";
 
 export { ErrorBoundary } from "expo-router";
 
@@ -59,7 +60,7 @@ export default function RootLayout() {
       runMigrations();
       setDbReady(true);
     } catch (e) {
-      console.error("Migration failed:", e);
+      logger.error("Migration failed:", e);
       setMigrationError(e instanceof Error ? e.message : String(e));
       SplashScreen.hideAsync();
     }
@@ -78,7 +79,7 @@ export default function RootLayout() {
         useSyncStore.getState().loadDetailCounts();
       })
       .catch((e) => {
-        console.error("Session restore failed:", e);
+        logger.error("Session restore failed:", e);
       })
       .finally(() => {
         setAuthChecked(true);

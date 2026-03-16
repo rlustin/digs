@@ -12,6 +12,7 @@ import { logout } from "@/lib/discogs/oauth";
 import { queryClient } from "@/lib/query-client";
 import { getDetailSyncCounts } from "@/db/queries/releases";
 import type { ReleaseSyncCallbacks } from "./release-sync";
+import { logger } from "@/lib/logger";
 
 /**
  * Shared sync pipeline: guards, folder sync, release sync step, detail sync, cleanup.
@@ -63,7 +64,7 @@ async function runSyncPipeline(
         setProgress: store.setProgress,
       });
     } catch (err) {
-      console.warn("Image caching failed:", err);
+      logger.warn("Image caching failed:", err);
     }
 
     store.finishSync();
@@ -138,7 +139,7 @@ export async function runDetailSyncLoop(
       if (processed === 0 && failed === 0) break;
     } catch (err) {
       if (signal?.aborted) break;
-      console.warn("Detail sync loop stopped:", err);
+      logger.warn("Detail sync loop stopped:", err);
       break;
     }
   }
@@ -165,6 +166,6 @@ export async function runDetailSyncBatch(maxReleases: number = 500) {
       queryClient.invalidateQueries({ queryKey: ["releases"] });
     }
   } catch (err) {
-    console.warn("Background detail sync batch failed:", err);
+    logger.warn("Background detail sync batch failed:", err);
   }
 }

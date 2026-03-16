@@ -14,6 +14,7 @@ import type { CollectionRelease } from "@/lib/discogs/types";
 import type { SyncPhase } from "@/stores/sync-store";
 import { AuthExpiredError } from "@/lib/discogs/errors";
 import { mapReleaseDetailToRow } from "./detail-mapper";
+import { logger } from "@/lib/logger";
 
 export interface ReleaseSyncCallbacks {
   setPhase: (phase: SyncPhase) => void;
@@ -284,7 +285,7 @@ export async function syncReleaseDetails(
         const err = result.reason;
         if (err instanceof AuthExpiredError) throw err;
         failed++;
-        console.warn("Detail sync failed for a release:", err);
+        logger.warn("Detail sync failed for a release:", err);
       }
     }
   }

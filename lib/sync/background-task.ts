@@ -1,6 +1,7 @@
 import * as BackgroundTask from "expo-background-task";
 import * as TaskManager from "expo-task-manager";
 import { runDetailSyncBatch } from "./engine";
+import { logger } from "@/lib/logger";
 
 const BACKGROUND_SYNC_TASK = "background-detail-sync";
 
@@ -23,7 +24,7 @@ export async function registerBackgroundSync() {
       minimumInterval: 15 * 60, // 15 minutes
     });
   } catch (err) {
-    console.warn("Failed to register background task:", err);
+    logger.warn("Failed to register background task:", err);
   }
 }
 

@@ -1,6 +1,7 @@
 import { Image } from "expo-image";
 import { db } from "@/db/client";
 import { releases } from "@/db/schema";
+import { logger } from "@/lib/logger";
 
 const BATCH_SIZE = 50;
 
@@ -48,7 +49,7 @@ export async function prefetchImages(
     try {
       await Image.prefetch(batch, { cachePolicy: "disk" });
     } catch (err) {
-      console.warn("Image prefetch batch failed:", err);
+      logger.warn("Image prefetch batch failed:", err);
     }
 
     const done = Math.min(i + BATCH_SIZE, urls.length);
