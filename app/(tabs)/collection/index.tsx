@@ -8,7 +8,6 @@ import { getAllFolders, getFolderThumbnails } from "@/db/queries/folders";
 import { getCollectionStats } from "@/db/queries/releases";
 import { EmptyState } from "@/components/ui/empty-state";
 import { ListSkeleton } from "@/components/ui/skeleton";
-import { SyncStatusCard } from "@/components/sync/sync-status-bar";
 import { CollectionStatsHeader } from "@/components/collection/collection-stats-header";
 import { FolderCoverCollage } from "@/components/collection/folder-cover-collage";
 import { useAuthStore } from "@/stores/auth-store";
@@ -21,6 +20,9 @@ export default function CollectionScreen() {
   const router = useRouter();
   const username = useAuthStore((s) => s.username);
   const isSyncing = useSyncStore((s) => s.isSyncing);
+  const syncPhase = useSyncStore((s) => s.phase);
+  const isSyncingReleases =
+    isSyncing && (syncPhase === "folders" || syncPhase === "basic-releases");
 
   const {
     data: folders = [],
@@ -95,23 +97,20 @@ export default function CollectionScreen() {
         keyExtractor={(item) => String(item.id)}
         contentContainerStyle={{ paddingTop: 4, paddingBottom: 90 }}
         initialNumToRender={15}
-        ListHeaderComponent={
-          <>
-            <SyncStatusCard />
-            {stats && (
-              <CollectionStatsHeader
-                totalReleases={stats.totalReleases}
-                totalArtists={stats.totalArtists}
-              />
-            )}
-          </>
-        }
         refreshControl={
           <RefreshControl
-            refreshing={isSyncing}
+            refreshing={isSyncingReleases}
             onRefresh={onRefresh}
             tintColor={Colors.accent}
           />
+        }
+        ListHeaderComponent={
+          stats ? (
+            <CollectionStatsHeader
+              totalReleases={stats.totalReleases}
+              totalArtists={stats.totalArtists}
+            />
+          ) : undefined
         }
         renderItem={({ item }) => (
           <Pressable
