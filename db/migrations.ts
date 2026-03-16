@@ -1,7 +1,5 @@
 import { expo } from "./client";
 
-const CURRENT_VERSION = 1;
-
 /**
  * Run all schema migrations. Call once at app startup before any queries.
  * Uses PRAGMA user_version to track which migrations have been applied.
