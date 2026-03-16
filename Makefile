@@ -1,6 +1,6 @@
 .DEFAULT_GOAL := help
 
-.PHONY: help setup start test lint lintfix download-covers fetch-collection screenshots build-preview build-production submit-production
+.PHONY: help setup start test lint lintfix download-covers fetch-collection screenshots build-development build-preview build-production submit-production
 
 help: ## Show this help
 	@grep -E '^[a-zA-Z_-]+:.*##' $(MAKEFILE_LIST) | awk -F ':.*## ' '{printf "  \033[36m%-10s\033[0m %s\n", $$1, $$2}'
@@ -34,6 +34,11 @@ fetch-collection: ## Fetch Discogs collection for screenshot fixtures
 screenshots: ## Generate App Store screenshots
 	node screenshots/seed-db.mjs
 	bash screenshots/take-screenshots.sh
+
+build-development: ## Build iOS development client locally (secrets from 1Password)
+	EXPO_PUBLIC_DISCOGS_KEY=$$(op read 'op://Private/Digs Discogs API/consumer_key' --account=my.1password.eu) \
+	EXPO_PUBLIC_DISCOGS_SECRET=$$(op read 'op://Private/Digs Discogs API/consumer_secret' --account=my.1password.eu) \
+	npx eas build --platform ios --profile development --local
 
 build-preview: ## Build iOS preview locally (secrets from 1Password)
 	EXPO_PUBLIC_DISCOGS_KEY=$$(op read 'op://Private/Digs Discogs API/consumer_key' --account=my.1password.eu) \
