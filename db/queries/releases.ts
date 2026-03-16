@@ -142,7 +142,8 @@ export function getCollectionStats() {
   );
   const artistCount = expo.getFirstSync<{ total: number }>(
     `SELECT COUNT(*) as total FROM (
-      SELECT DISTINCT value FROM releases, json_each(releases.artists, '$[*].name')
+      SELECT DISTINCT json_extract(value, '$.name') as name
+      FROM releases, json_each(releases.artists)
       WHERE releases.artists IS NOT NULL
     )`
   );
