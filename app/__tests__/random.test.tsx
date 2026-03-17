@@ -5,6 +5,10 @@ import RandomScreen from "../(tabs)/random";
 import { getRandomRelease } from "@/db/queries/releases";
 import { getAllFolders } from "@/db/queries/folders";
 
+// Flush React Query notifications synchronously to avoid act() warnings
+import { notifyManager } from "@tanstack/react-query";
+notifyManager.setScheduler(queueMicrotask);
+
 jest.mock("@/db/queries/releases", () => ({
   getRandomRelease: jest.fn().mockReturnValue(null),
 }));
