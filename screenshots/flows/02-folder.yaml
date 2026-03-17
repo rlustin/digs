@@ -10,8 +10,8 @@ appId: fr.lustin.digs
 - extendedWaitUntil:
     notVisible: "Downloading.*"
     timeout: 30000
-# Tap on the 2th folder row (Breakbeat & Breaks area, ~20% down the screen)
+# Tap on the 2th folder row (Breakbeat & Breaks area, ~23% down the screen)
 - tapOn:
-    point: "50%, 21%"
+    point: "50%, 23%"
 - waitForAnimationToEnd
 - takeScreenshot: 02-folder
