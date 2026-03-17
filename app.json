@@ -3,7 +3,7 @@
     "name": "Digs",
     "slug": "digs",
     "description": "Your Discogs vinyl collection, offline. Search, browse, and rediscover your records.",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "primaryColor": "#F17249",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
